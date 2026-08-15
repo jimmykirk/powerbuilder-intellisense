@@ -4,4 +4,10 @@ tools/**
 server/data/**
 .github/**
 .vscode/**
-node_modules/**/.bin/**
+out/**
+node_modules/**
+esbuild.js
+package-lock.json
+.gitignore
+tsconfig.json
+.eslintrc.json

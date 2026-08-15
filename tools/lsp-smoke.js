@@ -26,7 +26,8 @@ fs.writeFileSync(
   Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(UTF16_SRC, 'utf16le')])
 );
 
-const serverPath = path.join(__dirname, '..', 'out', 'server', 'server.js');
+// Test the bundled server — the exact artifact the packaged extension runs.
+const serverPath = path.join(__dirname, '..', 'dist', 'server.js');
 const child = spawn('node', [serverPath, '--stdio'], { stdio: ['pipe', 'pipe', 'inherit'] });
 
 let nextId = 1;

@@ -8,7 +8,7 @@ let client: LanguageClient | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  const serverModule = context.asAbsolutePath(path.join('out', 'server', 'server.js'));
+  const serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));
 
   const serverOptions: ServerOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },
