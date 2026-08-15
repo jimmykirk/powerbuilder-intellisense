@@ -32,6 +32,14 @@ export interface SymbolDefinition {
   character: number;
 }
 
+/** A PowerBuilder structure (`type str_x from structure ... end type`). */
+export interface StructureDefinition {
+  name: string;
+  members: { name: string; type: string }[];
+  uri: string;
+  line: number;
+}
+
 export interface VariableDefinition {
   name: string;
   type: string;
@@ -232,13 +240,16 @@ export function parseDataObjectBindings(text: string): { control: string; dataOb
 export function parseSymbols(uri: string, text: string): {
   symbols: SymbolDefinition[];
   variables: VariableDefinition[];
+  structures: StructureDefinition[];
 } {
   const lines = text.split(/\r?\n/);
   const symbols: SymbolDefinition[] = [];
   const variables: VariableDefinition[] = [];
+  const structures: StructureDefinition[] = [];
   let inPrototypes = false;
   let inVariables = false;
   let currentScope: 'global' | 'instance' | 'local' | 'shared' = 'global';
+  let currentStructure: StructureDefinition | null = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -252,10 +263,29 @@ export function parseSymbols(uri: string, text: string): {
       continue;
     }
 
+    // Structure bodies list their members as bare `type name` declarations
+    // between the `from structure` header and `end type`.
+    if (currentStructure) {
+      if (/^\s*end\s+type\b/i.test(line)) {
+        if (currentStructure.members.length > 0) {
+          structures.push(currentStructure);
+        }
+        currentStructure = null;
+        continue;
+      }
+      for (const decl of parseVariableDeclaration(line, i, uri, 'instance')) {
+        currentStructure.members.push({ name: decl.name, type: decl.type });
+      }
+      continue;
+    }
+
     const typeMatch = TYPE_RE.exec(line);
     if (typeMatch) {
       const name = typeMatch[1];
       const ancestor = typeMatch[2].replace(/`/g, '');
+      if (ancestor.toLowerCase() === 'structure') {
+        currentStructure = { name, members: [], uri, line: i };
+      }
       symbols.push({
         name,
         kind: 'type',
@@ -330,7 +360,10 @@ export function parseSymbols(uri: string, text: string): {
     }
   }
 
-  return { symbols, variables };
+  if (currentStructure && currentStructure.members.length > 0) {
+    structures.push(currentStructure);
+  }
+  return { symbols, variables, structures };
 }
 
 export class WorkspaceIndex {
@@ -344,6 +377,9 @@ export class WorkspaceIndex {
   private dwBindingsByUri = new Map<string, { control: string; dataObject: string }[]>();
   // Raw document text, kept for reference/rename scans
   private textByUri = new Map<string, string>();
+  // Structure name -> definition, plus per-document list for cleanup
+  private structuresByName = new Map<string, StructureDefinition>();
+  private structuresByUri = new Map<string, StructureDefinition[]>();
   // Type inheritance: maps type name -> immediate ancestor name
   private typeAncestors = new Map<string, string>();
   // Reverse mapping: ancestor -> all direct children
@@ -351,9 +387,14 @@ export class WorkspaceIndex {
 
   /** Re-parses a document and replaces any previously indexed symbols/variables for its URI. */
   updateDocument(uri: string, text: string): void {
-    const { symbols, variables } = parseSymbols(uri, text);
+    const { symbols, variables, structures } = parseSymbols(uri, text);
     this.setEntries(uri, symbols, variables);
     this.textByUri.set(uri, text);
+
+    this.structuresByUri.set(uri, structures);
+    for (const struct of structures) {
+      this.structuresByName.set(struct.name.toLowerCase(), struct);
+    }
 
     if (uri.toLowerCase().endsWith('.srd')) {
       const dataObject = path.basename(URI.parse(uri).fsPath, path.extname(URI.parse(uri).fsPath));
@@ -376,6 +417,14 @@ export class WorkspaceIndex {
   removeDocument(uri: string): void {
     this.textByUri.delete(uri);
     this.dwBindingsByUri.delete(uri);
+
+    for (const struct of this.structuresByUri.get(uri) ?? []) {
+      const key = struct.name.toLowerCase();
+      if (this.structuresByName.get(key) === struct) {
+        this.structuresByName.delete(key);
+      }
+    }
+    this.structuresByUri.delete(uri);
     if (uri.toLowerCase().endsWith('.srd')) {
       const dataObject = path.basename(URI.parse(uri).fsPath, path.extname(URI.parse(uri).fsPath));
       this.dwColumns.delete(dataObject.toLowerCase());
@@ -483,6 +532,11 @@ export class WorkspaceIndex {
   /** Returns the symbols declared in one document. */
   symbolsIn(uri: string): SymbolDefinition[] {
     return this.byUri.get(uri) ?? [];
+  }
+
+  /** Returns the structure definition for a type name, if it is a structure. */
+  findStructure(name: string): StructureDefinition | undefined {
+    return this.structuresByName.get(name.toLowerCase());
   }
 
   /** Returns the URI of the file whose primary `type` declaration defines typeName. */

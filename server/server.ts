@@ -38,11 +38,14 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import * as fs from 'fs';
 import {
+  EventInfo,
   formatEventHover,
   formatHover,
   formatParam,
   formatSignature,
+  FunctionInfo,
   ParamInfo,
+  PropertyInfo,
   VariantInfo
 } from './builtins';
 import {
@@ -346,10 +349,12 @@ connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] =
 
   const keywordItems: CompletionItem[] = KEYWORDS.map((keyword) => ({
     label: keyword,
-    kind: CompletionItemKind.Keyword
+    kind: CompletionItemKind.Keyword,
+    sortText: `${RANK.keyword}_${keyword}`
   }));
 
-  // When the active call argument is an enumerated type, float its values first.
+  // When the active call argument is an enumerated type, float its values first
+  // and preselect the documented default (the first listed value).
   const enumItems: CompletionItem[] = [];
   if (doc) {
     const call = findActiveCall(doc, params.position);
@@ -358,51 +363,34 @@ connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] =
       const param = fn.params[Math.min(call.activeParam, fn.params.length - 1)];
       const en = activeEnums.get(param.type.toLowerCase());
       if (en) {
-        for (const value of en.values) {
+        en.values.forEach((value, i) => {
           enumItems.push({
             label: value,
             kind: CompletionItemKind.EnumMember,
             detail: `${en.name} enumerated value`,
-            sortText: `0_${value}`
+            sortText: `${RANK.enumValue}_${String(i).padStart(3, '0')}`,
+            preselect: i === 0
           });
-        }
+        });
       }
     }
   }
 
-  // Instance/shared variables from the current object, plus workspace globals.
-  const seenVars = new Set<string>();
-  const variableItems: CompletionItem[] = [];
-  const ownVars = index.variablesIn(params.textDocument.uri);
-  const globalVars = index.allVariables().filter((v) => v.scope === 'global');
-  for (const v of [...ownVars, ...globalVars]) {
-    const key = v.name.toLowerCase();
-    if (seenVars.has(key)) {
-      continue;
-    }
-    seenVars.add(key);
-    variableItems.push({
-      label: v.name,
-      kind: CompletionItemKind.Variable,
-      detail: `${v.type} ${v.name} (${v.scope})`
-    });
-  }
+  // Everything in scope: script locals and parameters first, then the object's
+  // instance/shared variables, then workspace globals.
+  const variableItems: CompletionItem[] = doc
+    ? collectScopeVariables(doc, params.position).map((v) => ({
+        label: v.name,
+        kind: CompletionItemKind.Variable,
+        detail: `${v.type} ${v.name} (${v.scope})`,
+        sortText: `${
+          v.scope === 'local' || v.scope === 'parameter' ? RANK.local : RANK.objectVar
+        }_${v.name}`
+      }))
+    : [];
 
-  const builtinItems: CompletionItem[] = activeFunctions.map((fn) => ({
-    label: fn.name,
-    kind: CompletionItemKind.Function,
-    detail: formatSignature(fn),
-    documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
-    insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
-    insertTextFormat: 2 // Snippet
-  }));
-
-  const eventItems: CompletionItem[] = activeEvents.map((ev) => ({
-    label: ev.name,
-    kind: CompletionItemKind.Event,
-    detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')}) — ${ev.category}`,
-    documentation: { kind: MarkupKind.Markdown, value: formatEventHover(ev) }
-  }));
+  const builtinItems: CompletionItem[] = activeFunctions.map((fn) => fnItem(fn, RANK.builtin));
+  const eventItems: CompletionItem[] = activeEvents.map((ev) => eventItem(ev, RANK.builtinEvent));
 
   const seen = new Set<string>();
   const customItems: CompletionItem[] = [];
@@ -415,20 +403,62 @@ connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] =
       continue;
     }
     seen.add(key);
-    customItems.push({
-      label: def.name,
-      kind: def.kind === 'event' ? CompletionItemKind.Event : CompletionItemKind.Method,
-      detail: def.signature,
-      documentation: { kind: MarkupKind.Markdown, value: describeCustom(def) },
-      insertText: `${def.name}(${def.params.length > 0 ? '$1' : ''})`,
-      insertTextFormat: 2 // Snippet
-    });
+    customItems.push(symbolItem(def, RANK.workspace));
   }
 
   return [...enumItems, ...keywordItems, ...variableItems, ...builtinItems, ...eventItems, ...customItems];
 });
 
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => item);
+/**
+ * Fills in documentation for the item the user is actually looking at, so the
+ * completion list itself stays cheap to send.
+ */
+connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
+  const data = item.data as CompletionData | undefined;
+  if (!data || item.documentation) {
+    return item;
+  }
+
+  let value: string | undefined;
+  switch (data.kind) {
+    case 'fn': {
+      const fn = findActiveBuiltin(data.name);
+      value = fn ? formatHover(fn) : undefined;
+      break;
+    }
+    case 'event': {
+      const ev = findActiveEvent(data.name);
+      value = ev ? formatEventHover(ev) : undefined;
+      break;
+    }
+    case 'symbol': {
+      const def =
+        (data.uri !== undefined
+          ? index
+              .symbolsIn(data.uri)
+              .find((d) => d.line === data.line && d.name.toLowerCase() === data.name.toLowerCase())
+          : undefined) ?? index.findCallable(data.name);
+      value = def ? describeCustom(def) : undefined;
+      break;
+    }
+    case 'property': {
+      const prop = data.owner
+        ? activeProperties.get(data.owner.toLowerCase())?.find(
+            (p) => p.name.toLowerCase() === data.name.toLowerCase()
+          )
+        : undefined;
+      value = prop?.description
+        ? `**${prop.name}** : \`${prop.type}\`\n\n${prop.description}`
+        : undefined;
+      break;
+    }
+  }
+
+  if (value) {
+    item.documentation = { kind: MarkupKind.Markdown, value };
+  }
+  return item;
+});
 
 connection.onHover((params): Hover | null => {
   const doc = documents.get(params.textDocument.uri);
@@ -796,6 +826,146 @@ connection.onWorkspaceSymbol((params: WorkspaceSymbolParams): SymbolInformation[
   }));
 });
 
+// ------------------------------------------------- completion ranking/docs
+
+/**
+ * Sort buckets. VS Code orders by `sortText` before its own fuzzy score, so a
+ * one-character prefix is enough to float what the author most likely wants:
+ * their own identifiers first, the 1,100-entry built-in catalog last.
+ */
+const RANK = {
+  enumValue: '0',
+  local: '1',
+  objectVar: '2',
+  workspace: '3',
+  keyword: '4',
+  builtin: '5',
+  builtinEvent: '6'
+};
+
+/** Member-completion buckets: what the object itself declares outranks the catalog. */
+const MEMBER_RANK = {
+  own: '1',
+  property: '2',
+  catalog: '3'
+};
+
+/**
+ * Identifies a completion item well enough to rebuild its documentation in
+ * onCompletionResolve. Items ship without markdown so a keystroke sends
+ * labels and details only, not ~1,300 rendered hover bodies.
+ */
+interface CompletionData {
+  kind: 'fn' | 'event' | 'symbol' | 'property';
+  name: string;
+  uri?: string;
+  line?: number;
+  owner?: string;
+}
+
+function fnItem(fn: FunctionInfo, rank: string): CompletionItem {
+  return {
+    label: fn.name,
+    kind: CompletionItemKind.Function,
+    detail: formatSignature(fn),
+    insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
+    insertTextFormat: 2,
+    sortText: `${rank}_${fn.name}`,
+    data: { kind: 'fn', name: fn.name } as CompletionData
+  };
+}
+
+function eventItem(ev: EventInfo, rank: string): CompletionItem {
+  return {
+    label: ev.name,
+    kind: CompletionItemKind.Event,
+    detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')}) — ${ev.category}`,
+    sortText: `${rank}_${ev.name}`,
+    data: { kind: 'event', name: ev.name } as CompletionData
+  };
+}
+
+function symbolItem(def: SymbolDefinition, rank: string): CompletionItem {
+  return {
+    label: def.name,
+    kind: def.kind === 'event' ? CompletionItemKind.Event : CompletionItemKind.Method,
+    detail: def.signature,
+    insertText: `${def.name}(${def.params.length > 0 ? '$1' : ''})`,
+    insertTextFormat: 2,
+    sortText: `${rank}_${def.name}`,
+    data: { kind: 'symbol', name: def.name, uri: def.uri, line: def.line } as CompletionData
+  };
+}
+
+function propertyItem(prop: PropertyInfo, owner: string, rank: string): CompletionItem {
+  return {
+    label: prop.name,
+    kind: CompletionItemKind.Property,
+    detail: `${prop.type} ${prop.name}`,
+    sortText: `${rank}_${prop.name}`,
+    data: { kind: 'property', name: prop.name, owner } as CompletionData
+  };
+}
+
+/**
+ * Every variable in scope at a position: the enclosing script's locals
+ * (scanning back to the script boundary), then the object's own
+ * instance/shared variables, then workspace globals.
+ */
+function collectScopeVariables(
+  doc: TextDocument,
+  position: { line: number }
+): { name: string; type: string; scope: string }[] {
+  const out: { name: string; type: string; scope: string }[] = [];
+  const seen = new Set<string>();
+  const push = (name: string, type: string, scope: string): void => {
+    const key = name.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      out.push({ name, type, scope });
+    }
+  };
+
+  const lines = doc.getText().split(/\r?\n/);
+  const stop = Math.max(0, position.line - 400);
+  for (let i = position.line - 1; i >= stop; i--) {
+    const line = lines[i];
+    if (/^\s*end\s+(function|subroutine|event)\b/i.test(line)) {
+      break; // left the enclosing script
+    }
+    // The script header declares its parameters and marks the top of local
+    // scope — anything above it belongs to another script or a variables block.
+    const proto =
+      /^\s*(?:(?:public|private|protected|global)\s+)*(?:function|subroutine|event)\b[^(]*(?:\(([^)]*)\))?/i.exec(line);
+    if (proto && /^\s*(?:(?:public|private|protected|global)\s+)*(?:function|subroutine|event)\b/i.test(line)) {
+      for (const segment of (proto[1] ?? '').split(',')) {
+        const tokens = segment.trim().split(/\s+/).filter((t) => !/^(ref|readonly)$/i.test(t));
+        const name = tokens[tokens.length - 1]?.replace(/\[.*$/, '');
+        const type = tokens.length > 1 ? tokens[tokens.length - 2] : 'any';
+        if (name && /^[A-Za-z_]\w*$/.test(name)) {
+          push(name, type, 'parameter');
+        }
+      }
+      break;
+    }
+    for (const decl of parseVariableDeclaration(line, i, doc.uri, 'local')) {
+      if (!NON_TYPE_KEYWORDS.has(decl.type.toLowerCase())) {
+        push(decl.name, decl.type, 'local');
+      }
+    }
+  }
+
+  for (const v of index.variablesIn(doc.uri)) {
+    push(v.name, v.type, v.scope);
+  }
+  for (const v of index.allVariables()) {
+    if (v.scope === 'global') {
+      push(v.name, v.type, 'global');
+    }
+  }
+  return out;
+}
+
 // ------------------------------------------------------- member completion
 
 /**
@@ -895,23 +1065,11 @@ function builtinMemberItems(typeName: string): CompletionItem[] {
 
   const fnItems: CompletionItem[] = activeFunctions
     .filter((fn) => fn.member !== false && applies(fn))
-    .map((fn) => ({
-      label: fn.name,
-      kind: CompletionItemKind.Method,
-      detail: formatSignature(fn),
-      documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
-      insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
-      insertTextFormat: 2
-    }));
+    .map((fn) => ({ ...fnItem(fn, MEMBER_RANK.catalog), kind: CompletionItemKind.Method }));
 
   const evItems: CompletionItem[] = activeEvents
     .filter((ev) => applies(ev))
-    .map((ev) => ({
-      label: ev.name,
-      kind: CompletionItemKind.Event,
-      detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')})`,
-      documentation: { kind: MarkupKind.Markdown, value: formatEventHover(ev) }
-    }));
+    .map((ev) => eventItem(ev, MEMBER_RANK.catalog));
 
   return [...fnItems, ...evItems];
 }
@@ -929,6 +1087,13 @@ function parseChainSegments(chain: string): { name: string; call: boolean }[] {
 
 /** The declared type of `member` accessed on an instance of `typeName`. */
 function memberTypeOf(typeName: string, member: string, isCall: boolean): string | undefined {
+  const lowerMember = member.toLowerCase();
+  if (!isCall) {
+    const struct = index.findStructure(typeName);
+    if (struct) {
+      return struct.members.find((m) => m.name.toLowerCase() === lowerMember)?.type;
+    }
+  }
   const chain = index.getInheritanceChain(typeName);
   const walk = chain.length > 0 ? chain : [typeName.toLowerCase()];
   const lower = member.toLowerCase();
@@ -1014,16 +1179,29 @@ function memberCompletion(
   };
 
   if (typeName) {
+    // Structures have members and nothing else — no inheritance, no catalog.
+    const struct = index.findStructure(typeName);
+    if (struct) {
+      return struct.members.map((m) => ({
+        label: m.name,
+        kind: CompletionItemKind.Field,
+        detail: `${m.type} ${m.name} (${struct.name})`,
+        sortText: `${MEMBER_RANK.own}_${m.name}`
+      }));
+    }
+
     if (DATAWINDOW_TYPES.has(typeName.toLowerCase())) {
       push({
         label: 'Object',
         kind: CompletionItemKind.Field,
-        detail: 'DataWindow object expression — dw.Object.<column> reaches columns and properties'
+        detail: 'DataWindow object expression — dw.Object.<column> reaches columns and properties',
+        sortText: `${MEMBER_RANK.own}_Object`
       });
       push({
         label: 'DataObject',
         kind: CompletionItemKind.Field,
-        detail: 'string DataObject — name of the DataWindow object bound to this control'
+        detail: 'string DataObject — name of the DataWindow object bound to this control',
+        sortText: `${MEMBER_RANK.own}_DataObject`
       });
     }
     const chain = index.getInheritanceChain(typeName);
@@ -1035,20 +1213,14 @@ function memberCompletion(
           if (def.kind === 'type') {
             continue;
           }
-          push({
-            label: def.name,
-            kind: def.kind === 'event' ? CompletionItemKind.Event : CompletionItemKind.Method,
-            detail: def.signature,
-            documentation: { kind: MarkupKind.Markdown, value: describeCustom(def) },
-            insertText: `${def.name}(${def.params.length > 0 ? '$1' : ''})`,
-            insertTextFormat: 2
-          });
+          push(symbolItem(def, MEMBER_RANK.own));
         }
         for (const v of index.variablesIn(uri).filter((iv) => iv.scope === 'instance')) {
           push({
             label: v.name,
             kind: CompletionItemKind.Field,
-            detail: `${v.type} ${v.name} (instance)`
+            detail: `${v.type} ${v.name} (instance)`,
+            sortText: `${MEMBER_RANK.own}_${v.name}`
           });
         }
       }
@@ -1056,38 +1228,18 @@ function memberCompletion(
         push(item);
       }
       for (const prop of activeProperties.get(t) ?? []) {
-        push({
-          label: prop.name,
-          kind: CompletionItemKind.Property,
-          detail: `${prop.type} ${prop.name}`,
-          documentation: prop.description
-            ? { kind: MarkupKind.Markdown, value: prop.description }
-            : undefined
-        });
+        push(propertyItem(prop, t, MEMBER_RANK.property));
       }
     }
   } else {
     // Unresolved receiver: fall back to every documented member function/event
     // plus workspace callables, so completion stays useful on library types.
     for (const fn of activeFunctions.filter((f) => f.member)) {
-      push({
-        label: fn.name,
-        kind: CompletionItemKind.Method,
-        detail: formatSignature(fn),
-        documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
-        insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
-        insertTextFormat: 2
-      });
+      push({ ...fnItem(fn, MEMBER_RANK.catalog), kind: CompletionItemKind.Method });
     }
     for (const def of index.all()) {
       if (def.kind === 'function' || def.kind === 'subroutine' || def.kind === 'event') {
-        push({
-          label: def.name,
-          kind: def.kind === 'event' ? CompletionItemKind.Event : CompletionItemKind.Method,
-          detail: def.signature,
-          insertText: `${def.name}(${def.params.length > 0 ? '$1' : ''})`,
-          insertTextFormat: 2
-        });
+        push(symbolItem(def, MEMBER_RANK.own));
       }
     }
   }
@@ -1095,14 +1247,7 @@ function memberCompletion(
   for (const name of UNIVERSAL_MEMBERS) {
     const fn = findActiveBuiltin(name);
     if (fn) {
-      push({
-        label: fn.name,
-        kind: CompletionItemKind.Method,
-        detail: formatSignature(fn),
-        documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
-        insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
-        insertTextFormat: 2
-      });
+      push({ ...fnItem(fn, MEMBER_RANK.catalog), kind: CompletionItemKind.Method });
     }
   }
 
@@ -1136,41 +1281,14 @@ function isSqlContext(doc: TextDocument, line: number): boolean {
 
 /** `:hostvar` completion inside embedded SQL — every variable in scope. */
 function hostVariableCompletion(doc: TextDocument, position: { line: number }): CompletionItem[] {
-  const items: CompletionItem[] = [];
-  const seen = new Set<string>();
-  const push = (name: string, type: string, scope: string): void => {
-    const key = name.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      items.push({
-        label: name,
-        kind: CompletionItemKind.Variable,
-        detail: `${type} ${name} (${scope})`
-      });
-    }
-  };
-
-  const lines = doc.getText().split(/\r?\n/);
-  const stop = Math.max(0, position.line - 400);
-  for (let i = position.line - 1; i >= stop; i--) {
-    if (/^\s*end\s+(function|subroutine|event)\b/i.test(lines[i])) {
-      break;
-    }
-    for (const decl of parseVariableDeclaration(lines[i], i, doc.uri, 'local')) {
-      if (!NON_TYPE_KEYWORDS.has(decl.type.toLowerCase())) {
-        push(decl.name, decl.type, 'local');
-      }
-    }
-  }
-  for (const v of index.variablesIn(doc.uri)) {
-    push(v.name, v.type, v.scope);
-  }
-  for (const v of index.allVariables()) {
-    if (v.scope === 'global') {
-      push(v.name, v.type, 'global');
-    }
-  }
-  return items;
+  return collectScopeVariables(doc, position).map((v) => ({
+    label: v.name,
+    kind: CompletionItemKind.Variable,
+    detail: `${v.type} ${v.name} (${v.scope})`,
+    sortText: `${
+      v.scope === 'local' || v.scope === 'parameter' ? RANK.local : RANK.objectVar
+    }_${v.name}`
+  }));
 }
 
 /**
@@ -1198,10 +1316,7 @@ function eventStubCompletion(doc: TextDocument): CompletionItem[] {
   }
 
   return events.map((ev) => ({
-    label: ev.name,
-    kind: CompletionItemKind.Event,
-    detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')}) — ${ev.category}`,
-    documentation: { kind: MarkupKind.Markdown, value: formatEventHover(ev) },
+    ...eventItem(ev, RANK.local),
     insertText: `${ev.name};\n\t$0\nend event`,
     insertTextFormat: 2
   }));

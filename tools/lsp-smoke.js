@@ -166,9 +166,37 @@ const FEATURE_DOC = [
 ].join('\n');
 const FEATURE_URI = 'file:///virtual/w_feat.srw';
 
+const SRS_DOC = [
+  '$PBExportHeader$str_config.srs',
+  'global type str_config from structure',
+  '\tstring\t\tcfg_name',
+  '\tlong\t\tcfg_id',
+  '\tdatawindow\tcfg_dw',
+  'end type'
+].join('\n');
+
+const SCOPE_DOC = [
+  /*0*/ 'type variables',
+  /*1*/ 'string is_member',
+  /*2*/ 'end variables',
+  /*3*/ '',
+  /*4*/ 'global type w_scope from window',
+  /*5*/ 'end type',
+  /*6*/ '',
+  /*7*/ 'public function integer wf_scope (integer ai_param)',
+  /*8*/ 'string ls_localvar',
+  /*9*/ 'str_config lstr_cfg',
+  /*10*/ 'ls_',
+  /*11*/ 'lstr_cfg.',
+  /*12*/ 'lstr_cfg.cfg_dw.',
+  /*13*/ 'end function'
+].join('\n');
+
 const URI = 'file:///virtual/w_main.srw';
 const SRD_URI = 'file:///virtual/d_emp.srd';
 const DIAG_URI = 'file:///virtual/w_diag.srw';
+const SRS_URI = 'file:///virtual/str_config.srs';
+const SCOPE_URI = 'file:///virtual/w_scope.srw';
 let failures = 0;
 
 function check(label, condition, detail) {
@@ -366,6 +394,45 @@ async function main() {
   check('semantic tokens produced', types.length > 0, JSON.stringify(tokens).slice(0, 100));
   check('semantic tokens include enum values', types.includes(2), `types seen: ${[...new Set(types)].join(',')}`);
   check('semantic tokens include function calls', types.includes(0), `types seen: ${[...new Set(types)].join(',')}`);
+
+  // --- scope, ranking, lazy docs, structures ---
+  notify('textDocument/didOpen', {
+    textDocument: { uri: SRS_URI, languageId: 'powerbuilder', version: 1, text: SRS_DOC }
+  });
+  notify('textDocument/didOpen', {
+    textDocument: { uri: SCOPE_URI, languageId: 'powerbuilder', version: 1, text: SCOPE_DOC }
+  });
+  await new Promise((r) => setTimeout(r, 400));
+  const scopeAt = (line, character) => ({ textDocument: { uri: SCOPE_URI }, position: { line, character } });
+
+  const scoped = await request('textDocument/completion', scopeAt(10, 'ls_'.length));
+  const scopedItems = scoped.items ?? scoped;
+  const scopedLabels = new Set(scopedItems.map((i) => i.label.toLowerCase()));
+  check('local variable offered in completion', scopedLabels.has('ls_localvar'), [...scopedLabels].slice(0, 10).join(','));
+  check('script parameter offered in completion', scopedLabels.has('ai_param'), '');
+  check('instance variable still offered', scopedLabels.has('is_member'), '');
+
+  const rankOf = (label) => scopedItems.find((i) => i.label.toLowerCase() === label)?.sortText ?? 'zz';
+  check('locals rank above instance vars', rankOf('ls_localvar') < rankOf('is_member'), `${rankOf('ls_localvar')} vs ${rankOf('is_member')}`);
+  check('locals rank above builtins', rankOf('ls_localvar') < rankOf('messagebox'), `${rankOf('ls_localvar')} vs ${rankOf('messagebox')}`);
+  check('keywords rank above builtins', rankOf('if') < rankOf('messagebox'), `${rankOf('if')} vs ${rankOf('messagebox')}`);
+
+  // Lazy documentation: list items carry no markdown, resolve fills it in
+  const mbItem = scopedItems.find((i) => i.label === 'MessageBox');
+  check('completion items ship without documentation', !!mbItem && !mbItem.documentation, JSON.stringify(mbItem)?.slice(0, 120));
+  const payload = Buffer.byteLength(JSON.stringify(scopedItems));
+  check('completion payload under 400KB', payload < 400_000, `${Math.round(payload / 1024)}KB for ${scopedItems.length} items`);
+  console.log(`       (payload ${Math.round(payload / 1024)}KB for ${scopedItems.length} items)`);
+  const resolved = await request('completionItem/resolve', mbItem);
+  check('resolve fills in documentation', !!resolved?.documentation?.value?.includes('MessageBox'), JSON.stringify(resolved?.documentation)?.slice(0, 120));
+
+  // Structure members
+  const structMembers = await request('textDocument/completion', scopeAt(11, 'lstr_cfg.'.length));
+  const structLabels = new Set((structMembers.items ?? structMembers).map((i) => i.label.toLowerCase()));
+  check('structure members offered', structLabels.has('cfg_name') && structLabels.has('cfg_id'), [...structLabels].join(','));
+  check('structure members exclude catalog noise', !structLabels.has('triggerevent'), [...structLabels].slice(0, 8).join(','));
+  const structChain = labels(await request('textDocument/completion', scopeAt(12, 'lstr_cfg.cfg_dw.'.length)));
+  check('chain through structure member type', structChain.has('object') && structChain.has('dataobject'), [...structChain].slice(0, 8).join(','));
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   fs.rmSync(fixtureDir, { recursive: true, force: true });
