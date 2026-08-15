@@ -1,4 +1,6 @@
 **/*.ts
 **/*.map
+tools/**
+server/data/**
 .vscode/**
 node_modules/**/.bin/**

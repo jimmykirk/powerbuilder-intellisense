@@ -26,13 +26,7 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import * as fs from 'fs';
-import {
-  builtinFunctions,
-  findBuiltin,
-  formatHover,
-  formatSignature,
-  ParamInfo
-} from './builtins';
+import { formatHover, formatSignature, ParamInfo } from './builtins';
 import { findBuiltin2022, builtinFunctions2022 } from './builtins-2022';
 import { findBuiltin2025, builtinFunctions2025 } from './builtins-2025';
 import { SymbolDefinition, WorkspaceIndex } from './indexer';
@@ -375,7 +369,7 @@ connection.listen();
 async function loadConfiguration(): Promise<void> {
   try {
     const config = await connection.workspace.getConfiguration('powerbuilder');
-    const version = config.get<string>('version', '2025');
+    const version = typeof config?.version === 'string' ? config.version : '2025';
 
     if (version === '2022') {
       pbVersion = '2022';

@@ -180,7 +180,7 @@ export function parseSymbols(uri: string, text: string): {
       // Try to parse a variable declaration
       const parts = line.trim().split(/\s+/);
       if (parts.length >= 2) {
-        let scope = currentScope;
+        let scope: 'global' | 'instance' | 'local' | 'shared' = currentScope;
         let typeAndName = parts;
 
         // Check if first part is a scope keyword
