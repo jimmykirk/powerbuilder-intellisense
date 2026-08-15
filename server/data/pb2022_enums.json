@@ -1,0 +1,716 @@
+{
+  "version": "2022",
+  "enums": [
+    {
+      "name": "Alignment",
+      "values": [
+        "Center!",
+        "Justify!",
+        "Left!",
+        "Right!"
+      ]
+    },
+    {
+      "name": "ArrangeTypes",
+      "values": [
+        "Cascade!",
+        "Layer!",
+        "Tile!",
+        "TileHorizontal!",
+        "Icons!"
+      ]
+    },
+    {
+      "name": "AsymmetricAlgorithm",
+      "values": [
+        "RSA!",
+        "Rabin!",
+        "DSA!"
+      ]
+    },
+    {
+      "name": "Band",
+      "values": [
+        "Detail!",
+        "Header!",
+        "Footer!"
+      ]
+    },
+    {
+      "name": "BorderStyle",
+      "values": [
+        "StyleBox!",
+        "StyleLowered!",
+        "StyleRaised!",
+        "StyleShadowBox!"
+      ]
+    },
+    {
+      "name": "Button",
+      "values": [
+        "OK!",
+        "OKCancel!",
+        "YesNo!",
+        "YesNoCancel!",
+        "RetryCancel!",
+        "AbortRetryIgnore!"
+      ]
+    },
+    {
+      "name": "CharSet",
+      "values": [
+        "CharSetAnsi!",
+        "CharSetUnicode!",
+        "CharSetDBCS!",
+        "CharSetDBCSJapanese!",
+        "CharSetAnsiArabic!",
+        "CharSetAnsiHebrew!"
+      ]
+    },
+    {
+      "name": "DateTimeValue",
+      "values": [
+        "DtfCustom!",
+        "DtfLongDate!",
+        "DtfShortDate!",
+        "DtfTime!"
+      ]
+    },
+    {
+      "name": "FileAccess",
+      "values": [
+        "Read!",
+        "Write!"
+      ]
+    },
+    {
+      "name": "FileLock",
+      "values": [
+        "LockReadWrite!",
+        "LockRead!",
+        "LockWrite!",
+        "Shared!"
+      ]
+    },
+    {
+      "name": "FileMode",
+      "values": [
+        "LineMode!",
+        "StreamMode!",
+        "TextMode!"
+      ]
+    },
+    {
+      "name": "FileType",
+      "values": [
+        "FileTypeRichText!",
+        "FileTypeText!",
+        "FileTypeHTML!",
+        "FileTypeDoc!",
+        "FileTypeXLSX!",
+        "FileTypePDF!"
+      ]
+    },
+    {
+      "name": "FillPattern",
+      "values": [
+        "BDiagonal!",
+        "Diamond!",
+        "FDiagonal!",
+        "Horizontal!",
+        "Solid!",
+        "Square!",
+        "Vertical!"
+      ]
+    },
+    {
+      "name": "FontFamily",
+      "values": [
+        "AnyFont!",
+        "Decorative!",
+        "Modern!",
+        "Roman!",
+        "Script!",
+        "Swiss!"
+      ]
+    },
+    {
+      "name": "FontPitch",
+      "values": [
+        "Default!",
+        "Fixed!",
+        "Variable!"
+      ]
+    },
+    {
+      "name": "grAxisDataType",
+      "values": [
+        "AdtDate!",
+        "AdtDateTime!",
+        "AdtDefault!",
+        "AdtDouble!",
+        "AdtText!",
+        "AdtTime!"
+      ]
+    },
+    {
+      "name": "grGraphType",
+      "values": [
+        "Area3D!",
+        "AreaGraph!",
+        "Bar3DGraph!",
+        "Bar3DObjGraph!",
+        "BarGraph!",
+        "BarStack3DObjGraph!",
+        "BarStackGraph!",
+        "Col3DGraph!",
+        "Col3DObjGraph!",
+        "ColGraph!",
+        "ColStack3DObjGraph!",
+        "ColStackGraph!",
+        "Line3D!",
+        "LineGraph!",
+        "Pie3D!",
+        "PieGraph!",
+        "ScatterGraph!"
+      ]
+    },
+    {
+      "name": "grLegendType",
+      "values": [
+        "AtBottom!",
+        "AtLeft!",
+        "AtRight!",
+        "AtTop!",
+        "NoLegend!"
+      ]
+    },
+    {
+      "name": "grRoundToType",
+      "values": [
+        "RndDefault!",
+        "RndNumber!"
+      ]
+    },
+    {
+      "name": "grScaleType",
+      "values": [
+        "Linear!",
+        "Log10!",
+        "Loge!"
+      ]
+    },
+    {
+      "name": "grScaleValue",
+      "values": [
+        "Actual!",
+        "Cumulative!",
+        "Percentage!",
+        "CumPercent!"
+      ]
+    },
+    {
+      "name": "grTicType",
+      "values": [
+        "NoTic!",
+        "Inside!",
+        "Outside!",
+        "Straddle!"
+      ]
+    },
+    {
+      "name": "HelpCommand",
+      "values": [
+        "Finder!",
+        "Index!",
+        "Keyword!",
+        "Topic!"
+      ]
+    },
+    {
+      "name": "HMACAlgorithm",
+      "values": [
+        "HMACMD5!",
+        "HMACSHA1!",
+        "HMACSHA224!",
+        "HMACSHA256!",
+        "HMACSHA384!",
+        "HMACSHA512!"
+      ]
+    },
+    {
+      "name": "HTickMarks",
+      "values": [
+        "HTicksOnBottom!",
+        "HTicksOnTop!",
+        "HTicksOnBoth!",
+        "HTicksOnNeither!"
+      ]
+    },
+    {
+      "name": "Icon",
+      "values": [
+        "Information!",
+        "StopSign!",
+        "Exclamation!",
+        "Question!",
+        "None!"
+      ]
+    },
+    {
+      "name": "InkCollectionMode",
+      "values": [
+        "GestureOnly!",
+        "InkOnly!",
+        "InkAndGesture!"
+      ]
+    },
+    {
+      "name": "InkCompressionMode",
+      "values": [
+        "DefaultCompression!",
+        "MaximumCompression!",
+        "NoCompression!"
+      ]
+    },
+    {
+      "name": "InkEditStatus",
+      "values": [
+        "CollectingInk!",
+        "RecognizingInk!",
+        "Idle!"
+      ]
+    },
+    {
+      "name": "InkMode",
+      "values": [
+        "CollectInk!",
+        "CollectInkAndGestures!",
+        "InkDisabled!"
+      ]
+    },
+    {
+      "name": "InkPenTip",
+      "values": [
+        "PenTipBall!",
+        "PenTipRectangle!"
+      ]
+    },
+    {
+      "name": "InkPersistenceFormat",
+      "values": [
+        "Base64GIFFormat!",
+        "Base64InkSerializedFormat!",
+        "GIFFormat!",
+        "InkSerializedFormat!"
+      ]
+    },
+    {
+      "name": "LanguageSortID",
+      "values": [
+        "LanguageSortNative!",
+        "LanguageSortUnicode!"
+      ]
+    },
+    {
+      "name": "LineStyle",
+      "values": [
+        "Transparent!",
+        "Continuous!",
+        "Dash!",
+        "Dot!",
+        "DashDot!",
+        "DashDotDot!"
+      ]
+    },
+    {
+      "name": "Location",
+      "values": [
+        "First!",
+        "Last!",
+        "Next!",
+        "Prior!"
+      ]
+    },
+    {
+      "name": "mailFileType",
+      "values": [
+        "mailAttach!",
+        "mailOLE!",
+        "mailOLEStatic!"
+      ]
+    },
+    {
+      "name": "mailRecipientType",
+      "values": [
+        "mailBCC!",
+        "mailCC!",
+        "mailOriginator!",
+        "mailTo!"
+      ]
+    },
+    {
+      "name": "MaskDataType",
+      "values": [
+        "DateMask!",
+        "DateTimeMask!",
+        "DecimalMask!",
+        "NumericMask!",
+        "StringMask!",
+        "TimeMask!"
+      ]
+    },
+    {
+      "name": "MenuItemType",
+      "values": [
+        "MenuItemTypeAbout!",
+        "MenuItemTypeExit!",
+        "MenuItemTypeHelp!",
+        "MenuItemTypeNormal!"
+      ]
+    },
+    {
+      "name": "MenuMergeOption",
+      "values": [
+        "EditMenu!",
+        "Exclude!",
+        "FileMenu!",
+        "HelpMenu!",
+        "Merge!",
+        "WindowMenu!"
+      ]
+    },
+    {
+      "name": "MenuStyle",
+      "values": [
+        "contemporarymenu!",
+        "traditionalmenu!"
+      ]
+    },
+    {
+      "name": "MonthCalDisplayState",
+      "values": [
+        "EntirelyDisplayed!",
+        "PartlyDisplayed!"
+      ]
+    },
+    {
+      "name": "MonthCalRepeatType",
+      "values": [
+        "Once!",
+        "Monthly!",
+        "Yearly!"
+      ]
+    },
+    {
+      "name": "OperationMode",
+      "values": [
+        "OperationModeECB!",
+        "OperationModeCBC!",
+        "OperationModeCFB!",
+        "OperationModeOFB!",
+        "OperationModeCTR!"
+      ]
+    },
+    {
+      "name": "PaddingScheme",
+      "values": [
+        "NoPadding!",
+        "ZerosPadding!",
+        "PKCSPadding!",
+        "OneAndZerosPadding!",
+        "DefaultPadding!"
+      ]
+    },
+    {
+      "name": "ParagraphSetting",
+      "values": [
+        "Indent!",
+        "LeftMargin!",
+        "RightMargin!"
+      ]
+    },
+    {
+      "name": "ParmType",
+      "values": [
+        "TypeBoolean!",
+        "TypeByte!",
+        "TypeDate!",
+        "TypeDateTime!",
+        "TypeDecimal!",
+        "TypeDouble!",
+        "TypeInteger!",
+        "TypeLong!",
+        "TypeLongLong!",
+        "TypeReal!",
+        "TypeString!",
+        "TypeTime!",
+        "TypeUInt!",
+        "TypeULong!",
+        "TypeUnknown!"
+      ]
+    },
+    {
+      "name": "Pointer",
+      "values": [
+        "AppStarting!",
+        "Arrow!",
+        "Cross!",
+        "Beam!",
+        "Help!",
+        "HourGlass!",
+        "Hyperlink!",
+        "Icon!",
+        "None!",
+        "Size!",
+        "SizeNS!",
+        "SizeNESW!",
+        "SizeWE!",
+        "SizeNWSE!",
+        "UpArrow!"
+      ]
+    },
+    {
+      "name": "ProfileRoutineKind",
+      "values": [
+        "RoutineESQL!",
+        "RoutineEvent!",
+        "RoutineFunction!",
+        "RoutineGarbageCollection!",
+        "RoutineObjectCreation!",
+        "RoutineObjectDestruction!",
+        "RoutineRoot!"
+      ]
+    },
+    {
+      "name": "RegistryValueType",
+      "values": [
+        "RegString!",
+        "RegExpandString!",
+        "RegBinary!",
+        "ReguLong!",
+        "ReguLongBigEndian!",
+        "RegLongLong!",
+        "RegLink!",
+        "RegMultiString!"
+      ]
+    },
+    {
+      "name": "SaveAsType",
+      "values": [
+        "Clipboard!",
+        "CSV!",
+        "dBASE2!",
+        "dBASE3!",
+        "DIF!",
+        "EMF!",
+        "Excel!",
+        "Excel5!",
+        "Excel8!",
+        "HTMLTable!",
+        "PDF!",
+        "PSReport!",
+        "SQLInsert!",
+        "SYLK!",
+        "Text!",
+        "WKS!",
+        "WK1!",
+        "WMF!",
+        "XLSB!",
+        "XLSX!",
+        "XML!",
+        "XSLFO!",
+        "dBase2!"
+      ]
+    },
+    {
+      "name": "SeekType",
+      "values": [
+        "FromBeginning!",
+        "FromCurrent!",
+        "FromEnd!"
+      ]
+    },
+    {
+      "name": "SetPosType",
+      "values": [
+        "Behind!",
+        "ToTop!",
+        "ToBottom!",
+        "TopMost!",
+        "NoTopMost!"
+      ]
+    },
+    {
+      "name": "SHAAlgorithm",
+      "values": [
+        "SHA1!",
+        "SHA224!",
+        "SHA256!",
+        "SHA384!",
+        "SHA512!",
+        "SHA3_224!",
+        "SHA3_256!",
+        "SHA3_384!",
+        "SHA3_512!"
+      ]
+    },
+    {
+      "name": "Spacing",
+      "values": [
+        "Spacing1!",
+        "Spacing15!",
+        "Spacing2!"
+      ]
+    },
+    {
+      "name": "SymmetricAlgorithm",
+      "values": [
+        "AES!",
+        "DES!",
+        "TDES!",
+        "DESX!",
+        "Blowfish!"
+      ]
+    },
+    {
+      "name": "SyncProcessType",
+      "values": [
+        "DownloadOnly!",
+        "UploadOnly!",
+        "Bidirectional!"
+      ]
+    },
+    {
+      "name": "TabPosition",
+      "values": [
+        "TabsOnBottom!",
+        "TabsOnBottomAndTop!",
+        "TabsOnLeft!",
+        "TabsOnLeftAndRight!",
+        "TabsOnRight!",
+        "TabsOnRightAndLeft!",
+        "TabsOnTop!",
+        "TabsOnTopAndBottom!"
+      ]
+    },
+    {
+      "name": "TextCase",
+      "values": [
+        "AnyCase!",
+        "Lower!",
+        "Upper!"
+      ]
+    },
+    {
+      "name": "ToolbarAlignment",
+      "values": [
+        "AlignAtBottom!",
+        "AlignAtLeft!",
+        "AlignAtRight!",
+        "AlignAtTop!",
+        "Floating!"
+      ]
+    },
+    {
+      "name": "ToolbarStyle",
+      "values": [
+        "contemporarytoolbar!",
+        "traditionaltoolbar!"
+      ]
+    },
+    {
+      "name": "TraceActivity",
+      "values": [
+        "ActBegin!",
+        "ActError!",
+        "ActESQL!",
+        "ActGarbageCollect!",
+        "ActLine!",
+        "ActObjectCreate!",
+        "ActObjectDestroy!",
+        "ActRoutine!",
+        "ActUser!"
+      ]
+    },
+    {
+      "name": "TraceCategory",
+      "values": [
+        "TraceAtomic!",
+        "TraceIn!",
+        "TraceOut!"
+      ]
+    },
+    {
+      "name": "UserObjects",
+      "values": [
+        "CustomVisual!",
+        "ExternalVisual!"
+      ]
+    },
+    {
+      "name": "ValSchemeType",
+      "values": [
+        "ValNever!",
+        "ValAlways!",
+        "ValAuto!"
+      ]
+    },
+    {
+      "name": "VTextAlign",
+      "values": [
+        "Bottom!",
+        "MultiLine!",
+        "Top!",
+        "VCenter!"
+      ]
+    },
+    {
+      "name": "VTickMarks",
+      "values": [
+        "VTicksOnRight!",
+        "VTicksOnLeft!",
+        "VTicksOnBoth!",
+        "VTicksOnNeither!"
+      ]
+    },
+    {
+      "name": "WindowDockState",
+      "values": [
+        "WindowDockStateDocked!",
+        "WindowDockStateFloating!",
+        "WindowDockStateTabbedDocument!",
+        "WindowDockStateTabbedWindow!"
+      ]
+    },
+    {
+      "name": "WindowState",
+      "values": [
+        "Maximized!",
+        "Minimized!",
+        "Normal!"
+      ]
+    },
+    {
+      "name": "WindowType",
+      "values": [
+        "Child!",
+        "Main!",
+        "MDI!",
+        "MDIHelp!",
+        "MDIDock!",
+        "MDIDockHelp!",
+        "Popup!",
+        "Response!"
+      ]
+    },
+    {
+      "name": "WriteMode",
+      "values": [
+        "Append!",
+        "Replace!",
+        "Read!"
+      ]
+    }
+  ]
+}
