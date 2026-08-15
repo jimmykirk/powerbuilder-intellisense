@@ -66,7 +66,7 @@
         },
         {
           "name": "categorynumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the category for which you want the name"
         }
       ],
@@ -105,7 +105,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column whose value list you want to delete. Column can be a column number (integer) or a column name (string)."
         }
       ],
@@ -141,12 +141,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that belongs to the TreeView level of the group to be collapsed"
         },
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group to be collapsed"
         }
       ],
@@ -179,12 +179,12 @@
         },
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that belongs to the group to be collapsed"
         },
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group to be collapsed"
         }
       ],
@@ -201,7 +201,7 @@
       "params": [
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group to be collapsed"
         }
       ],
@@ -229,13 +229,13 @@
       "params": [
         {
           "name": "selected",
-          "type": "any",
+          "type": "boolean",
           "description": "A value indicating whether to copy selected text only. Values are: true -- (Default) Copy selected text only. false -- Copy the entire contents of the band.",
           "optional": true
         },
         {
           "name": "band",
-          "type": "any",
+          "type": "Band",
           "description": "A value specifying the band from which to copy text. For a list of valid values, see Band . The default is the band that contains the insertion point.",
           "optional": true
         }
@@ -259,7 +259,7 @@
         },
         {
           "name": "errorbuffer",
-          "type": "any",
+          "type": "string",
           "description": "The name of a string that will hold any error messages that are generated. If you do not specify an error buffer, a message box will display the error messages.",
           "optional": true
         }
@@ -289,7 +289,7 @@
       "params": [
         {
           "name": "rssource",
-          "type": "datastore",
+          "type": "ResultSet",
           "description": "A ResultSet or ADOResultSet object that contains meta data from which the DataStore object is created"
         }
       ],
@@ -328,7 +328,7 @@
       "params": [
         {
           "name": "graphcontrol",
-          "type": "graph",
+          "type": "string",
           "description": "The name of the graph in the DataWindow control"
         },
         {
@@ -400,7 +400,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row you want to delete. To delete the current row, specify 0 for row."
         }
       ],
@@ -438,7 +438,7 @@
       "params": [
         {
           "name": "dragvalue",
-          "type": "any",
+          "type": "DragMode",
           "description": "A value indicating the action you want to take on a control: Begin! -- Put dwcontrol in drag mode. Cancel! -- Stop dragging dwcontrol but do not cause a DragDrop event. End! -- Stop dragging dwcontrol and if dwcontrol is over a target object, cause a DragDrop event."
         }
       ],
@@ -456,12 +456,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that belongs to the TreeView level of the group to be expanded"
         },
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group to be expanded"
         }
       ],
@@ -489,12 +489,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that belongs to the group to be expanded"
         },
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group to be expanded"
         }
       ],
@@ -511,7 +511,7 @@
       "params": [
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group to be expanded"
         }
       ],
@@ -545,7 +545,7 @@
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to export the data. For a list of valid values, see DWBuffer . If not specified, exports the data from the Primary! buffer. If specified, exports the data from the specified buffer.",
           "optional": true
         }
@@ -591,22 +591,22 @@
       "params": [
         {
           "name": "expression",
-          "type": "any",
+          "type": "string",
           "description": "A string whose value is a boolean expression that you want to use as the search criterion. The expression includes column names."
         },
         {
           "name": "start",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location at which to begin the search. Start can be greater than the number of rows."
         },
         {
           "name": "end",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location at which to end the search. End can be greater than the number of rows. To search backward, make end less than start."
         },
         {
           "name": "buffer",
-          "type": "any",
+          "type": "DWBuffer",
           "description": "The name of the buffer from which you want to find data. Values are: Primary -- (Default) The data in the primary buffer (the data that has not been deleted or filtered out). Delete -- The data in the delete buffer (data deleted from the DataWindow control). Filter -- The data in the filter buffer (data that was filtered out).",
           "optional": true
         }
@@ -631,7 +631,7 @@
         },
         {
           "name": "categoryvalue",
-          "type": "any",
+          "type": "time",
           "description": "A value that is the category for which you want the number. The value you specify must be the same datatype as the datatype of the category axis."
         }
       ],
@@ -648,12 +648,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row at which you want to begin searching for the group break."
         },
         {
           "name": "level",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the group for which you are searching. Groups are numbered in the order in which you defined them."
         }
       ],
@@ -682,17 +682,17 @@
       "params": [
         {
           "name": "dwbuffer",
-          "type": "datawindow",
+          "type": "DWBuffer",
           "description": "A value indicating the DataWindow buffer you want to search for required columns. Valid buffers are: Primary! Filter!"
         },
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the first row to be searched. Row also stores the number of the found row. FindRequired increments the row number automatically after it validates each row's columns. When it finds a row with a required column that contains a null value, the row number is stored in row. After FindRequired validates the last column in the last row, it sets row to 0. PowerBuilder The row argument must be a variable so it can return a value for the found row."
         },
         {
           "name": "colnbr",
-          "type": "any",
+          "type": "integer",
           "description": "A value identifying the first column to be searched. Colnbr also stores the number of the found column. After validating the last column, FindRequired sets colnbr to 1 and increments row. When it finds a required column that contains a null value, the column number is stored in colnbr. PowerBuilder The colnbr argument must be a variable so it can return a value for the found column."
         },
         {
@@ -702,7 +702,7 @@
         },
         {
           "name": "updateonly",
-          "type": "any",
+          "type": "boolean",
           "description": "A value indicating whether you want to validate all rows and columns or only rows that have been inserted or modified: true -- Validate only those rows that have changed. Setting updateonly to true enhances performance in large DataWindows. false -- Validate all rows and columns."
         }
       ],
@@ -800,8 +800,9 @@
       "params": [
         {
           "name": "rsdest",
-          "type": "datastore",
-          "description": "The ResultSet object into which the data in the DataStore is written. This value is passed by reference."
+          "type": "ResultSet",
+          "description": "The ResultSet object into which the data in the DataStore is written. This value is passed by reference.",
+          "ref": true
         },
         {
           "name": "dwbuffer",
@@ -858,7 +859,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column for which you want to obtain the border style. Column can be a column number or a column name."
         }
       ],
@@ -877,8 +878,9 @@
       "params": [
         {
           "name": "changeblob",
-          "type": "datawindow",
-          "description": "A variable into which the returned DataWindow changes will be placed."
+          "type": "blob",
+          "description": "A variable into which the returned DataWindow changes will be placed.",
+          "ref": true
         },
         {
           "name": "cookie",
@@ -917,8 +919,9 @@
         },
         {
           "name": "dwchildvariable",
-          "type": "datawindow",
-          "description": "A variable in which you want to store the reference to the child DataWindow or report."
+          "type": "DataWindowChild",
+          "description": "A variable in which you want to store the reference to the child DataWindow or report.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1002,7 +1005,7 @@
         },
         {
           "name": "servicereference",
-          "type": "powerobject",
+          "type": "PowerObject",
           "description": "PowerObject into which the method places a reference to the service object specified by servicename. This argument is passed by reference."
         }
       ],
@@ -1026,12 +1029,12 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number that identifies the series from which you want data."
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "long",
           "description": "The number of the data point for which you want the value."
         },
         {
@@ -1118,18 +1121,19 @@
         },
         {
           "name": "series",
-          "type": "any",
+          "type": "integer",
           "description": "The number that identifies the series"
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the exploded data point (that is, the pie slice)"
         },
         {
           "name": "percentage",
           "type": "integer",
-          "description": "An integer variable in which you want to store the percentage that the pie slice is exploded"
+          "description": "An integer variable in which you want to store the percentage that the pie slice is exploded",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1238,18 +1242,19 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number that identifies the series from which you want data."
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "int",
           "description": "The number of the data point for which you want the transparency value."
         },
         {
           "name": "transparency",
-          "type": "integer",
-          "description": "Integer value for percent transparency. A value of 0 means that the data point is opaque and a value of 100 means that it is completely transparent."
+          "type": "int",
+          "description": "Integer value for percent transparency. A value of 0 means that the data point is opaque and a value of 100 means that it is completely transparent.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1270,18 +1275,19 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number that identifies the series from which you want data."
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "long",
           "description": "The number of the data point for which you want the value."
         },
         {
           "name": "datavariable",
-          "type": "any",
-          "description": "The name of a variable that will hold the data value. The variable's datatype can be date, DateTime, double, string, or time. The variable must have the same datatype as the values axis of the graph."
+          "type": "time",
+          "description": "The name of a variable that will hold the data value. The variable's datatype can be date, DateTime, double, string, or time. The variable must have the same datatype as the values axis of the graph.",
+          "ref": true
         },
         {
           "name": "xory",
@@ -1303,7 +1309,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column for which you want the display format. Column can be a column number (integer) or a column name (string)."
         }
       ],
@@ -1334,7 +1340,7 @@
       "params": [
         {
           "name": "dwasblob",
-          "type": "datawindow",
+          "type": "blob",
           "description": "A variable into which the returned DataWindow will be placed."
         }
       ],
@@ -1375,17 +1381,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location of the data."
         },
         {
           "name": "column",
-          "type": "date",
+          "type": "integer",
           "description": "The column location of the data. The datatype of the column must be date. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view. To get the contents of a computed field, specify the name of the computed field for column. Computed fields do not have numbers."
         },
         {
           "name": "dwbuffer",
-          "type": "datawindow",
+          "type": "DWBuffer",
           "description": "A value identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1411,17 +1417,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location of the data."
         },
         {
           "name": "column",
-          "type": "datetime",
+          "type": "integer",
           "description": "The column location of the data. The datatype of the column must be DateTime. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view. To get the contents of a computed field, specify the name of the computed field for column. Computed fields do not have numbers."
         },
         {
           "name": "dwbuffer",
-          "type": "datawindow",
+          "type": "DWBuffer",
           "description": "A value identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1447,17 +1453,17 @@
       "params": [
         {
           "name": "row",
-          "type": "decimal",
+          "type": "long",
           "description": "A value identifying the row location of the decimal data."
         },
         {
           "name": "column",
-          "type": "decimal",
+          "type": "string",
           "description": "The column location of the data. The datatype of the column must be one of type decimal. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view. To get the contents of a computed field, specify the name of the computed field for column. Computed fields do not have numbers."
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1483,7 +1489,7 @@
       "params": [
         {
           "name": "row",
-          "type": "string",
+          "type": "long",
           "description": "A value identifying the row location of the string data."
         },
         {
@@ -1493,7 +1499,7 @@
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1519,17 +1525,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location of the numeric data."
         },
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column location of the numeric data. The datatype of the column must be one of a numeric datatype. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view. To get the contents of a computed field, specify the name of the computed field for column. Computed fields do not have numbers."
         },
         {
           "name": "dwbuffer",
-          "type": "datawindow",
+          "type": "DWBuffer",
           "description": "A value identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1555,17 +1561,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row for which you want the status."
         },
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column for which you want the status. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view. Specify 0 to get the status of the whole row."
         },
         {
           "name": "dwbuffer",
-          "type": "datawindow",
+          "type": "DWBuffer",
           "description": "A value identifying the DataWindow buffer containing the row for which you want status. For a list of valid values, see DWBuffer ."
         }
       ],
@@ -1584,7 +1590,7 @@
       "params": [
         {
           "name": "row",
-          "type": "string",
+          "type": "long",
           "description": "A value identifying the row location of the string data."
         },
         {
@@ -1594,7 +1600,7 @@
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1620,17 +1626,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location of the data."
         },
         {
           "name": "column",
-          "type": "time",
+          "type": "integer",
           "description": "The column location of the data. The datatype of the column must be time. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view. To get the contents of a computed field, specify the name of the computed field for column. Computed fields do not have numbers."
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1656,7 +1662,7 @@
       "params": [
         {
           "name": "row",
-          "type": "string",
+          "type": "long",
           "description": "A value identifying the row location of the string data."
         },
         {
@@ -1666,7 +1672,7 @@
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to get the data. For a list of valid values, see DWBuffer .",
           "optional": true
         },
@@ -1727,12 +1733,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row location after which you want to locate the modified row. To search from the beginning, specify 0."
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer in which you want to locate the modified row. For a list of valid values, see DWBuffer ."
         }
       ],
@@ -1775,8 +1781,9 @@
       "params": [
         {
           "name": "align",
-          "type": "any",
-          "description": "Current alignment setting of the selected text"
+          "type": "alignment",
+          "description": "Current alignment setting of the selected text",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1794,7 +1801,8 @@
         {
           "name": "color",
           "type": "long",
-          "description": "A long used to define the color"
+          "description": "A long used to define the color",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1812,7 +1820,8 @@
         {
           "name": "typeface",
           "type": "string",
-          "description": "A string used to define the type"
+          "description": "A string used to define the type",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1829,8 +1838,9 @@
       "params": [
         {
           "name": "size",
-          "type": "any",
-          "description": "Value indicating the point size of the font; if the selected text is a mix of sizes, the value is 0"
+          "type": "integer",
+          "description": "Value indicating the point size of the font; if the selected text is a mix of sizes, the value is 0",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1847,13 +1857,14 @@
       "params": [
         {
           "name": "style",
-          "type": "any",
+          "type": "TextStyle",
           "description": "Value for specifying a text style. Allowable values are: bold! italic! strikeout! subscript! superscript! underlined!"
         },
         {
           "name": "state",
-          "type": "any",
-          "description": "Indicates whether the selected text or text at the cursor position has a style applied to it"
+          "type": "boolean",
+          "description": "Indicates whether the selected text or text at the cursor position has a style applied to it",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -1883,12 +1894,12 @@
       "params": [
         {
           "name": "rowid",
-          "type": "any",
+          "type": "long",
           "description": "A number specifying the row identifier for which you want the associated row number."
         },
         {
           "name": "buffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer that contains the row. For a list of valid values, see DWBuffer .",
           "optional": true
         }
@@ -1908,12 +1919,12 @@
       "params": [
         {
           "name": "rownumber",
-          "type": "any",
+          "type": "long",
           "description": "A number specifying the row number for which you want the associated row identifier."
         },
         {
           "name": "buffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer that contains the row. For a list of valid values, see DWBuffer .",
           "optional": true
         }
@@ -1933,7 +1944,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the location of the row after which you want to search for the next selected row. Specify 0 to begin searching at the first row."
         }
       ],
@@ -1963,7 +1974,8 @@
         {
           "name": "value",
           "type": "boolean",
-          "description": "A boolean passed by reference to indicate whether the series has labels."
+          "description": "A boolean passed by reference to indicate whether the series has labels.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -2066,8 +2078,9 @@
         },
         {
           "name": "transparency",
-          "type": "integer",
-          "description": "Integer value for percent transparency. A value of 0 means that the series is opaque and a value of 100 means that it is completely transparent."
+          "type": "int",
+          "description": "Integer value for percent transparency. A value of 0 means that the series is opaque and a value of 100 means that it is completely transparent.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -2109,7 +2122,7 @@
       "params": [
         {
           "name": "cookie",
-          "type": "datawindow",
+          "type": "blob",
           "description": "A variable in which you want to store a cookie that contains state information for the DataWindow"
         }
       ],
@@ -2159,12 +2172,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A variable that will store the number of the row that will be updated or for which an update was attempted."
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer that contains the row being updated. For a list of valid values, see DWBuffer ."
         }
       ],
@@ -2182,7 +2195,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column for which you want the validation rule. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view."
         }
       ],
@@ -2201,12 +2214,12 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column for which you want the item. Column can be a column number (integer) or a column name (string)."
         },
         {
           "name": "index",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the item in the value list or the code table for the edit style."
         }
       ],
@@ -2249,37 +2262,37 @@
       "params": [
         {
           "name": "importtype",
-          "type": "datawindow",
+          "type": "saveastype",
           "description": "An enumerated value of the SaveAsType DataWindow constant or a number representing that value (see SaveAsType ). Valid import type arguments for ImportClipboard are: Text! CSV! XML! If you want to generate an XML trace file, the XML! argument is required.",
           "optional": true
         },
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first detail row in the clipboard that you want to copy. The default is 1. For default XML import, if startrow is supplied, the first N (startrow -1) elements are skipped, where N is the DataWindow row size. For template XML import, if startrow is supplied, the first (startrow -1) occurrences of the repetitive row mapping defined in the template are skipped.",
           "optional": true
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last detail row in the clipboard that you want to copy. The default is the rest of the rows. For default XML import, if endrow is supplied, import stops when N * endrow elements have been imported, where N is the DataWindow row size. For template XML import, if endrow is supplied, import stops after endrow occurrences of the repetitive row mapping defined in the template have been imported.",
           "optional": true
         },
         {
           "name": "startcolumn",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first column in the clipboard that you want to copy. The default is 1. For default XML import, if startcolumn is supplied, import skips the first (startcolumn - 1) elements in each row. This argument has no effect on template XML import.",
           "optional": true
         },
         {
           "name": "endcolumn",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last column in the clipboard that you want to copy. The default is the rest of the columns. For default XML import, if endcolumn is supplied and is smaller than N, where N is the DataWindow row size, import skips the last (N - endcolumn) elements in each row. This argument has no effect on template XML import.",
           "optional": true
         },
         {
           "name": "dwstartcolumn",
-          "type": "datawindow",
+          "type": "long",
           "description": "The number of the first column in the DataWindow control or DataStore that should receive data. The default is 1. This argument is supported for default and template XML import.",
           "optional": true
         }
@@ -2299,7 +2312,7 @@
       "params": [
         {
           "name": "importtype",
-          "type": "datawindow",
+          "type": "saveastype",
           "description": "An enumerated value of the SaveAsType DataWindow constant or a number representing that value (see SaveAsType ). If this argument is specified, the filename argument can be specified without an extension. Valid type arguments for ImportFile are: Text! CSV! XML! DBase2! DBase3!",
           "optional": true
         },
@@ -2310,31 +2323,31 @@
         },
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first detail row in the file that you want to copy. The default is 1. For default XML import, if startrow is supplied, the first N (startrow -1) elements are skipped, where N is the DataWindow row size. For template XML import, if startrow is supplied, the first (startrow -1) occurrences of the repetitive row mapping defined in the template are skipped.",
           "optional": true
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last detail row in the file that you want to copy. The default is the rest of the rows. For default XML import, if endrow is supplied, import stops when N * endrow elements have been imported, where N is the DataWindow row size. For template XML import, if endrow is supplied, import stops after endrow occurrences of the repetitive row mapping defined in the template have been imported.",
           "optional": true
         },
         {
           "name": "startcolumn",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first column in the file that you want to copy. The default is 1. For default XML import, if startcolumn is supplied, import skips the first (startcolumn - 1) elements in each row. This argument has no effect on template XML import.",
           "optional": true
         },
         {
           "name": "endcolumn",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last column in the file that you want to copy. The default is the rest of the columns. For default XML import, if endcolumn is supplied and is smaller than N, where N is the DataWindow row size, import skips the last (N - endcolumn) elements in each row. This argument has no effect on template XML import.",
           "optional": true
         },
         {
           "name": "dwstartcolumn",
-          "type": "datawindow",
+          "type": "long",
           "description": "The number of the first column in the DataWindow control or DataStore that should receive data. The default is 1. This argument is supported for default and template XML import.",
           "optional": true
         }
@@ -2359,43 +2372,43 @@
         },
         {
           "name": "error",
-          "type": "any",
+          "type": "string",
           "description": "A variable into which the returned warning or error message will be placed. When there are a large amount of error messages, the error information will only display the total number of errors, and the detailed message of the first 10 errors. The import warning caused by data type mismatch will not affect the return value of ImportJson; although the data of the mismatched columns will not be imported, the rest columns (even only one column) that are matched will be imported successfully; and that row will be regarded as a successful import and counted into the return value. The import error caused by DW presentation style mismatch, invalid arguments, startrow value greater than the number of rows, etc. will be regarded as a failure, and represented by a negative return value of ImportJson, instead of being placed into this variable. See the Return Value section for more. Most of the messages placed into this variable are warnings (such as data type mismatch) rather than errors. Developers can adjust the JSON data according to the message or simply ignore the message if the problematic column is not critical and the corresponding DataWindow column can be left blank.",
           "optional": true
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to import the data. For a list of valid values, see DWBuffer . For plain JSON: If not specified, imports the JSON data to the Primary! buffer. If specified, imports the JSON data to the specified buffer. For DataWindow JSON: If not specified, imports data from all of the buffers from the JSON string to the corresponding buffers and, if any, imports the data for DataWindowChild. If specified, imports data from the specified buffer from the JSON string to the corresponding buffer.",
           "optional": true
         },
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first detail object in the JSON array that you want to import. The default is 1. If it is 0 or negative, 1 is used.",
           "optional": true
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last detail object in the JSON array that you want to import. The default is the rest of the objects. If it is 0 or negative, it indicates the rest of rows.",
           "optional": true
         },
         {
           "name": "startcolumn",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first key value in the JSON object that you want to import. The default is 1. If it is 0 or negative, 1 is used.",
           "optional": true
         },
         {
           "name": "endcolumn",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last key value in the JSON object that you want to import. The default is the rest of the key values. If it is 0 or negative, it indicates the rest of columns.",
           "optional": true
         },
         {
           "name": "dwstartcolumn",
-          "type": "datawindow",
+          "type": "long",
           "description": "The number of the first column in the DataWindow control, DataStore or DataWindowChild that should receive data. The default is 1. If it is 0 or negative, 1 is used.",
           "optional": true
         }
@@ -2420,25 +2433,25 @@
         },
         {
           "name": "error",
-          "type": "any",
+          "type": "string",
           "description": "A variable into which the returned warning or error message will be placed. When there are a large amount of error messages, the error information will only display the total number of errors, and the detailed message of the first 10 errors. The import warning caused by data type mismatch will not affect the return value of ImportJsonByKey; although the data of the mismatched columns will not be imported, the rest columns (even only one column) that are matched will be imported successfully; and that row will be regarded as a successful import and counted into the return value. The import error caused by DW presentation style mismatch, invalid arguments, startrow value greater than the number of rows,etc. will be regarded as a failure, and represented by a negative return value of ImportJsonByKey, instead of being placed into this variable. See the Return Value section for more. Most of the messages placed into this variable are warnings (such as data type mismatch) rather than errors. Developers can adjust the JSON data according to the message or simply ignore the message if the problematic column is not critical and the corresponding DataWindow column can be left blank.",
           "optional": true
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to import the data. For a list of valid values, see DWBuffer . For plain JSON: If not specified, imports the JSON data to the Primary! buffer. If specified, imports the JSON data to the specified buffer. For DataWindow JSON: If not specified, imports data of all of the buffers from the JSON string to the corresponding buffers and, if any, imports the data for DataWindowChild. If specified, imports data of the specified buffer from the JSON string to the corresponding buffer.",
           "optional": true
         },
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first detail object in the JSON Array that you want to import. The default is 1. If it is 0 or negative, 1 is used.",
           "optional": true
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last detail object in the JSON Array that you want to import. The default is the rest of the objects. If it is 0 or negative, it indicates the rest of rows.",
           "optional": true
         }
@@ -2468,13 +2481,14 @@
         },
         {
           "name": "error",
-          "type": "any",
+          "type": "string",
           "description": "A variable into which the returned warning or error message will be placed. When there are a large amount of error messages, the error information will only display the total number of errors, and the detailed message of the first 10 errors. The import warning caused by data type mismatch will not affect the return value of this function; although the data of the mismatched columns will not be imported, the rest columns (even only one column) that are matched will be imported successfully; and that row will be regarded as a successful import and counted into the return value. The import error caused by DW presentation style mismatch, invalid arguments etc. will be regarded as a failure, and represented by a negative return value of this function, instead of being placed into this variable. See the Return Value section for more. Most of the messages placed into this variable are warnings (such as data type mismatch) rather than errors. Developers can adjust the JSON data according to the message or simply ignore the message if the problematic column is not critical and the corresponding DataWindow column can be left blank.",
-          "optional": true
+          "optional": true,
+          "ref": true
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to import the data. For a list of valid values, see DWBuffer . If not specified, imports the JSON data to the Primary! buffer. If specified, imports the JSON data to the specified buffer.",
           "optional": true
         }
@@ -2494,7 +2508,7 @@
       "params": [
         {
           "name": "importtype",
-          "type": "string",
+          "type": "saveastype",
           "description": "An enumerated value of the SaveAsType DataWindow constant or a string or number representing that value (see SaveAsType ). Valid type arguments are: Text! CSV! XML! If you want to generate an XML trace file, the XML! argument is required.",
           "optional": true
         },
@@ -2505,31 +2519,31 @@
         },
         {
           "name": "startrow",
-          "type": "string",
+          "type": "long",
           "description": "The number of the first detail row in the string that you want to copy. The default is 1. For default XML import, if startrow is supplied, the first N (startrow -1) elements are skipped, where N is the DataWindow row size. For template XML import, if startrow is supplied, the first (startrow -1) occurrences of the repetitive row mapping defined in the template are skipped.",
           "optional": true
         },
         {
           "name": "endrow",
-          "type": "string",
+          "type": "long",
           "description": "The number of the last detail row in the string that you want to copy. The default is the rest of the rows. For default XML import, if endrow is supplied, import stops when N * endrow elements have been imported, where N is the DataWindow row size. For template XML import, if endrow is supplied, import stops after endrow occurrences of the repetitive row mapping defined in the template have been imported.",
           "optional": true
         },
         {
           "name": "startcolumn",
-          "type": "string",
+          "type": "long",
           "description": "The number of the first column in the string that you want to copy. The default is 1. For default XML import, if startcolumn is supplied, import skips the first (startcolumn - 1) elements in each row. This argument has no effect on template XML import.",
           "optional": true
         },
         {
           "name": "endcolumn",
-          "type": "string",
+          "type": "long",
           "description": "The number of the last column in the string that you want to copy. The default is the rest of the columns. For default XML import, if endcolumn is supplied and is smaller than N, where N is the DataWindow row size, import skips the last (N - endcolumn) elements in each row. This argument has no effect on template XML import.",
           "optional": true
         },
         {
           "name": "dwstartcolumn",
-          "type": "datawindow",
+          "type": "long",
           "description": "The number of the first column in the DataWindow control or DataStore that should receive data. The default is 1. This argument is supported for default and template XML import.",
           "optional": true
         }
@@ -2577,7 +2591,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row before which you want to insert a row. To insert a row at the end, specify 0."
         }
       ],
@@ -2596,12 +2610,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that belongs to the group"
         },
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group"
         }
       ],
@@ -2630,7 +2644,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row you want to test to see if it is selected"
         }
       ],
@@ -2697,12 +2711,12 @@
         },
         {
           "name": "x",
-          "type": "any",
+          "type": "integer",
           "description": "The x coordinate of the new location in PowerBuilder units"
         },
         {
           "name": "y",
-          "type": "any",
+          "type": "integer",
           "description": "The y coordinate of the new location in PowerBuilder units"
         }
       ],
@@ -2725,12 +2739,14 @@
         {
           "name": "seriesnumber",
           "type": "integer",
-          "description": "In PowerBuilder, an integer variable in which you want to store the number of the series under the pointer."
+          "description": "In PowerBuilder, an integer variable in which you want to store the number of the series under the pointer.",
+          "ref": true
         },
         {
           "name": "datapoint",
           "type": "integer",
-          "description": "In PowerBuilder, an integer variable in which you want to store the number of the data point under the pointer."
+          "description": "In PowerBuilder, an integer variable in which you want to store the number of the data point under the pointer.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -2768,17 +2784,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A long identifying the row location of the Database Blob control in the DataWindow object."
         },
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column location of the Database Blob. Column can be a column number (integer) or a column name (string)."
         },
         {
           "name": "verb",
-          "type": "any",
+          "type": "integer",
           "description": "Usually 0, but the verb is dependent on the OLE server."
         }
       ],
@@ -2824,7 +2840,7 @@
         },
         {
           "name": "band",
-          "type": "any",
+          "type": "Band",
           "description": "A value specifying the band into which the rich text data is pasted. For a list of valid values, see Band . The default is the band that contains the insertion point.",
           "optional": true
         }
@@ -2947,7 +2963,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row to reselect"
         }
       ],
@@ -2984,12 +3000,12 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the series in which you want to reset the color of a data point"
         },
         {
           "name": "datapointnumber",
-          "type": "any",
+          "type": "long",
           "description": "The number of the data point for which you want to reset the color"
         }
       ],
@@ -3006,12 +3022,12 @@
       "params": [
         {
           "name": "name",
-          "type": "any",
+          "type": "string",
           "description": "The name of the InkPicture control from which you want to clear the picture."
         },
         {
           "name": "rownumber",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that contains the picture to be cleared. To clear all rows, set rownumber to 0."
         }
       ],
@@ -3054,12 +3070,12 @@
       "params": [
         {
           "name": "width",
-          "type": "any",
+          "type": "integer",
           "description": "The new width in PowerBuilder units"
         },
         {
           "name": "height",
-          "type": "any",
+          "type": "integer",
           "description": "The new height in PowerBuilder units"
         }
       ],
@@ -3110,32 +3126,32 @@
       "params": [
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first row you want to copy."
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last row you want to copy."
         },
         {
           "name": "copybuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to copy rows. For a list of valid values, see DWBuffer ."
         },
         {
           "name": "targetdw",
-          "type": "datawindow",
+          "type": "datawindowchild",
           "description": "A reference to the DataWindow control or DataStore object to which you want to copy the rows. Targetdw can be the same DataWindow (or DataStore) or another DataWindow (or DataStore)."
         },
         {
           "name": "beforerow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row before which you want to insert the copied rows. To insert after the last row, use any value that is greater than the number of existing rows."
         },
         {
           "name": "targetbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the target DataWindow buffer for the copied rows. For a list of valid values, see DWBuffer ."
         }
       ],
@@ -3154,17 +3170,17 @@
       "params": [
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first row you want to discard."
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last row you want to discard."
         },
         {
           "name": "buffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype specifying the DataWindow buffer containing the rows to be discarded. For a list of valid values, see DWBuffer ."
         }
       ],
@@ -3183,32 +3199,32 @@
       "params": [
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first row you want to move."
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last row you want to move."
         },
         {
           "name": "movebuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to move the rows. For a list of valid values, see DWBuffer ."
         },
         {
           "name": "targetdw",
-          "type": "datawindow",
+          "type": "datawindowchild",
           "description": "The name of the DataWindow control or DataStore to which you want to move the rows. Targetdw can be the same DataWindow control (or DataStore) or a different DataWindow control (or DataStore), but it cannot be a child DataWindow."
         },
         {
           "name": "beforerow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row before which you want to insert the moved rows. To insert after the last row, use any value that is greater than the number of existing rows."
         },
         {
           "name": "targetbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the target buffer for the rows. For a list of valid values, see DWBuffer ."
         }
       ],
@@ -3233,7 +3249,7 @@
         },
         {
           "name": "saveastype",
-          "type": "SaveAsType",
+          "type": "saveastype",
           "description": "A value of the SaveAsType enumerated datatype specifying the format in which to save the contents of the DataWindow object. For a list of values, see SaveAsType .",
           "optional": true
         },
@@ -3245,7 +3261,7 @@
         },
         {
           "name": "encoding",
-          "type": "any",
+          "type": "encoding",
           "description": "Character encoding of the file to which the data is saved. This parameter applies only to the following formats: TEXT, CSV, SQL, HTML, and DIF. If you do not specify an encoding parameter, the file is saved in ANSI format. Values are: EncodingANSI! (default) EncodingUTF8! EncodingUTF16LE! EncodingUTF16BE!",
           "optional": true
         }
@@ -3276,7 +3292,7 @@
         },
         {
           "name": "quotecharacter",
-          "type": "any",
+          "type": "string",
           "description": "A string whose value is the character to be used to wrap values. If you omit quotecharacter, the default is double quote.",
           "optional": true
         },
@@ -3312,7 +3328,7 @@
         },
         {
           "name": "encoding",
-          "type": "any",
+          "type": "string",
           "description": "Character encoding of the file to which the data is saved. If you do not specify an encoding parameter, the file is saved in ANSI format. Values are: EncodingANSI! (default) EncodingUTF8! EncodingUTF16LE! EncodingUTF16BE!",
           "optional": true
         },
@@ -3324,7 +3340,7 @@
         },
         {
           "name": "quotecharacter",
-          "type": "any",
+          "type": "string",
           "description": "A string whose value is the character to be used to wrap values. If you omit quotecharacter, the default is double quote.",
           "optional": true
         },
@@ -3355,12 +3371,12 @@
       "params": [
         {
           "name": "name",
-          "type": "any",
+          "type": "string",
           "description": "The name of the InkPicture control from which you want to save the ink."
         },
         {
           "name": "rownumber",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that contains the ink to be saved."
         },
         {
@@ -3375,13 +3391,13 @@
         },
         {
           "name": "format",
-          "type": "InkPersistenceFormat",
+          "type": "inkpersistenceformat",
           "description": "A value of the InkPersistenceFormat enumerated variable that specifies the format in which you want to save the ink. Values are: Base64GIFFormat! Base64InkSerializedFormat! GIFFormat! InkSerializedFormat! (default)",
           "optional": true
         },
         {
           "name": "mode",
-          "type": "InkCompressionMode",
+          "type": "inkcompressionmode",
           "description": "A value of the InkCompressionMode enumerated variable that specifies the compression mode in which you want to save the ink. Values are: DefaultCompression! (default) MaximumCompression! NoCompression!",
           "optional": true
         }
@@ -3399,12 +3415,12 @@
       "params": [
         {
           "name": "name",
-          "type": "any",
+          "type": "string",
           "description": "The name of the InkPicture control from which you want to save the picture."
         },
         {
           "name": "rownumber",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that contains the picture to be saved."
         },
         {
@@ -3456,7 +3472,7 @@
       "params": [
         {
           "name": "number",
-          "type": "any",
+          "type": "long",
           "description": "A value specifying the direction and number of lines you want to scroll. To scroll down, use a positive value. To scroll up, use a negative value."
         }
       ],
@@ -3545,7 +3561,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row to which you want to scroll. If row is 0, ScrollToRow scrolls to the first row. If row is greater than the last row number, it scrolls to the last row. If row is visible without scrolling, the DataWindow does not scroll."
         }
       ],
@@ -3607,7 +3623,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "A value identifying the row you want to select or deselect. Specify 0 to select or deselect all rows."
         },
         {
@@ -3643,7 +3659,7 @@
       "params": [
         {
           "name": "band",
-          "type": "Band",
+          "type": "band",
           "description": "A value of the Band enumerated datatype specifying the band in which you want to select all the text. Values are: Detail! Header! Footer! The default is the band that contains the insertion point.",
           "optional": true
         }
@@ -3683,17 +3699,17 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The number of the row that belongs to the group"
         },
         {
           "name": "groupLevel",
-          "type": "any",
+          "type": "long",
           "description": "The TreeView level of the group"
         },
         {
           "name": "bSelect",
-          "type": "any",
+          "type": "boolean",
           "description": "Indicates whether the TreeView node is selected or not"
         }
       ],
@@ -3732,7 +3748,7 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the series for which you want to obtain the name"
         }
       ],
@@ -3761,7 +3777,7 @@
       "params": [
         {
           "name": "code",
-          "type": "datawindow",
+          "type": "long",
           "description": "A value specifying the action you want to take in the DataWindow control. The meaning of the action code depends on the event."
         }
       ],
@@ -3779,12 +3795,12 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column in which you want to change the border style. Column can be a column number or a column name."
         },
         {
           "name": "borderstyle",
-          "type": "Border",
+          "type": "border",
           "description": "A value of the Border enumerated datatype identifying the border style you want to use for the column. For a list of valid values, see Border ."
         }
       ],
@@ -3839,7 +3855,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column you want to make current. Column can be a column number or a column name."
         }
       ],
@@ -3893,17 +3909,17 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "int",
           "description": "The number that identifies the series in which you want to set the data labelling value."
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "int",
           "description": "The datapoint."
         },
         {
           "name": "value",
-          "type": "any",
+          "type": "boolean",
           "description": "Indicates whether to label the data with its value."
         }
       ],
@@ -3925,17 +3941,17 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number that identifies the series."
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the data point (that is, the pie slice) to be exploded."
         },
         {
           "name": "percentage",
-          "type": "any",
+          "type": "integer",
           "description": "A number between 0 and 100 that is the percentage of the radius that the pie slice is moved away from the center. When percentage is 100, the tip of the slice is even with the circumference of the pie's circle."
         }
       ],
@@ -3968,17 +3984,17 @@
         },
         {
           "name": "seriesnumber",
-          "type": "any",
+          "type": "integer",
           "description": "The number that identifies the series in which you want to set the transparency value of a data point."
         },
         {
           "name": "datapoint",
-          "type": "any",
+          "type": "int",
           "description": "The number of the data point for which you want to set a transparency value."
         },
         {
           "name": "transparency",
-          "type": "integer",
+          "type": "int",
           "description": "Integer value for percent transparency. A value of 0 means that the data point is opaque and a value of 100 means that it is completely transparent."
         }
       ],
@@ -3995,17 +4011,17 @@
       "params": [
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The first row in the range of rows for which you want to set the height"
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The last row in the range of rows for which you want to set the height"
         },
         {
           "name": "height",
-          "type": "datawindow",
+          "type": "long",
           "description": "The height of the detail area for the specified rows in the units specified for the DataWindow object"
         }
       ],
@@ -4036,7 +4052,7 @@
       "params": [
         {
           "name": "format",
-          "type": "any",
+          "type": "string",
           "description": "A string whose value is a boolean expression that you want to use as the filter criteria. The expression includes column names or numbers. A column number must be preceded by a pound sign (#). If format is null, PowerBuilder prompts you to enter a filter."
         }
       ],
@@ -4055,7 +4071,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column for which you are specifying the display format. Column can be a column number or a column name."
         },
         {
@@ -4132,12 +4148,12 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The row location of the data."
         },
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column location of the data. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view."
         },
         {
@@ -4197,22 +4213,22 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The row location in which you want to set the status."
         },
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column location in which you want to set the status. Column can be a column number or a column name. To set the status for the row, enter 0 for column."
         },
         {
           "name": "dwbuffer",
-          "type": "datawindow",
+          "type": "dwbuffer",
           "description": "A value identifying the DataWindow buffer that contains the row. For a list of valid values, see DWBuffer ."
         },
         {
           "name": "status",
-          "type": "dwItemStatus",
+          "type": "dwitemstatus",
           "description": "A value of the dwItemStatus enumerated datatype specifying the new status. For a list of valid values, see DWItemStatus ."
         }
       ],
@@ -4267,7 +4283,7 @@
       "params": [
         {
           "name": "controlname",
-          "type": "datawindow",
+          "type": "string",
           "description": "The name of the control within the DataWindow that you want to move. You assign names to the controls in the DataWindow painter."
         },
         {
@@ -4313,7 +4329,7 @@
       "params": [
         {
           "name": "sAlign",
-          "type": "any",
+          "type": "Alignment",
           "description": "Value for specifying the alignment that you want to set for columns with the RichText edit style. Allowable values are: Left! Right! Center! Justified!"
         }
       ],
@@ -4418,7 +4434,7 @@
       "params": [
         {
           "name": "row",
-          "type": "any",
+          "type": "long",
           "description": "The row you want to make current"
         }
       ],
@@ -4442,13 +4458,13 @@
         },
         {
           "name": "xlocation",
-          "type": "any",
+          "type": "integer",
           "description": "The x coordinate in PowerBuilder units of the position of the hand or bitmap relative to the upper-left corner of the row.",
           "optional": true
         },
         {
           "name": "ylocation",
-          "type": "any",
+          "type": "integer",
           "description": "The y coordinate in PowerBuilder units of the position of the hand or bitmap relative to the upper-left corner of the row.",
           "optional": true
         }
@@ -4489,7 +4505,7 @@
         },
         {
           "name": "value",
-          "type": "any",
+          "type": "boolean",
           "description": "Indicates whether to label the series with its values."
         }
       ],
@@ -4527,7 +4543,7 @@
         },
         {
           "name": "transparency",
-          "type": "integer",
+          "type": "int",
           "description": "Integer value for percentage transparency. A value of 0 means that the series is opaque and a value of 100 means that it is completely transparent."
         }
       ],
@@ -4625,12 +4641,12 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "string",
           "description": "The column to which you are assigning a tab value. Column can be a column number or a column name. The column number is the number of the column as it is listed in the Column Specification view of the DataWindow painter -- not necessarily the number of the column in the Design view."
         },
         {
           "name": "tabnumber",
-          "type": "datawindow",
+          "type": "integer",
           "description": "The tab sequence number (0 - 9999) you want to assign to the DataWindow column. 0 removes the column from the tab order, which makes it read-only."
         }
       ],
@@ -4704,7 +4720,7 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column for which you want to set the input validation rule. Column can be a column number or a column name."
         },
         {
@@ -4728,12 +4744,12 @@
       "params": [
         {
           "name": "column",
-          "type": "any",
+          "type": "integer",
           "description": "The column that contains the value list or code table. Column can be a column number or a column name. The edit style of the column can be DropDownListBox, Edit, or RadioButton. SetValue has no effect when column has the EditMask or DropDownDataWindow edit style."
         },
         {
           "name": "index",
-          "type": "any",
+          "type": "integer",
           "description": "The number of the item in the value list or code table for which you want to set the value."
         },
         {
@@ -4757,27 +4773,27 @@
       "params": [
         {
           "name": "allowupdate",
-          "type": "any",
+          "type": "boolean",
           "description": "Specifies whether the generated HTML will be a form with INPUT elements so that the user can change the data. Values are: True -- The generated HTML is a form. The user can change the data. False -- The generated HTML is a table. The user cannot change the data. When allowupdate is false, validation and clientformatting are ignored and no validation or formatting scripts are generated."
         },
         {
           "name": "validation",
-          "type": "any",
+          "type": "boolean",
           "description": "Specifies whether the generated HTML will include scripts for validating data the user enters. The scripts implement validation rules defined in the DataWindow object. Values are: True -- The generated HTML has scripts that implement validation rules. False -- The generated HTML does not validate user-entered data. Sets the value of the HTMLGen.ClientValidation property for the DataWindow object associated with the server component."
         },
         {
           "name": "events",
-          "type": "any",
+          "type": "boolean",
           "description": "Specifies whether the generated HTML will include code for triggering events. Values are: True -- The generated HTML has scripts that trigger events. False -- The generated HTML does not trigger events. Sets the value of the HTMLGen.ClientEvents property for the DataWindow object associated with the server component. The available events are listed in the DataWindow event cross-reference ."
         },
         {
           "name": "clientscriptable",
-          "type": "any",
+          "type": "boolean",
           "description": "Specifies whether the generated HTML allows client-side scripts to call methods of the client control. Values are: True -- The generated HTML includes methods that the client scripts can call. False -- The generated HTML does not include methods. This option adds approximately 100K to the generated HTML. Sets the value of the HTMLGen.ClientScriptable property for the DataWindow object associated with the server component."
         },
         {
           "name": "clientformatting",
-          "type": "any",
+          "type": "boolean",
           "description": "Specifies whether the generated HTML will include scripts for formatting data the user enters. The scripts implement display formats defined in the DataWindow object. Values are: True -- The generated HTML has scripts that format user-entered data. False -- The generated HTML does not format user-entered data. Sets the value of the HTMLGen.ClientFormatting property for the DataWindow object associated with the server component."
         }
       ],
@@ -4795,7 +4811,7 @@
       "params": [
         {
           "name": "dwsecondary",
-          "type": "datawindow",
+          "type": "datawindowchild",
           "description": "The name of the secondary DataWindow with which the control dwprimary will share the data. The secondary DataWindow can be a child DataWindow or a report in a composite DataWindow object but it cannot be a Crosstab DataWindow object."
         }
       ],
@@ -4886,7 +4902,7 @@
       "params": [
         {
           "name": "event",
-          "type": "TrigEvent",
+          "type": "trigevent",
           "description": "A value of the TrigEvent enumerated datatype that identifies a PowerBuilder event (for example, Clicked!, Modified!, or DoubleClicked!) or a string whose value is the name of an event. The event must be a valid event for objectname and a script must exist for the event in objectname."
         },
         {

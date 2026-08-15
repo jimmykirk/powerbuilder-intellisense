@@ -163,6 +163,54 @@ def infer_param_type(name, desc):
     return "any"
 
 
+def syntax_param_hints(syntax):
+    """
+    Per-argument facts taken from the documented syntax line, which is more
+    authoritative than the prose: `REF DataWindowChild dwchildvariable` gives
+    both the by-reference marker and the real type, where the description only
+    says "a variable in which ...".
+    """
+    hints = {}
+    if not syntax:
+        return hints
+    inner = syntax[syntax.find("(") + 1:syntax.rfind(")")] if "(" in syntax else ""
+    for segment in re.split(r",", inner):
+        seg = squash(segment.replace("{", " ").replace("}", " "))
+        seg = re.sub(r"\.\s*\.\s*\.", " ", seg)
+        tokens = [t for t in seg.split() if t]
+        if not tokens:
+            continue
+        is_ref = tokens[0].lower() == "ref"
+        if is_ref:
+            tokens = tokens[1:]
+        if not tokens:
+            continue
+        name = tokens[-1].strip("[]")
+        stype = tokens[-2] if len(tokens) >= 2 else None
+        if not re.fullmatch(r"[A-Za-z_]\w*", name):
+            continue
+        if stype and not re.fullmatch(r"[A-Za-z_]\w*", stype):
+            stype = None
+        hints[name.lower()] = {"ref": is_ref, "type": stype}
+    return hints
+
+
+def apply_syntax_hints(params, syntax):
+    """Marks by-reference params and prefers the syntax's declared type."""
+    hints = syntax_param_hints(syntax)
+    for param in params:
+        hint = hints.get(param["name"].lower())
+        if not hint:
+            continue
+        if hint["ref"]:
+            param["ref"] = True
+        # The syntax line is the actual declaration, so its type wins over the
+        # type guessed from the argument's prose description.
+        if hint["type"]:
+            param["type"] = hint["type"]
+    return params
+
+
 def optional_depths(syntax):
     """Map each identifier occurring in the syntax line to its brace depth."""
     depths = {}
@@ -291,8 +339,9 @@ def parse_variant(sub):
     ret_elems = collect(smap, lambda h: h.lower().startswith("return"))
     return_type = parse_return_type(ret_elems)
 
-    if not syntax and not params:
+    if not syntax and not params and not (label and re.match(r"Syntax \d", label)):
         return None
+    apply_syntax_hints(params, syntax)
     variant = {"params": params}
     if label:
         variant["label"] = label
@@ -373,6 +422,8 @@ def parse_page(path, kind="func"):
         if opt:
             param["optional"] = True
         params.append(param)
+
+    apply_syntax_hints(params, syntax)
 
     ret_elems = collect(sections, lambda h: h.lower().startswith("return"))
     return_type = parse_return_type(ret_elems) or "none"

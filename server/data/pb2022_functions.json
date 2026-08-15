@@ -78,12 +78,12 @@
         },
         {
           "name": "tokenRequest",
-          "type": "any",
+          "type": "TokenRequest",
           "description": "A reference to the TokenRequest object specifying the request information."
         },
         {
           "name": "tokenResponse",
-          "type": "any",
+          "type": "TokenResponse",
           "description": "A reference to the TokenResponse object into which the function returns the object."
         }
       ],
@@ -807,7 +807,7 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the menu item (RibbonMenuItem) into which you want to insert a submenu separator. It cannot be an index of a separator. If not specified, a separator will be added at the end of the menu; if specified to a valid value, a separator will be added at the end of the submenu under the menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         }
@@ -854,7 +854,7 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the menu item (RibbonMenuItem) into which you want to insert a submenu separator. It cannot be an index of a separator. If not specified, a separator will be added at the end of the menu; if specified to a valid value, a separator will be added at the end of the submenu under the menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         }
@@ -976,7 +976,7 @@
       "params": [
         {
           "name": "theme",
-          "type": "string",
+          "type": "String",
           "description": "A string whose value is the theme name (or theme path and name) you want to apply to the current application. The theme path is optional. If not specified, the default value is \"%AppeonInstallPath%\\PowerBuilder [version]\\IDE\\theme\" when the app is run from the IDE (at the development environment), and the default value is the \"theme\" under the root of the application installation directory when the application's executable file is run (at the production environment). If specified, it can be an absolute path or a relative path; and cannot be a UNC path (for example, \"\\\\172.16.0.1\\theme\\Flat Design Blue\" is unsupported). The relative path is relative to the PBT file at the development environment; and relative to the root of the installation directory of the app's executable file at the production environment. The theme name should be the sub-folder name under the specified theme path or the default path that contain the files for the theme, therefore the sub-folder name represents the theme name. In Windows system, the maximum length for a path is defined as 260 characters. Therefore, it is recommended the theme path (including theme name) should be less than 260 characters and the path alone (excluding theme name) should be less than 200 characters."
         }
       ]
@@ -1619,7 +1619,7 @@
         },
         {
           "name": "ItemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID used to identify the file. The minimum value is 1. ItemId should be the return value of DownloadingStart or DownloadingStateChanged event ."
         }
       ],
@@ -2465,7 +2465,7 @@
         },
         {
           "name": "format",
-          "type": "any",
+          "type": "ArchiveFormat",
           "description": "A value of the enumerated datatype ArchiveFormat specifying the format of the target file. The supported values are: ArchiveFormatZIP! -- zip file. Supports AES-256 encryption for password. This is the default value. ArchiveFormat7Zip! -- 7zip file. Supports AES-256 encryption for password. ArchiveFormatGZip! -- gzip format archive. Supports compressing a single file. ArchiveFormatTAR! -- tar format archive. If the extension in \"dest\" is inconsistent with the format specified in \"format\", the file or folder will be compressed according to the format specified in \"format\" and the extension of \"dest\" will not be revised.",
           "optional": true
         }
@@ -2828,12 +2828,12 @@
             },
             {
               "name": "classname",
-              "type": "any",
+              "type": "string",
               "description": "The name of the .NET class. It must contain the namespace and the class name: [namespace].[class], for example, AppeonSample.StandardTest."
             },
             {
               "name": "DotNetObject",
-              "type": "any",
+              "type": "CSharpObjcet",
               "description": "The name of the DotNetObject object."
             },
             {
@@ -3282,7 +3282,7 @@
             },
             {
               "name": "ItemHandle",
-              "type": "any",
+              "type": "Long",
               "description": "The handle of the category you want to delete."
             }
           ],
@@ -3306,7 +3306,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the check box you want to delete."
         }
       ],
@@ -3364,7 +3364,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the combo box you want to delete."
         }
       ],
@@ -3413,7 +3413,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the group you want to delete."
         }
       ],
@@ -3537,13 +3537,13 @@
             },
             {
               "name": "ParentIndex",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item (RibbonMenuItem) whose submenu you want to delete. If not specified, the menu item will be deleted; if specified to a valid value, the submenu of the menu item (whose index is ParentIndex) will be deleted; if specified to an invalid value, an error would occur and this operation would return -1.",
               "optional": true
             },
             {
               "name": "Index",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item or submenu item you want to delete. If index is invalid, an error would occur and this operation would return -1."
             }
           ],
@@ -3560,7 +3560,7 @@
             },
             {
               "name": "ItemHandle",
-              "type": "any",
+              "type": "Long",
               "description": "The handle of the item which you want to delete."
             }
           ],
@@ -3601,7 +3601,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the large button you want to delete."
         }
       ],
@@ -3662,13 +3662,13 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) whose submenu you want to delete. If not specified, the master menu item will be deleted; if specified to a valid value, the submenu item of the master menu item (whose index is ParentIndex) will be deleted; if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item or submenu item which you want to delete. If index is invalid, an error would occur and this operation would return -1."
         }
       ],
@@ -3690,7 +3690,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel you want to delete."
         }
       ],
@@ -3755,7 +3755,7 @@
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the recent menu item which you want to delete."
         }
       ],
@@ -3799,7 +3799,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the small button you want to delete."
         }
       ],
@@ -3901,7 +3901,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the tab button you want to delete."
         }
       ],
@@ -4322,7 +4322,7 @@
         },
         {
           "name": "script",
-          "type": "any",
+          "type": "string",
           "description": "The JavaScript to be evaluated."
         }
       ],
@@ -4344,20 +4344,22 @@
         },
         {
           "name": "script",
-          "type": "any",
+          "type": "string",
           "description": "The JavaScript to be evaluated. The JavaScript cannot have statements that show dialog boxes. If a dialog box must be displayed in JavaScript, the script must be executed asynchronously. If there are multiple JavaScript statements, only the last JavaScript statement will have its result returned."
         },
         {
           "name": "result",
           "type": "string",
           "description": "The result of script execution. The execution result is represented in a JSON string. The supported JavaScript data types are bool, int, double, string, date, array. When the above types are mapped to the PowerBuilder data types, they are boolean, integer, double, string, datetime, array. For example, {\"type\":\"double\",\"value\":1585620350123};//returns a double-type value {\"type\":\"string\",\"value\":\"12d6_1585674123456_74563\"};//returns a string-type value",
-          "optional": true
+          "optional": true,
+          "ref": true
         },
         {
           "name": "error",
           "type": "string",
           "description": "The error information if an error occurs during execution. The error information is represented in a JSON string. For example, {\"type\":\"error\",\"value\":\"Uncaught TypeError: Cannot read property 'style' \"}",
-          "optional": true
+          "optional": true,
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -4530,12 +4532,12 @@
       "params": [
         {
           "name": "FileName",
-          "type": "any",
+          "type": "String",
           "description": "The file path and file name where the JSON file will be saved."
         },
         {
           "name": "encoding",
-          "type": "any",
+          "type": "Encoding",
           "description": "Character encoding of the file to which the data is saved. If you do not specify an encoding parameter, the file is saved in UTF8 format. Values are: EncodingANSI! EncodingUTF8! (default) EncodingUTF16LE! EncodingUTF16BE!",
           "optional": true
         }
@@ -4553,12 +4555,12 @@
       "params": [
         {
           "name": "FileName",
-          "type": "any",
+          "type": "String",
           "description": "The file path and file name where the XML file will be saved."
         },
         {
           "name": "encoding",
-          "type": "any",
+          "type": "Encoding",
           "description": "Character encoding of the file to which the data is saved. If you do not specify an encoding parameter, the file is saved in UTF8 format. If you specify EncodingANSI! in the Japanese OS, EncodingUTF8! will be used instead of EncodingANSI! (as the ISO-2022-JP encoding used by ANSI in the Japanese OS is unsupported). Values are: EncodingANSI! EncodingUTF8! (default) EncodingUTF16LE! EncodingUTF16BE!",
           "optional": true
         }
@@ -4598,7 +4600,7 @@
         },
         {
           "name": "source",
-          "type": "any",
+          "type": "string",
           "description": "A string whose value is the full directory of the compressed archive. Or a blob whose value is the compressed data stream."
         },
         {
@@ -5508,8 +5510,9 @@
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonCategoryItem variable in which you want to store the active category."
+          "type": "RibbonCategoryItem",
+          "description": "A RibbonCategoryItem variable in which you want to store the active category.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -5572,8 +5575,9 @@
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonApplicationButtonItem variable in which you want to store the application button."
+          "type": "RibbonApplicationButtonItem",
+          "description": "A RibbonApplicationButtonItem variable in which you want to store the application button.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -5690,7 +5694,7 @@
             },
             {
               "name": "data",
-              "type": "any",
+              "type": "string",
               "description": "A string or blob variable into which the function returns data. The following data encodings are supported: EncodingANSI!, EncodingUTF8!, EncodingUTF16LE! and EncodingUTF16BE!."
             },
             {
@@ -5712,7 +5716,7 @@
             },
             {
               "name": "data",
-              "type": "any",
+              "type": "string",
               "description": "A string or blob variable into which the function returns data. The following data encodings are supported: EncodingANSI!, EncodingUTF8!, EncodingUTF16LE! and EncodingUTF16BE!."
             },
             {
@@ -5796,13 +5800,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the category you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonCategoryItem variable in which you want to store the category identified by the item handle."
+          "type": "RibbonCategoryItem",
+          "description": "A RibbonCategoryItem variable in which you want to store the category identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -5823,13 +5828,14 @@
         },
         {
           "name": "Index",
-          "type": "any",
+          "type": "Long",
           "description": "The index of the category which you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonCategoryItem variable in which you want to store the category identified by the index."
+          "type": "RibbonCategoryItem",
+          "description": "A RibbonCategoryItem variable in which you want to store the category identified by the index.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -5867,7 +5873,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle for the category you want to obtain the index."
         }
       ],
@@ -5916,13 +5922,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle for the check box you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonCheckBoxItem variable in which you want to store the check box identified by the item handle."
+          "type": "RibbonCheckBoxItem",
+          "description": "A RibbonCheckBoxItem variable in which you want to store the check box identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -6002,18 +6009,19 @@
         },
         {
           "name": "Handle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the parent item whose child item you want to obtain. The parent item can be Category, Panel, or Group."
         },
         {
           "name": "Index",
-          "type": "any",
+          "type": "Long",
           "description": "The index of the child item you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "An item variable in which you want to store the child item identified by the index."
+          "type": "PowerObject",
+          "description": "An item variable in which you want to store the child item identified by the index.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -6034,7 +6042,7 @@
         },
         {
           "name": "Handle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the parent object whose child items you want to count. The parent object can be Category, Panel, or Group."
         }
       ],
@@ -6149,13 +6157,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle for the combo box you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonComboBoxItem variable in which you want to store the combo box identified by the item handle."
+          "type": "RibbonComboBoxItem",
+          "description": "A RibbonComboBoxItem variable in which you want to store the combo box identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -7184,7 +7193,7 @@
         },
         {
           "name": "source",
-          "type": "any",
+          "type": "string",
           "description": "The full path of the compressed package. Packages compressed by the LINUX commands are unsupported."
         }
       ],
@@ -7206,7 +7215,7 @@
         },
         {
           "name": "source",
-          "type": "any",
+          "type": "string",
           "description": "The full path of the compressed package. Packages compressed by the LINUX commands are unsupported."
         },
         {
@@ -7326,13 +7335,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the group you want to get."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonGroupItem variable in which you want to store the group identified by the item handle."
+          "type": "RibbonGroupItem",
+          "description": "A RibbonGroupItem variable in which you want to store the group identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -7792,19 +7802,20 @@
             },
             {
               "name": "ParentIndex",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item (RibbonMenuItem) whose submenu you want to get. If not specified, the menu item will be obtained; if specified to a valid value, the submenu of the menu item (whose index is ParentIndex) will be obtained; if specified to an invalid value, an error would occur and this operation would return -1.",
               "optional": true
             },
             {
               "name": "Index",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item or submenu item you want to obtain. If index is invalid, an error would occur and this operation would return -1."
             },
             {
               "name": "Item",
-              "type": "menu",
-              "description": "A RibbonMenuItem variable in which you want to store the menu item identified by the index."
+              "type": "RibbonMenuItem",
+              "description": "A RibbonMenuItem variable in which you want to store the menu item identified by the index.",
+              "ref": true
             }
           ],
           "label": "Syntax 4: For RibbonMenu controls",
@@ -7820,13 +7831,14 @@
             },
             {
               "name": "ItemHandle",
-              "type": "any",
+              "type": "Long",
               "description": "The handle of the item you want to obtain."
             },
             {
               "name": "Item",
-              "type": "any",
-              "description": "An item variable in which you want to store the item identified by the item handle."
+              "type": "PowerObject",
+              "description": "An item variable in which you want to store the item identified by the item handle.",
+              "ref": true
             }
           ],
           "label": "Syntax 5: For RibbonBar controls",
@@ -8248,13 +8260,14 @@
         },
         {
           "name": "Tag",
-          "type": "any",
+          "type": "String",
           "description": "The tag value of the item you want to obtain."
         },
         {
           "name": "Item",
-          "type": "powerobject",
-          "description": "A PowerObject variable in which you want to store the item identified by the tag."
+          "type": "PowerObject",
+          "description": "A PowerObject variable in which you want to store the item identified by the tag.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -8275,7 +8288,7 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the menu item (RibbonMenuItem) whose submenu items you want to count. If not specified, the menu item will be counted; if specified to a valid value, the submenu items of the menu item (whose index is ParentIndex) will be counted; if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         }
@@ -8488,7 +8501,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "long",
+          "type": "Long",
           "description": "A long whose value is the handle of the item of JsonNumberItem type."
         },
         {
@@ -8520,7 +8533,7 @@
             },
             {
               "name": "ItemHandle",
-              "type": "long",
+              "type": "Long",
               "description": "A long whose value is the handle of the item of JsonNumberItem type."
             }
           ],
@@ -8846,13 +8859,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the child item whose parent item you want to obtain."
         },
         {
           "name": "Item",
-          "type": "powerobject",
-          "description": "A PowerObject variable in which you want to store the parent item."
+          "type": "PowerObject",
+          "description": "A PowerObject variable in which you want to store the parent item.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9101,7 +9115,7 @@
         },
         {
           "name": "e",
-          "type": "blob",
+          "type": "Encoding",
           "description": "Character encoding of the resulting blob. Values are: EncodingANSI!, EncodingUTF8!, EncodingUTF16LE! (default), and EncodingUTF16BE!.",
           "optional": true
         }
@@ -9153,8 +9167,9 @@
         },
         {
           "name": "token",
-          "type": "any",
-          "description": "The server response which contains the access token. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The server response which contains the access token. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9197,13 +9212,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the large button you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonLargeButtonItem variable in which you want to store the large button identified by the item handle."
+          "type": "RibbonLargeButtonItem",
+          "description": "A RibbonLargeButtonItem variable in which you want to store the large button identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9271,19 +9287,20 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) whose submenu you want to get. If not specified, the master menu item will be obtained; if specified to a valid value, the submenu item under the master menu item (whose index is ParentIndex) will be obtained; if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item or submenu item you want to obtain. If index is invalid, an error would occur and this operation would return -1."
         },
         {
           "name": "Item",
-          "type": "menu",
-          "description": "A RibbonMenuItem variable in which you want to store the master menu item identified by the index."
+          "type": "RibbonMenuItem",
+          "description": "A RibbonMenuItem variable in which you want to store the master menu item identified by the index.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9304,7 +9321,7 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) whose submenu items you want to count. If not specified, the master menu items will be counted; if specified to a valid value, the submenu items under the master menu item (whose index is ParentIndex) will be counted; if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         }
@@ -9327,8 +9344,9 @@
         },
         {
           "name": "ApplicationMenu",
-          "type": "menu",
-          "description": "A RibbonApplicationMenu variable in which you want to store the menu."
+          "type": "RibbonApplicationMenu",
+          "description": "A RibbonApplicationMenu variable in which you want to store the menu.",
+          "ref": true
         },
         {
           "name": "Menu",
@@ -9357,13 +9375,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "menu",
+          "type": "Long",
           "description": "The handle of the button whose menu you want to get."
         },
         {
           "name": "ApplicationMenu",
-          "type": "menu",
-          "description": "A RibbonApplicationMenu variable in which you want to store the menu."
+          "type": "RibbonApplicationMenu",
+          "description": "A RibbonApplicationMenu variable in which you want to store the menu.",
+          "ref": true
         },
         {
           "name": "Menu",
@@ -9529,13 +9548,14 @@
         },
         {
           "name": "tokenRequest",
-          "type": "any",
+          "type": "TokenRequest",
           "description": "The OAuth2.0 Access Token Request object."
         },
         {
           "name": "token",
-          "type": "any",
-          "description": "The access token returned from the server."
+          "type": "string",
+          "description": "The access token returned from the server.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9601,13 +9621,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonPanelItem variable in which you want to store the panel identified by the item handle."
+          "type": "RibbonPanelItem",
+          "description": "A RibbonPanelItem variable in which you want to store the panel identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9730,13 +9751,14 @@
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the recent menu item which you want to obtain. If index is invalid, an error would occur and this operation would return -1."
         },
         {
           "name": "Item",
-          "type": "menu",
-          "description": "A RibbonMenuItem variable in which you want to store the recent menu item identified by the index."
+          "type": "RibbonMenuItem",
+          "description": "A RibbonMenuItem variable in which you want to store the recent menu item identified by the index.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9774,8 +9796,9 @@
         },
         {
           "name": "Title",
-          "type": "menu",
-          "description": "Title of the recent menu list. It is displayed on top of the recent menu list."
+          "type": "String",
+          "description": "Title of the recent menu list. It is displayed on top of the recent menu list.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -9991,7 +10014,7 @@
         },
         {
           "name": "data",
-          "type": "any",
+          "type": "string",
           "description": "A string or blob variable into which the function returns the data. For the string data, if the encoding charset is specified in the Content-Type response header, this function will encode the data with the specified charset; if charset is not specified, this function determines the encoding type based on the BOM header, and then converts the data into UNICODE."
         },
         {
@@ -10454,13 +10477,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the small button you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonSmallButtonItem variable in which you want to store the small button identified by the item handle."
+          "type": "RibbonSmallButtonItem",
+          "description": "A RibbonSmallButtonItem variable in which you want to store the small button identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -10638,13 +10662,14 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the tab button you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonTabButtonItem variable in which you want to store the tab button identified by the item handle."
+          "type": "RibbonTabButtonItem",
+          "description": "A RibbonTabButtonItem variable in which you want to store the tab button identified by the item handle.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -10665,13 +10690,14 @@
         },
         {
           "name": "Index",
-          "type": "any",
+          "type": "Long",
           "description": "The index of the tab button you want to obtain."
         },
         {
           "name": "Item",
-          "type": "any",
-          "description": "A RibbonTabButtonItem variable in which you want to store the tab button identified by the index."
+          "type": "RibbonTabButtonItem",
+          "description": "A RibbonTabButtonItem variable in which you want to store the tab button identified by the index.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -11303,7 +11329,7 @@
         },
         {
           "name": "dwcontrol",
-          "type": "datawindow",
+          "type": "dwcontrol",
           "description": "A reference to a DataWindow control, DataStore, or DataWindowChild."
         },
         {
@@ -11314,25 +11340,25 @@
         },
         {
           "name": "error",
-          "type": "any",
+          "type": "string",
           "description": "A variable into which the returned warning or error message will be placed. When there are a large amount of error messages, the error information will only display the total number of errors, and the detailed message of the first 10 errors. The import warning caused by data type mismatch will not affect the return value of ImportJsonByKey; although the data of the mismatched columns will not be imported, the rest columns (even only one column) that are matched will be imported successfully; and that row will be regarded as a successful import and counted into the return value. The import error caused by DW presentation style mismatch, invalid arguments, startrow value greater than the number of rows,etc. will be regarded as a failure, and represented by a negative return value of GetValueToDataWindow, instead of being placed into this variable. See the Return Value section for more. Most of the messages placed into this variable are warnings (such as data type mismatch) rather than errors. Developers can adjust the JSON data according to the message or simply ignore the message if the problematic column is not critical and the corresponding DataWindow column can be left blank.",
           "optional": true
         },
         {
           "name": "dwbuffer",
-          "type": "dwBuffer",
+          "type": "DWBuffer",
           "description": "A value of the dwBuffer enumerated datatype identifying the DataWindow buffer from which you want to import the data. For a list of valid values, see the section called “DWBuffer” in DataWindow Reference . For plain JSON: If not specified, imports the JSON data to the Primary! buffer. If specified, imports the JSON data to the specified buffer. For DataWindow JSON: If not specified, imports data of all of the buffers from the JSON string to the corresponding buffers and, if any, imports the data for DataWindowChild. If specified, imports data of the specified buffer from the JSON string to the corresponding buffer.",
           "optional": true
         },
         {
           "name": "startrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the first detail object in the JSON Array that you want to import. The default is 1. If it is 0 or negative, 1 is used.",
           "optional": true
         },
         {
           "name": "endrow",
-          "type": "any",
+          "type": "long",
           "description": "The number of the last detail object in the JSON Array that you want to import. The default is the rest of the objects. If it is 0 or negative, it indicates the rest of rows.",
           "optional": true
         }
@@ -11637,7 +11663,7 @@
         },
         {
           "name": "dw",
-          "type": "datawindow",
+          "type": "DataWindow",
           "description": "The DataWindow object whose data is imported to a PDF document"
         },
         {
@@ -11669,7 +11695,7 @@
             },
             {
               "name": "dw",
-              "type": "datawindow",
+              "type": "DataWindow",
               "description": "The DataWindow object whose data is imported to a PDF document"
             }
           ],
@@ -11686,12 +11712,12 @@
             },
             {
               "name": "dw",
-              "type": "datawindow",
+              "type": "DataWindow",
               "description": "The DataWindow object whose data is imported to a PDF document"
             },
             {
               "name": "targetIndex",
-              "type": "datawindow",
+              "type": "long",
               "description": "The target index of a PDF document before which you want to import all pages from a DataWindow object"
             }
           ],
@@ -11708,7 +11734,7 @@
             },
             {
               "name": "dwc",
-              "type": "any",
+              "type": "DataWindowChild",
               "description": "The DataWindowChild object whose data is imported to a PDF document"
             }
           ],
@@ -11725,12 +11751,12 @@
             },
             {
               "name": "dwc",
-              "type": "any",
+              "type": "DataWindowChild",
               "description": "The DataWindowChild object whose data is imported to a PDF document"
             },
             {
               "name": "targetIndex",
-              "type": "any",
+              "type": "long",
               "description": "The target index of a PDF document before which you want to import all pages from a DataWindowChild object"
             }
           ],
@@ -11747,7 +11773,7 @@
             },
             {
               "name": "ds",
-              "type": "datastore",
+              "type": "DataStore",
               "description": "The DataStore object whose data is imported to a PDF document"
             }
           ],
@@ -11764,12 +11790,12 @@
             },
             {
               "name": "ds",
-              "type": "datastore",
+              "type": "DataStore",
               "description": "The DataStore object whose data is imported to a PDF document"
             },
             {
               "name": "targetIndex",
-              "type": "datastore",
+              "type": "long",
               "description": "The target index of a PDF document before which you want to import all pages from a DataStore object"
             }
           ],
@@ -12001,7 +12027,7 @@
         },
         {
           "name": "fileName",
-          "type": "any",
+          "type": "string",
           "description": "The name of the PDF document to be imported (including the file path)"
         },
         {
@@ -12038,7 +12064,7 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "string",
               "description": "The name of the PDF document to be imported (including the file path)"
             }
           ],
@@ -12055,12 +12081,12 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "string",
               "description": "The name of the PDF document to be imported (including the file path)"
             },
             {
               "name": "masterPassword",
-              "type": "any",
+              "type": "string",
               "description": "The master password of the imported PDF document to be set"
             }
           ],
@@ -12077,12 +12103,12 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "string",
               "description": "The name of the PDF document to be imported (including the file path)"
             },
             {
               "name": "targetIndex",
-              "type": "any",
+              "type": "long",
               "description": "The target index of a new PDF document before which you want to import all pages of the existing PDF document"
             }
           ],
@@ -12099,17 +12125,17 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "string",
               "description": "The name of the PDF document to be imported (including the file path)"
             },
             {
               "name": "targetIndex",
-              "type": "any",
+              "type": "long",
               "description": "The target index of a new PDF document before which you want to import all pages of the existing PDF document"
             },
             {
               "name": "masterPassword",
-              "type": "any",
+              "type": "string",
               "description": "The master password of the imported PDF document to be set"
             }
           ],
@@ -12126,22 +12152,22 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "string",
               "description": "The name of the PDF document to be imported (including the file path)"
             },
             {
               "name": "startSourceIndex",
-              "type": "any",
+              "type": "long",
               "description": "The start index of the existing PDF document to be specified"
             },
             {
               "name": "endSourceIndex",
-              "type": "any",
+              "type": "long",
               "description": "The end index of the existing PDF document to be specified"
             },
             {
               "name": "targetIndex",
-              "type": "any",
+              "type": "long",
               "description": "The target index of a new PDF document before which you want to import the specified pages of the existing PDF document"
             }
           ],
@@ -12158,27 +12184,27 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "String",
               "description": "The name of the PDF document to be imported (including the file path)"
             },
             {
               "name": "startSourceIndex",
-              "type": "any",
+              "type": "long",
               "description": "The start index of the existing PDF document to be specified"
             },
             {
               "name": "endSourceIndex",
-              "type": "any",
+              "type": "long",
               "description": "The end index of the existing PDF document to be specified"
             },
             {
               "name": "targetIndex",
-              "type": "any",
+              "type": "long",
               "description": "The target index of a new PDF document before which you want to import the specified pages of the existing PDF document"
             },
             {
               "name": "masterPassword",
-              "type": "any",
+              "type": "string",
               "description": "The master password of the imported PDF document to be set"
             }
           ],
@@ -12620,12 +12646,12 @@
             },
             {
               "name": "ItemHandleAfter",
-              "type": "any",
+              "type": "Long",
               "description": "The handle of the category on the same level after which you want to insert the category."
             },
             {
               "name": "Text",
-              "type": "any",
+              "type": "String",
               "description": "The title of the category to be inserted."
             },
             {
@@ -12654,7 +12680,7 @@
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The title of the category to be inserted."
         },
         {
@@ -12681,7 +12707,7 @@
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The title of the category to be inserted."
         },
         {
@@ -12708,22 +12734,22 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group in which you want to insert a check box."
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, or group) on the same level after which you want to insert the check box."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the check box."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the check box. The Clicked user event for the check box must have a long parameter for receiving the handle of the check box. For details, see Clicked ."
         },
         {
@@ -12750,17 +12776,17 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert a check box."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the check box."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the check box. The Clicked user event for the check box must have a long parameter for receiving the handle of the check box. For details, see Clicked ."
         },
         {
@@ -12787,17 +12813,17 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert a check box."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the check box."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the check box. The Clicked user event for the check box must have a long parameter for receiving the handle of the check box. For details, see Clicked ."
         },
         {
@@ -12880,17 +12906,17 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert a combo box."
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, or group) on the same level after which you want to insert the combo box."
         },
         {
           "name": "SelectionChanged",
-          "type": "any",
+          "type": "String",
           "description": "The name of the SelectionChanged user event to be bound with the combo box. The SelectionChanged user event for the combo box must have two long parameters for receiving the handle and index number of the combo box. For details, see SelectionChanged ."
         },
         {
@@ -12917,12 +12943,12 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group in which you want to insert a combo box."
         },
         {
           "name": "SelectionChanged",
-          "type": "any",
+          "type": "String",
           "description": "The name of the SelectionChanged user event to be bound with the combo box. The SelectionChanged user event for the combo box must have two long parameters for receiving the handle and index number of the combo box. For details, see SelectionChanged ."
         },
         {
@@ -12949,12 +12975,12 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert a combo box."
         },
         {
           "name": "SelectionChanged",
-          "type": "any",
+          "type": "String",
           "description": "The name of the SelectionChanged user event to be bound with the combo box. The SelectionChanged user event for the combo box must have two long parameters for receiving the handle and index number of the combo box. For details, see SelectionChanged ."
         },
         {
@@ -13079,12 +13105,12 @@
         },
         {
           "name": "PanelHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel into which you want to insert a group."
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, group) on the same level after which you want to insert the group."
         },
         {
@@ -13111,7 +13137,7 @@
         },
         {
           "name": "PanelHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel into which you want to insert a group."
         },
         {
@@ -13138,7 +13164,7 @@
         },
         {
           "name": "PanelHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel into which you want to insert a group."
         },
         {
@@ -13409,28 +13435,28 @@
             },
             {
               "name": "ParentIndex",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item (RibbonMenuItem) into which you want to insert a submenu item. It cannot be an index of a separator (that is RibbonMenuItem with ItemType 1). If not specified, a menu item will be inserted at the specified position; if specified to a valid value, a submenu item will be inserted at the specified position under the menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
               "optional": true
             },
             {
               "name": "Index",
-              "type": "menu",
+              "type": "Long",
               "description": "The index number of the menu item or submenu item before which you are inserting a new menu item. If index is invalid, an error would occur and this operation would return -1."
             },
             {
               "name": "Text",
-              "type": "menu",
+              "type": "String",
               "description": "The text that displays in the menu item or submenu item."
             },
             {
               "name": "PictureName",
-              "type": "any",
+              "type": "String",
               "description": "The name of the file that contains the picture. The image is displayed in 16*16 pixels."
             },
             {
               "name": "Clicked",
-              "type": "menu",
+              "type": "String",
               "description": "The name of the Clicked user event to be bound with the menu item. The Clicked user event for the menu item must be defined with the required parameters and types. For details, see Clicked ."
             },
             {
@@ -13567,23 +13593,23 @@
             },
             {
               "name": "ParentIndex",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item (RibbonMenuItem) into which you want to insert a submenu item. It cannot be an index of a separator (that is RibbonMenuItem with ItemType 1). If not specified, a menu item will be inserted as the first item; if specified to a valid value, a submenu item will be inserted as the first item under the menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
               "optional": true
             },
             {
               "name": "Text",
-              "type": "menu",
+              "type": "String",
               "description": "The text that displays in the menu item or submenu item."
             },
             {
               "name": "PictureName",
-              "type": "any",
+              "type": "String",
               "description": "The name of the file that contains the picture. The image will be displayed in 16*16 pixels."
             },
             {
               "name": "Clicked",
-              "type": "menu",
+              "type": "String",
               "description": "The name of the Clicked user event to be bound with the menu item. The Clicked user event for the menu item must be defined with the required parameters and types. For details, see Clicked ."
             },
             {
@@ -13720,23 +13746,23 @@
             },
             {
               "name": "ParentIndex",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item (RibbonMenuItem) into which you want to insert a submenu item. It cannot be an index of a separator (that is RibbonMenuItem with ItemType 1). If not specified, a menu item will be inserted as the last item; if specified to a valid value, a submenu item will be inserted as the last item under the menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
               "optional": true
             },
             {
               "name": "Text",
-              "type": "menu",
+              "type": "String",
               "description": "The text that displays in the menu item or submenu item."
             },
             {
               "name": "PictureName",
-              "type": "any",
+              "type": "String",
               "description": "The name of the file that contains the picture. The image will be displayed in 16*16 pixels."
             },
             {
               "name": "Clicked",
-              "type": "menu",
+              "type": "String",
               "description": "The name of the Clicked user event to be bound with the menu item. The Clicked user event for the menu item must be defined with the required parameters and types. For details, see Clicked ."
             },
             {
@@ -13853,27 +13879,27 @@
         },
         {
           "name": "PanelHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel into which you want to insert a large button."
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, group) on the same level after which you want to insert the large button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the large button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 32*32."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the large button. The Clicked user event for the large button must have a long parameter for receiving the handle of the large button. For details, see Clicked ."
         },
         {
@@ -13900,22 +13926,22 @@
         },
         {
           "name": "PanelHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel into which you want to insert a large button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the large button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 32*32."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the large button. The Clicked user event for the large button must have a long parameter for receiving the handle of the large button. For details, see Clicked ."
         },
         {
@@ -13942,22 +13968,22 @@
         },
         {
           "name": "PanelHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel into which you want to insert a large button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the large button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 32*32."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the large button. The Clicked user event for the large button must have a long parameter for receiving the handle of the large button. For details, see Clicked ."
         },
         {
@@ -13984,28 +14010,28 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) into which you want to insert a submenu item. It cannot be an index of a separator (that is RibbonMenuItem with ItemType 1). If not specified, a master menu item will be inserted at the specified position; if specified to a valid value, a submenu item will be inserted at the specified position under the master menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index number of the master menu item or submenu item before which you are inserting a master menu item. If index is invalid, an error would occur and this operation would return -1."
         },
         {
           "name": "Text",
-          "type": "menu",
+          "type": "String",
           "description": "The text that displays in the master menu item or submenu item."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. The image is displayed in 32*32 pixels."
         },
         {
           "name": "Clicked",
-          "type": "menu",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the master menu item. The Clicked user event for the master menu item (RibbonMenuItem with \"Normal(0)\" type) must have three long parameters for receiving the handle of the application button and the index numbers of the master menu item and submenu item. For details, see Clicked ."
         },
         {
@@ -14032,23 +14058,23 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) into which you want to insert a submenu item. It cannot be an index of a separator (that is RibbonMenuItem with ItemType 1). If not specified, a master menu item will be inserted as the first item; if specified to a valid value, a submenu item will be inserted as the first item under the master menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         },
         {
           "name": "Text",
-          "type": "menu",
+          "type": "String",
           "description": "The text that displays in the master menu item or submenu item."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. The image will be displayed in 32*32 pixels."
         },
         {
           "name": "Clicked",
-          "type": "menu",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the master menu item. The Clicked user event for the master menu item (RibbonMenuItem with \"Normal(0)\" type) must have three long parameters for receiving the handle of the application button and the index numbers of the master menu item and submenu item. For details, see Clicked ."
         },
         {
@@ -14075,23 +14101,23 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) into which you want to insert a submenu item. It cannot be an index of a separator (that is RibbonMenuItem with ItemType 1). If not specified, a master menu item will be inserted as the last item; if specified to a valid value, a submenu item will be inserted as the last item under the master menu item (whose index is ParentIndex); if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         },
         {
           "name": "Text",
-          "type": "menu",
+          "type": "String",
           "description": "The text that displays in the master menu item or submenu item."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. The image will be displayed in 32*32 pixels."
         },
         {
           "name": "Clicked",
-          "type": "menu",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the master menu item. The Clicked user event for the master menu item (RibbonMenuItem with \"Normal(0)\" type) must have three long parameters for receiving the handle of the application button and the index numbers of the master menu item and submenu item. For details, see Clicked ."
         },
         {
@@ -14132,22 +14158,22 @@
         },
         {
           "name": "CategoryHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the category into which you want to insert a panel."
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel on the same level after which you want to insert the panel."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The title of the panel to be inserted."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16. The picture will be shown when the panel is collapsed (a panel is collapsed automatically when the window width becomes too small to display the panel). See the section called “Introduction to RibbonBar items” in Users Guide for more."
         },
         {
@@ -14174,17 +14200,17 @@
         },
         {
           "name": "CategoryHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the category into which you want to insert a panel."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The title of the panel to be inserted."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16. The picture will be shown when the panel is collapsed (a panel is collapsed automatically when the window width becomes too small to display the panel). See the section called “Introduction to RibbonBar items” in Users Guide for more."
         },
         {
@@ -14211,17 +14237,17 @@
         },
         {
           "name": "CategoryHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the category into which you want to insert a panel."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The title of the panel to be inserted."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16. The picture will be shown when the panel is collapsed (a panel is collapsed automatically when the window width becomes too small to display the panel). See the section called “Introduction to RibbonBar items” in Users Guide for more."
         },
         {
@@ -14276,17 +14302,17 @@
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index number of the recent menu item before which you are inserting a recent menu item. If index is invalid, an error would occur and this operation would return -1."
         },
         {
           "name": "Text",
-          "type": "menu",
+          "type": "String",
           "description": "The text that displays in the recent menu item."
         },
         {
           "name": "Clicked",
-          "type": "menu",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the recent menu item. The Clicked user event for the recent menu item (RibbonMenuItem with \"Recent(2)\" type) must have two long parameters for receiving the handle of the application button and the index number of the recent menu item. For details, see Clicked ."
         }
       ],
@@ -14308,12 +14334,12 @@
         },
         {
           "name": "Text",
-          "type": "menu",
+          "type": "String",
           "description": "The text that displays in the recent menu item."
         },
         {
           "name": "Clicked",
-          "type": "menu",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the recent menu item. The Clicked user event for the recent menu item (RibbonMenuItem with \"Recent(2)\" type) must have two long parameters for receiving the handle of the application button and the index number of the recent menu item. For details, see Clicked ."
         }
       ],
@@ -14335,12 +14361,12 @@
         },
         {
           "name": "Text",
-          "type": "menu",
+          "type": "String",
           "description": "The text that displays in the recent menu item."
         },
         {
           "name": "Clicked",
-          "type": "menu",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the recent menu item. The Clicked user event for the recent menu item (RibbonMenuItem with \"Recent(2)\" type) must have two long parameters for receiving the handle of the application button and the index number of the recent menu item. For details, see Clicked ."
         }
       ],
@@ -14389,27 +14415,27 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert a small button."
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, group) on the same level after which you want to insert the small button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the small button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the small button. The Clicked user event for the small button must have a long parameter for receiving the handle of the small button. For details, see Clicked ."
         },
         {
@@ -14436,22 +14462,22 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert the small button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the small button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the small button. The Clicked user event for the small button must have a long parameter for receiving the handle of the small button. For details, see Clicked ."
         },
         {
@@ -14478,22 +14504,22 @@
         },
         {
           "name": "ParentHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel or group into which you want to insert the small button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the small button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the small button. The Clicked user event for the small button must have a long parameter for receiving the handle of the small button. For details, see Clicked ."
         },
         {
@@ -14520,22 +14546,22 @@
         },
         {
           "name": "ItemHandleAfter",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the tab button after which you want to insert a tab button."
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the tab button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed in 16*16 pixels."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the tab button. The Clicked user event for the tab button must have a long parameter for receiving the handle of the tab button. For details, see Clicked ."
         },
         {
@@ -14562,17 +14588,17 @@
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the tab button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the tab button. The Clicked user event for the tab button must have a long parameter for receiving the handle of the tab button. For details, see Clicked ."
         },
         {
@@ -14599,17 +14625,17 @@
         },
         {
           "name": "Text",
-          "type": "any",
+          "type": "String",
           "description": "The text that displays in the tab button."
         },
         {
           "name": "PictureName",
-          "type": "any",
+          "type": "String",
           "description": "The name of the file that contains the picture. It will be displayed as 16*16."
         },
         {
           "name": "Clicked",
-          "type": "any",
+          "type": "String",
           "description": "The name of the Clicked user event to be bound with the tab button. The Clicked user event for the tab button must have a long parameter for receiving the handle of the tab button. For details, see Clicked ."
         },
         {
@@ -15634,7 +15660,7 @@
       "params": [
         {
           "name": "assemblypath",
-          "type": "any",
+          "type": "string",
           "description": "The name and location of the .NET assembly (*.dll). The location can be an absolute path or a relative path. When a relative path is executed in the development environment, it is relative to the location of the PBT file; when a relative path is executed in the production environment, it is relative to the installation location of the application's executable file."
         }
       ],
@@ -15656,12 +15682,12 @@
         },
         {
           "name": "assemblypath",
-          "type": "any",
+          "type": "string",
           "description": "The name and location of the .NET assembly (*.dll). The location can be an absolute path or a relative path. When a relative path is executed in the development environment, it is relative to the location of the PBT file; when a relative path is executed in the production environment, it is relative to the installation location of the application's executable file."
         },
         {
           "name": "dotnetcoreversion",
-          "type": "any",
+          "type": "string",
           "description": "The highest .NET Core version to be supported. 2.1 and later versions are supported. For example, if the value is 3, it supports 3.x, the latest release for version 3 which is currently installed on the machine. If the value is not specified, it supports the latest version currently installed on the machine.",
           "optional": true
         }
@@ -15684,7 +15710,7 @@
         },
         {
           "name": "assemblypath",
-          "type": "any",
+          "type": "string",
           "description": "The name and location of the .NET assembly (*.dll). The location can be an absolute path or a relative path. When a relative path is executed in the development environment, it is relative to the location of the PBT file; when a relative path is executed in the production environment, it is relative to the installation location of the application's executable file."
         },
         {
@@ -16770,7 +16796,7 @@
         },
         {
           "name": "url",
-          "type": "any",
+          "type": "string",
           "description": "The address of the page to browse."
         }
       ],
@@ -18273,7 +18299,7 @@
         },
         {
           "name": "ItemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID used to identify the file. The minimum value is 1. ItemId should be the return value of DownloadingStart or DownloadingStateChanged event."
         }
       ],
@@ -18787,25 +18813,26 @@
       "params": [
         {
           "name": "registeredObject",
-          "type": "any",
+          "type": "string",
           "description": "The registered name of PowerBuilder object that is case-sensitive."
         },
         {
           "name": "eventName",
-          "type": "any",
+          "type": "string",
           "description": "The event name to be triggered."
         },
         {
           "name": "eventParam",
-          "type": "any",
+          "type": "string",
           "description": "The parameter of the event.",
           "optional": true
         },
         {
           "name": "returnValue",
-          "type": "any",
+          "type": "string",
           "description": "The return value of the event.",
-          "optional": true
+          "optional": true,
+          "ref": true
         }
       ]
     },
@@ -19034,7 +19061,7 @@
         },
         {
           "name": "PdfFile",
-          "type": "any",
+          "type": "string",
           "description": "The file path and file name of the PDF file to be saved."
         }
       ],
@@ -19906,7 +19933,7 @@
         },
         {
           "name": "eventname",
-          "type": "any",
+          "type": "string",
           "description": "The name of the user-defined event to be registered."
         }
       ],
@@ -19923,12 +19950,12 @@
       "params": [
         {
           "name": "objectname",
-          "type": "any",
+          "type": "string",
           "description": "The name to be registered with the object. The user event in the registered object can be triggered by .NET assembly. The object name is case-sensitive."
         },
         {
           "name": "obj",
-          "type": "any",
+          "type": "PowerObject",
           "description": "The PowerBuilder object to be registered."
         }
       ],
@@ -20313,12 +20340,12 @@
         },
         {
           "name": "oAuthRequest",
-          "type": "any",
+          "type": "OAuthRequest",
           "description": "A reference to the OAuthRequest object specifying the request information."
         },
         {
           "name": "resourceResponse",
-          "type": "any",
+          "type": "ResourceResponse",
           "description": "A reference to the ResourceResponse object into which the function returns the object."
         }
       ],
@@ -20556,7 +20583,7 @@
         },
         {
           "name": "ItemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID used to identify the file. The minimum value is 1. ItemId should be the return value of DownloadingStart or DownloadingStateChanged event."
         }
       ],
@@ -20639,7 +20666,7 @@
         },
         {
           "name": "dwObject",
-          "type": "datawindow",
+          "type": "DWControl",
           "description": "The name of the DataWindow control, DataStore, or child DataWindow."
         },
         {
@@ -20995,7 +21022,7 @@
             },
             {
               "name": "fileName",
-              "type": "any",
+              "type": "string",
               "description": "The name of the PDF document to be saved (including the file path)"
             },
             {
@@ -21279,7 +21306,7 @@
         },
         {
           "name": "standard",
-          "type": "any",
+          "type": "string",
           "description": "The format indicating the level of PDF/A conformance. Values are: \"0\" -- None \"1\" -- PDF/A-1a (not supported yet) \"2\" -- PDF/A-1b \"3\" -- PDF/A-3a (not supported yet) \"4\" -- PDF/A-3b (not supported yet) \"5\" -- PDF/A-3u (not supported yet) Note: Only the values of \"0\" and \"2\" are supported now.",
           "optional": true
         },
@@ -21291,13 +21318,13 @@
         },
         {
           "name": "masterPassword",
-          "type": "any",
+          "type": "string",
           "description": "A password that enables you to restrict the permissions of the generated PDF document. You can set the permissions by the restrictions argument. If masterPassword is an empty string, the restrictions argument will be ignored and no actions (copy/print/edit/etc.) will be restricted.",
           "optional": true
         },
         {
           "name": "restrictions",
-          "type": "any",
+          "type": "string",
           "description": "The permission settings that enable you to restrict certain actions (such as copying/printing/editing) of a PDF document. One or more of the following string values can be contained (multiple strings are separated by \",\"). You can set the restrictions argument as an empty string. In this case, if masterPassword is valid, all permissions will be restricted, and if the masterPassword is invalid, the permissions will not be restricted. noprint! -- Acrobat will prevent printing the file. nohiresprint! -- Acrobat will prevent high-resolution printing. If noprint is not set, printing is restricted to the print as image feature which prints a low-resolution rendition of the page. nomodify! -- Acrobat will prevent editing or cropping pages and creating or changing form fields. noassemble! -- Acrobat will prevent inserting, deleting, or rotating pages and creating bookmarks and thumbnails. noannots! -- Acrobat will prevent creating or changing annotations and form fields. noforms! -- Acrobat will prevent form field filling. (implies nomodify and noannots) nocopy! -- Acrobat will prevent copying and extracting text or graphics; the accessibility interface will be controlled by noaccessible. noaccessible! -- (Obsolete in PDF 2.0; not allowed in PDF/UA-1) Acrobat will prevent extracting text or graphics for accessibility Note: If standard is set to \"2\" - PDF/A-1b, the three arguments ( userPassword , masterPassword , restrictions ) will be ignored. The PDF document will be saved using PDF/A-1b standard and will be opened without any password.",
           "optional": true
         }
@@ -21364,7 +21391,7 @@
         },
         {
           "name": "e",
-          "type": "blob",
+          "type": "Encoding",
           "description": "Character encoding of the resulting blob. Values are: EncodingANSI!, EncodingUTF8!, EncodingUTF16LE! (default), and EncodingUTF16BE!.",
           "optional": true
         }
@@ -22058,7 +22085,7 @@
             },
             {
               "name": "band",
-              "type": "Band",
+              "type": "tochar",
               "description": "A value of the Band enumerated datatype specifying the band in which to make the selection. Values are: Detail! Header! Footer! The default is the band that contains the insertion point.",
               "optional": true
             }
@@ -22183,8 +22210,9 @@
         },
         {
           "name": "response",
-          "type": "any",
-          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -22210,8 +22238,9 @@
         },
         {
           "name": "response",
-          "type": "any",
-          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset, if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset, if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -22242,8 +22271,9 @@
         },
         {
           "name": "response",
-          "type": "any",
-          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -22274,8 +22304,9 @@
         },
         {
           "name": "response",
-          "type": "any",
-          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset, if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset, if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -22306,8 +22337,9 @@
         },
         {
           "name": "response",
-          "type": "any",
-          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset; if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -22492,7 +22524,7 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the category that you will set to active."
         }
       ],
@@ -22514,7 +22546,7 @@
         },
         {
           "name": "Index",
-          "type": "any",
+          "type": "Long",
           "description": "The index number of the category that you want to set as active."
         }
       ],
@@ -22558,7 +22590,7 @@
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonApplicationButtonItem",
           "description": "The application button item you want to set."
         }
       ],
@@ -22678,7 +22710,7 @@
         },
         {
           "name": "data",
-          "type": "any",
+          "type": "string",
           "description": "A string or blob specifying the data. The data will be converted to EncodingUTF8!."
         },
         {
@@ -22738,7 +22770,7 @@
         },
         {
           "name": "PictureList",
-          "type": "any",
+          "type": "String",
           "description": "A comma-separated list of picture files, in full path with file extension. The picture is displayed in 16*16 or 32*32 pixels. If the image is 16*16 pixels, it will be displayed as 16*16; if the image is bigger than 16*16 pixels, it will be displayed as 32*32."
         }
       ],
@@ -22784,12 +22816,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the category you want to set."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonCategoryItem",
           "description": "A category item that will be set."
         }
       ],
@@ -22811,12 +22843,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, group) on the same level that you will set the item."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonCheckBoxItem",
           "description": "A check box item you are setting."
         }
       ],
@@ -22838,12 +22870,12 @@
         },
         {
           "name": "p12cert",
-          "type": "any",
+          "type": "string",
           "description": "The client's private key and public key p12 or PFX certificate file path."
         },
         {
           "name": "password",
-          "type": "any",
+          "type": "string",
           "description": "Password of p12 or PFX certificate."
         },
         {
@@ -22878,12 +22910,12 @@
             },
             {
               "name": "p12cert",
-              "type": "any",
+              "type": "string",
               "description": "The client's private key and public key p12 or PFX certificate file path."
             },
             {
               "name": "password",
-              "type": "any",
+              "type": "string",
               "description": "Password of p12 or PFX certificate."
             },
             {
@@ -22915,12 +22947,12 @@
             },
             {
               "name": "p12cert",
-              "type": "any",
+              "type": "string",
               "description": "The client's private key and public key p12 or PFX certificate file path."
             },
             {
               "name": "password",
-              "type": "any",
+              "type": "string",
               "description": "Password of p12 or PFX certificate."
             },
             {
@@ -22996,12 +23028,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the item (check box, combo box, large button, small button, group) on the same level that you will set the item."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonComboBoxItem",
           "description": "A combo box item you are setting."
         }
       ],
@@ -23559,12 +23591,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the group on the same level that you will set."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonGroupItem",
           "description": "A group item you are setting."
         }
       ],
@@ -23729,7 +23761,7 @@
         },
         {
           "name": "replace",
-          "type": "boolean",
+          "type": "Boolean",
           "description": "A boolean determines whether to replace the current existing request value if the same header name already exists. TRUE -- to replace the value in the current existing request header if the same header name already exists. FALSE -- to add the value (with a \",\") to the current existing request header if the same header name already exists. The default value is FALSE. Note: use this argument cautiously 1) TRUE is recommended when you specify the charset in the \"Content-Type\" header, because no more than one charset is allowed; 2) FALSE is recommended when cookie is used.",
           "optional": true
         }
@@ -23886,18 +23918,18 @@
             },
             {
               "name": "ParentIndex",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item (RibbonMenuItem) whose submenu item you want to set. If not specified, the menu item will be set; if specified to a valid value, the submenu item of the menu item (whose index is ParentIndex) will be set; if specified to an invalid value, an error would occur and this operation would return -1.",
               "optional": true
             },
             {
               "name": "Index",
-              "type": "menu",
+              "type": "Long",
               "description": "The index of the menu item or submenu item for which you want to set. If index is invalid, an error would occur and this operation would return -1."
             },
             {
               "name": "Item",
-              "type": "any",
+              "type": "RibbonMenuItem",
               "description": "A RibbonMenuItem item you want to set. Only RibbonMenuItem with \"Normal(0)\" or \"Separator(1)\" ItemType is supported. If RibbonMenuItem is with other ItemType such as \"Recent(2)\", an error would occur and this operation would return -1."
             }
           ],
@@ -23914,12 +23946,12 @@
             },
             {
               "name": "ItemHandle",
-              "type": "any",
+              "type": "Long",
               "description": "The handle of the item which you want to set."
             },
             {
               "name": "Item",
-              "type": "powerobject",
+              "type": "PowerObject",
               "description": "The object of type PowerObject containing information about the class definition of the item."
             }
           ],
@@ -23965,12 +23997,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the large button on the same level that you will set."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonLargeButtonItem",
           "description": "A large button item you are setting."
         }
       ],
@@ -24075,18 +24107,18 @@
         },
         {
           "name": "ParentIndex",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the master menu item (RibbonMenuItem) whose submenu item you want to set. If not specified, the master menu item will be set; if specified to a valid value, the submenu item of the master menu item (whose index is ParentIndex) will be set; if specified to an invalid value, an error would occur and this operation would return -1.",
           "optional": true
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index for the master menu item or submenu item for which you want to set. If index is invalid, an error would occur and this operation would return -1."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonMenuItem",
           "description": "A RibbonMenuItem item you want to set. Only RibbonMenuItem with \"Normal(0)\" or \"Separator(1)\" ItemType is supported. If RibbonMenuItem is with other ItemType such as \"Recent(2)\", an error would occur and this operation would return -1."
         }
       ],
@@ -24108,7 +24140,7 @@
         },
         {
           "name": "ApplicationMenu",
-          "type": "any",
+          "type": "RibbonApplicationMenu",
           "description": "The RibbonApplicationMenu item you want to set."
         },
         {
@@ -24179,7 +24211,7 @@
         },
         {
           "name": "Minimized",
-          "type": "boolean",
+          "type": "Boolean",
           "description": "A boolean indicating whether to set the RibbonBar control to be minimized."
         }
       ],
@@ -24288,12 +24320,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the panel on the same level that you will set the panel."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonPanelItem",
           "description": "A panel item you are setting."
         }
       ],
@@ -24586,12 +24618,12 @@
         },
         {
           "name": "Index",
-          "type": "menu",
+          "type": "Long",
           "description": "The index of the recent menu item for which you want to set. If index is invalid, an error would occur and this operation would return -1."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonMenuItem",
           "description": "A RibbonMenuItem item you want to set. Only RibbonMenuItem with \"Recent(2)\" ItemType is supported. If RibbonMenuItem is with other ItemType such as \"Normal(0)\" or \"Separator(1)\", an error would occur and this operation would return -1."
         }
       ],
@@ -24613,7 +24645,7 @@
         },
         {
           "name": "Title",
-          "type": "menu",
+          "type": "String",
           "description": "Title of the recent menu list. It will be displayed on top of the recent menu list."
         }
       ],
@@ -24793,7 +24825,7 @@
         },
         {
           "name": "replace",
-          "type": "boolean",
+          "type": "Boolean",
           "description": "A boolean determines whether to replace the current existing request value if the same header name already exists. TRUE -- to replace the value in the current existing request header if the same header name already exists. FALSE -- to add the value (with a “,”) to the current existing request header if the same header name already exists. The default value is FALSE. Note: use this argument cautiously (TRUE is recommended) when you specify the charset in the \"Content-Type\" header, because no more than one charset is allowed.",
           "optional": true
         }
@@ -25187,12 +25219,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the small button on the same level that you will set the item."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonSmallButtonItem",
           "description": "A small button item you are setting."
         }
       ],
@@ -25282,12 +25314,12 @@
         },
         {
           "name": "ItemHandle",
-          "type": "any",
+          "type": "Long",
           "description": "The handle of the tab button on the same level that you will set the tab button."
         },
         {
           "name": "Item",
-          "type": "any",
+          "type": "RibbonTabButtonItem",
           "description": "A tab button item you are setting."
         }
       ],
@@ -25864,7 +25896,7 @@
         },
         {
           "name": "dwcontrol",
-          "type": "datawindow",
+          "type": "dwcontrol",
           "description": "A reference to a DataWindow control, DataStore, or DataWindowChild."
         },
         {
@@ -26612,7 +26644,7 @@
         },
         {
           "name": "stopmode",
-          "type": "any",
+          "type": "integer",
           "description": "0 - continues executing the remaining SQL scripts when an error occurs. 1 - stops executing the remaining SQL scripts when an error occurs. Default value is 0.",
           "optional": true
         }
@@ -26890,17 +26922,18 @@
         },
         {
           "name": "urlName",
-          "type": "any",
+          "type": "string",
           "description": "The URL indicating where the data will be submitted."
         },
         {
           "name": "response",
-          "type": "any",
-          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset, if charset is not specified, this function will encode the data in UTF-8 by default."
+          "type": "string",
+          "description": "The content of the server response. If RESTClient failed to send request or server provides no response, the response value is an empty string. If the response value is compressed as gzip, it will be automatically decompressed. Only gzip compression format is supported at this moment. If the server specified the Content-Type response header, and in which the encoding charset is specified, this function will encode the data with the specified charset, if charset is not specified, this function will encode the data in UTF-8 by default.",
+          "ref": true
         },
         {
           "name": "dwObject",
-          "type": "datawindow",
+          "type": "DWControl",
           "description": "The DataWindow control, DataStore, or DataWindowChild object whose data will be submitted."
         },
         {
@@ -27110,13 +27143,14 @@
         },
         {
           "name": "len",
-          "type": "integer",
+          "type": "Integer",
           "description": "An integer value specifying the key length. Values are: The value can be 16, 24, or 32 with AES The value must be 8 with DES The value can be 16 or 24 with TDES The value must be 24 with DESX The value can range from 4 to 56 with Blowfish"
         },
         {
           "name": "key",
-          "type": "blob",
-          "description": "A blob specifying the secret key. The length of the secret key can be 128 bits, 192 bits, 256 bits with AES. The length of the secret key must be 64 bits with DES. The length of the secret key can be 128 bits, 192 bits with TDES. The length of the secret key must be 192 bits with DESX. The length of the secret key can range from 32 bits to 448 bits with Blowfish."
+          "type": "Blob",
+          "description": "A blob specifying the secret key. The length of the secret key can be 128 bits, 192 bits, 256 bits with AES. The length of the secret key must be 64 bits with DES. The length of the secret key can be 128 bits, 192 bits with TDES. The length of the secret key must be 192 bits with DESX. The length of the secret key can range from 32 bits to 448 bits with Blowfish.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -27327,7 +27361,7 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "long",
           "description": "The ID of the target to be deleted"
         }
       ],
@@ -27349,7 +27383,7 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "long",
           "description": "The target ID you want to obtain"
         }
       ],
@@ -27371,7 +27405,7 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "long",
           "description": "The ID of the target that the cursor jumps to"
         },
         {
@@ -27393,7 +27427,7 @@
             },
             {
               "name": "id",
-              "type": "any",
+              "type": "long",
               "description": "The ID of the target that the cursor jumps to"
             }
           ],
@@ -27410,7 +27444,7 @@
             },
             {
               "name": "name",
-              "type": "any",
+              "type": "string",
               "description": "The name of the target that the cursor jumps to. If there are multiple targets with the same name, the cursor will only jump to the first target. Name is case-sensitive."
             }
           ],
@@ -27434,7 +27468,7 @@
         },
         {
           "name": "name",
-          "type": "any",
+          "type": "string",
           "description": "The name of the target to be inserted. You can insert multiple targets with the same name. Name is case sensitive."
         },
         {
@@ -27461,7 +27495,7 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "long",
           "description": "The next target ID of the specified target. If you want to get the first target ID, this value should be set to 0."
         }
       ],
@@ -27483,12 +27517,12 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "long",
           "description": "The ID of the target to be set"
         },
         {
           "name": "name",
-          "type": "any",
+          "type": "string",
           "description": "The target name to be set"
         }
       ],
@@ -27553,7 +27587,7 @@
             },
             {
               "name": "Index",
-              "type": "any",
+              "type": "Integer",
               "description": "The index of the item for which you want the text"
             }
           ],
@@ -27577,7 +27611,7 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the text field you want to obtain"
         }
       ],
@@ -27599,7 +27633,7 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the text field you want to obtain"
         }
       ],
@@ -27621,13 +27655,14 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the text field you want to obtain"
         },
         {
           "name": "data",
           "type": "string",
-          "description": "A string specifying the type data of the text field. If the function fails to get the type data, the string value will not be modified and remain unchanged as before the call."
+          "description": "A string specifying the type data of the text field. If the function fails to get the type data, the string value will not be modified and remain unchanged as before the call.",
+          "ref": true
         }
       ],
       "appliesTo": [
@@ -27648,7 +27683,7 @@
         },
         {
           "name": "text",
-          "type": "any",
+          "type": "string",
           "description": "The text of the text field that displays in the control"
         }
       ],
@@ -27670,12 +27705,12 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the text field to be set"
         },
         {
           "name": "text",
-          "type": "any",
+          "type": "string",
           "description": "The text of the text field that displays in the control"
         }
       ],
@@ -27697,12 +27732,12 @@
         },
         {
           "name": "id",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the text field to be set"
         },
         {
           "name": "type",
-          "type": "any",
+          "type": "string",
           "description": "The type of the text field to be set. The following types are supported now (the strings are case-insensitive): standard -- The standard text type to which the newly inserted text field is set by default. If type is standard, the typedata argument will be ignored. externallink -- The external link that can link to the external document or URL. You can set the address of the external link by the typedata argument. internallink -- The internal link that can link to a location within the current document. You can set the address of the internal link which is also the target name by the typedata argument."
         },
         {
@@ -28299,7 +28334,7 @@
         },
         {
           "name": "eventname",
-          "type": "any",
+          "type": "string",
           "description": "The name of the user-defined event to be unregistered."
         }
       ],
@@ -28316,7 +28351,7 @@
       "params": [
         {
           "name": "objectname",
-          "type": "any",
+          "type": "string",
           "description": "The name of the object that has been registered. The name is case-sensitive."
         }
       ],
@@ -28428,13 +28463,14 @@
       "params": [
         {
           "name": "n",
-          "type": "any",
+          "type": "string",
           "description": "The name of the setting. See WebBrowserSet for the list of available settings."
         },
         {
           "name": "v",
-          "type": "any",
-          "description": "The value of the setting that is obtained."
+          "type": "string",
+          "description": "The value of the setting that is obtained.",
+          "ref": true
         }
       ]
     },
@@ -28447,12 +28483,12 @@
       "params": [
         {
           "name": "n",
-          "type": "any",
+          "type": "string",
           "description": "The name of the setting. The setting can be: CachePath -- The folder that stores the web page cache, cookies etc. You can specify a directory or use the default directory which uses the system environment %HOMEPATH% and %TEMP%, for example, C:\\Users\\appeon\\AppData\\Local\\Temp\\pbcefcache. CachePath must be set before the WebBrowser control is initialized. It must be an absolute path, and cannot be a relative path. You can set it in the application Open event. UserDataPath -- The folder that stores the user data dictionary. You can specify a directory or use the default directory which uses the system environment %HOMEPATH% and %TEMP%, for example, C:\\Users\\appeon\\AppData\\Local\\pbcef\\User Data\\Dictionaries. UserDataPath must be set before the WebBrowser control is initialized. It must be an absolute path, and cannot be a relative path. You can set it in the application Open event. DownloadPath -- The folder that stores the downloaded files etc. You can specify a directory or use the default directory which uses the system environment %HOMEPATH% and %TEMP%, for example, C:\\Users\\appeon\\AppData\\Local\\Temp\\pbcefdownload. DownloadPath must be set before the WebBrowser control starts downloading files. It must be an absolute path, and cannot be a relative path. UserAgent -- The User-Agent request header that contains a characteristic string that allows the network protocol peers to identify the application type, operating system, software vendor or software version of the requesting software user agent. UserAgent must be set before the WebBrowser control is initialized. You can set it in the application Open event. ProxyAuto -- Whether to use auto proxy detection. The value could be 1 or 0 (the default). Auto proxy detection is used if it is set to 1. ProxyPacUrl -- The URL address of the PAC file. It is unsupported to load the PAC file on the local directory via file:/// (you will have to put the file on the server and load it via http or https). ProxyAddress -- The address of the proxy server. ProxyPort -- The port of the proxy server. The default value is -1. ProxyUser -- The user name that will be authenticated by the proxy server. ProxyPassword -- The password that will be authenticated by the proxy server. WebBrowser supports auto proxy detection, PAC (proxy auto configuration) file setting, and manual proxy settings. The priority order of the settings is: auto proxy detection > PAC file setting > manual proxy settings. By default the IE proxy is used. If the proxy setting is set before the WebBrowser control is initialized, it will be effective to all Web pages loaded; if it is set before the Navigate operation, then it will be effective to only the Web page being navigated. allow-file-access-from-files -- Whether to allow access to the local files (XML etc.). The value is \"true\" or \"false\" (the default). This setting must be set before the WebBrowser control is initialized. You can set it in the application Open event. enable-media-stream -- Whether to allow access to the microphone or camera. The value is \"true\" or \"false\" (the default). This setting must be set before the WebBrowser control is initialized. You can set it in the application Open event. remote-debugging-port -- Whether to enable remote debugging over HTTP on the specified port. This setting must be set before the WebBrowser control is initialized. You can set it in the application Open event. To support the remote debugging: 1. Enable remote debugging on the specified port number, by executing the following script in the application Open event: li_return = WebBrowserSet(\"remote-debugging-port\", \"8210\") Every time when this script is executed, a page ID is generated. You can get and use this ID through the debugging APIs. 2. Run the debugging APIs in Chrome or Edge browser. For example: Access the main page: http://localhost:8210 Get the JSON string (which includes the page ID): http://localhost:8210/json Get the version information: http://localhost:8210/json/version Activate the page: http://localhost:8210/json/activate/{id}, for example, http://localhost:8210/json/activate/054A6021CB9DD4EDBDBFA55E4384EA38 Close the page: http://localhost:8210/json/close/{id} Remote control: http://localhost:8210/devtools/inspector.html?ws=localhost:8210/devtools/page/{id} Suppose the current URL is www.appeon.com, here are a few samples of the returned information of the debugging APIs:"
         },
         {
           "name": "v",
-          "type": "any",
+          "type": "string",
           "description": "The value of the setting to be set."
         }
       ]
@@ -28705,7 +28741,7 @@
         },
         {
           "name": "zoomlevel",
-          "type": "any",
+          "type": "integer",
           "description": "The ratio to zoom the web page. The default zoom ratio is 0. The range of values (in percentage) is 0~500, and 1~99 for reduction."
         }
       ],

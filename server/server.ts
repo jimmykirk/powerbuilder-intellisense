@@ -45,6 +45,7 @@ import {
   formatSignature,
   FunctionInfo,
   ParamInfo,
+  pickVariantForTypes,
   PropertyInfo,
   VariantInfo
 } from './builtins';
@@ -225,6 +226,19 @@ function anyPropertyNames(): Set<string> {
   return anyPropertyCache.names;
 }
 
+/**
+ * The single built-in signature a call site can be checked against: undefined
+ * when the name is variadic, has multiple documented syntaxes, or is shadowed
+ * by a workspace symbol, since any of those make argument checks unreliable.
+ */
+function trustworthySignature(name: string): FunctionInfo | undefined {
+  const fn = findActiveBuiltin(name) ?? findActiveDWMethod(name);
+  if (!fn || fn.variadic || (fn.variants?.length ?? 0) > 1 || index.find(name).length > 0) {
+    return undefined;
+  }
+  return fn;
+}
+
 function buildSemanticContext(text: string): SemanticContext {
   const localNames = new Set<string>();
   const lines = text.split(/\r?\n/);
@@ -271,20 +285,9 @@ function buildSemanticContext(text: string): SemanticContext {
           : `it was removed after PB ${otherVersion}`;
       return `'${other.name}' is not available in PowerBuilder ${pbVersion} — ${detail}.`;
     },
-    maxArgs: (name) => {
-      const fn = findActiveBuiltin(name);
-      if (!fn || fn.variadic || (fn.variants?.length ?? 0) > 1 || index.find(name).length > 0) {
-        return undefined; // unknown arity, variants, or shadowed by workspace
-      }
-      return fn.params.length;
-    },
-    paramTypesOf: (name) => {
-      const fn = findActiveBuiltin(name);
-      if (!fn || fn.variadic || (fn.variants?.length ?? 0) > 1 || index.find(name).length > 0) {
-        return undefined;
-      }
-      return fn.params.map((p) => p.type);
-    },
+    maxArgs: (name) => trustworthySignature(name)?.params.length,
+    paramTypesOf: (name) => trustworthySignature(name)?.params.map((p) => p.type),
+    refParamsOf: (name) => trustworthySignature(name)?.params.map((p) => !!p.ref),
     enumNameOf: (valueToken) => {
       const lower = valueToken.toLowerCase();
       for (const en of activeEnums.values()) {
@@ -677,8 +680,13 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
     return buildSignatureHelp(builtIn.name, formatSignature(builtIn), builtIn.params, call.activeParam, builtIn.documentation);
   }
 
+  // A workspace definition wins — unless it is a bare `event clicked;`
+  // implementation, which carries no signature of its own and would hide the
+  // documented per-object arguments.
   const custom = index.findCallable(call.name);
-  if (custom) {
+  const documentedEvent = findActiveEvent(call.name);
+  const bareEventImpl = custom?.kind === 'event' && custom.params.length === 0;
+  if (custom && !(bareEventImpl && documentedEvent)) {
     return buildSignatureHelp(custom.name, custom.signature, custom.params, call.activeParam, describeCustom(custom));
   }
 
@@ -697,11 +705,17 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
   // Built-in object events, for call sites like `obj.EVENT Clicked(...)`.
   const builtinEvent = findActiveEvent(call.name);
   if (builtinEvent && (builtinEvent.variants?.length ?? 0) >= 2) {
+    const receiverChain = receiverTypeChain(doc, params.position, call.name);
+    const preferred = pickVariantForTypes(
+      builtinEvent.variants!,
+      receiverChain.length > 0 ? receiverChain : enclosingTypeChain(doc)
+    );
     return buildVariantSignatureHelp(
       builtinEvent.name,
       builtinEvent.variants!,
       call.activeParam,
-      formatEventHover(builtinEvent)
+      formatEventHover(builtinEvent),
+      preferred
     );
   }
   if (builtinEvent && builtinEvent.params.length > 0) {
@@ -1345,6 +1359,32 @@ function memberCompletion(
  * the PowerScript catalog for other objects (Retrieve on RestClient,
  * GetItemString on JSONParser), so the receiver decides which docs are right.
  */
+/** Inheritance chain of the receiver a call is made on, most specific first. */
+function receiverTypeChain(
+  doc: TextDocument,
+  position: { line: number; character: number },
+  callName: string
+): string[] {
+  const line = doc.getText({
+    start: { line: position.line, character: 0 },
+    end: { line: position.line + 1, character: 0 }
+  });
+  const prefix = line.slice(0, Math.min(position.character, line.length));
+  const callMatch = new RegExp(
+    `([A-Za-z_]\\w*(?:\\s*\\.\\s*[A-Za-z_]\\w*)*)\\s*\\.\\s*(?:event\\s+)?${callName}\\s*\\([^()]*$`,
+    'i'
+  ).exec(prefix);
+  if (!callMatch) {
+    return [];
+  }
+  const type = resolveChainType(doc, position, parseChainSegments(callMatch[1]));
+  if (!type) {
+    return [];
+  }
+  const chain = index.getInheritanceChain(type);
+  return chain.length > 0 ? chain : [type.toLowerCase()];
+}
+
 function isDataWindowReceiver(
   doc: TextDocument,
   position: { line: number; character: number },
@@ -1380,6 +1420,24 @@ function isDataWindowReceiver(
   }
   const type = resolveChainType(doc, position, parseChainSegments(chain));
   return !!type && DATAWINDOW_TYPES.has(type.toLowerCase());
+}
+
+/**
+ * Type names describing the object a script belongs to, most specific first:
+ * the document's own `type X from Y` chain (w_main, window, ...). Used to pick
+ * the right variant of an event documented per object type.
+ */
+function enclosingTypeChain(doc: TextDocument): string[] {
+  const mainType = index.symbolsIn(doc.uri).find((def) => def.kind === 'type' && !!def.container);
+  if (!mainType) {
+    return [];
+  }
+  const chain = index.getInheritanceChain(mainType.name);
+  const names = chain.length > 0 ? [...chain] : [mainType.name.toLowerCase()];
+  if (mainType.container && !names.includes(mainType.container.toLowerCase())) {
+    names.push(mainType.container.toLowerCase());
+  }
+  return names;
 }
 
 /** SQL verbs that begin an embedded SQL statement in PowerScript. */
@@ -1443,11 +1501,20 @@ function eventStubCompletion(doc: TextDocument): CompletionItem[] {
     }
   }
 
-  return events.map((ev) => ({
-    ...eventItem(ev, RANK.local),
-    insertText: `${ev.name};\n\t$0\nend event`,
-    insertTextFormat: 2
-  }));
+  const chain = enclosingTypeChain(doc);
+  return events.map((ev) => {
+    const item = eventItem(ev, RANK.local);
+    const variantIndex = ev.variants?.length ? pickVariantForTypes(ev.variants, chain) : -1;
+    const variant = variantIndex >= 0 ? ev.variants![variantIndex] : undefined;
+    return {
+      ...item,
+      detail: variant
+        ? `event ${ev.name}(${variant.params.map(formatParam).join(', ')}) — ${variant.label ?? ev.category}`
+        : item.detail,
+      insertText: `${ev.name};\n\t$0\nend event`,
+      insertTextFormat: 2
+    };
+  });
 }
 
 /** Built-in types that carry a DataWindow object expression (`.object.`). */
@@ -1576,7 +1643,8 @@ function buildVariantSignatureHelp(
   name: string,
   variants: VariantInfo[],
   activeParam: number,
-  documentation: string
+  documentation: string,
+  preferredIndex = -1
 ): SignatureHelp {
   const signatures: SignatureInformation[] = variants.map((variant) => {
     const ret = variant.returnType ? `${variant.returnType} ` : '';
@@ -1596,7 +1664,9 @@ function buildVariantSignatureHelp(
     } as SignatureInformation;
   });
 
-  let active = variants.findIndex((v) => v.params.length > activeParam);
+  // An object-specific variant (picked from the enclosing or receiver type)
+  // wins; otherwise fall back to the first one that can still take this arg.
+  let active = preferredIndex >= 0 ? preferredIndex : variants.findIndex((v) => v.params.length > activeParam);
   if (active === -1) {
     active = 0;
   }

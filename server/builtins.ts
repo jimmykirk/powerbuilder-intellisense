@@ -13,6 +13,11 @@ export interface ParamInfo {
   description?: string;
   /** Optional / omittable argument. */
   optional?: boolean;
+  /**
+   * Passed by reference (`REF` in the documented syntax): the caller must
+   * supply a variable, and the callee writes the result back into it.
+   */
+  ref?: boolean;
 }
 
 /** One documented syntax variant of a multi-syntax function or event. */
@@ -46,7 +51,8 @@ export interface FunctionInfo {
  */
 export function formatParam(param: ParamInfo): string {
   const optional = param.optional ? '?' : '';
-  return `${param.type} ${param.name}${optional}`;
+  const byRef = param.ref ? 'ref ' : '';
+  return `${byRef}${param.type} ${param.name}${optional}`;
 }
 
 /** Builds a full C-style signature string, e.g. `long Pos(string source, string target)`. */
@@ -71,8 +77,9 @@ export function formatHover(fn: FunctionInfo): string {
     lines.push('**Parameters**');
     for (const param of fn.params) {
       const optional = param.optional ? ' *(optional)*' : '';
+      const byRef = param.ref ? ' *(by reference — pass a variable)*' : '';
       const desc = param.description ? ` — ${param.description}` : '';
-      lines.push(`- \`${param.name}\` \`${param.type}\`${optional}${desc}`);
+      lines.push(`- \`${param.name}\` \`${param.type}\`${optional}${byRef}${desc}`);
     }
   }
 
@@ -229,6 +236,30 @@ export interface PropertyInfo {
 export interface EnumInfo {
   name: string;
   values: string[];
+}
+
+/**
+ * Picks the documented variant that matches an object type, using the variant
+ * headings ("Syntax 2: For ListView and Toolbar controls"). Types are tried
+ * most-specific first, so a `w_main from window` prefers the window variant.
+ * Returns -1 when no heading names any of the types.
+ */
+export function pickVariantForTypes(variants: VariantInfo[], typeNames: string[]): number {
+  for (const typeName of typeNames) {
+    const needle = typeName.toLowerCase();
+    if (!needle) {
+      continue;
+    }
+    const index = variants.findIndex((v) => {
+      const label = (v.label ?? '').toLowerCase();
+      // Match whole words so "tab" does not match "toolbar".
+      return new RegExp(`\\b${needle}s?\\b`).test(label);
+    });
+    if (index >= 0) {
+      return index;
+    }
+  }
+  return -1;
 }
 
 /** Loads a property catalog into a lowercase-class-name lookup map. */

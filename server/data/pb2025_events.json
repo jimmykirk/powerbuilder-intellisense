@@ -9,17 +9,17 @@
       "params": [
         {
           "name": "Kind",
-          "type": "window",
+          "type": "integer",
           "description": "The type of key event that triggers this event. The values are: 0 -- WM_KEYDOWN in Window message 1 -- WM_KEYUP in Window message 2 -- WM_SYSKEYDOWN in Window message 3 -- WM_SYSKEYUP in Window message"
         },
         {
           "name": "VirtualKey",
-          "type": "any",
+          "type": "integer",
           "description": "The virtual key that is pressed or released."
         },
         {
           "name": "lParam",
-          "type": "any",
+          "type": "integer",
           "description": "The parameter of the key."
         }
       ],
@@ -47,12 +47,12 @@
       "params": [
         {
           "name": "newUrl",
-          "type": "any",
+          "type": "string",
           "description": "The browser’s new address."
         },
         {
           "name": "isNewPage",
-          "type": "any",
+          "type": "boolean",
           "description": "Whether navigating to a new page. The values are: TRUE -- Navigates to a new web page. FALSE -- Navigates within the current web page. Only portion of the current page is loaded; no new page is loaded and navigated."
         }
       ],
@@ -352,17 +352,17 @@
       "params": [
         {
           "name": "errorText",
-          "type": "any",
+          "type": "string",
           "description": "The error description."
         },
         {
           "name": "requestUrl",
-          "type": "any",
+          "type": "string",
           "description": "The URL of the server currently being requested."
         },
         {
           "name": "certificateInfo",
-          "type": "time",
+          "type": "string",
           "description": "The certificate information which includes certificate issuer, certificate subject, certificate expiration time, and certificate PEM encoding."
         }
       ],
@@ -441,6 +441,11 @@
       ],
       "variants": [
         {
+          "params": [],
+          "label": "Syntax 1: For menus",
+          "returnType": "none"
+        },
+        {
           "params": [
             {
               "name": "index",
@@ -514,6 +519,11 @@
           ],
           "label": "Syntax 6: For Ribbon item controls",
           "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 7: For other controls",
+          "returnType": "long"
         }
       ],
       "eventId": "pbm_lvnclicked, pbm_tcnclicked, pbm_tvnclicked, pbm_lbuttonclk, pbm_lbuttondwn, pbm_bnclicked, pbm_lbuttondown"
@@ -528,6 +538,23 @@
         "Application",
         "OLE",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For the application object",
+          "returnType": "none"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For OLE controls",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 3: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_omnclose, pbm_close"
     },
@@ -598,7 +625,7 @@
       "params": [
         {
           "name": "IsErrorPage",
-          "type": "any",
+          "type": "boolean",
           "description": "Whether the page that is currently loaded is an error page. TRUE indicates that an error page is currently loaded. FALSE indicates that a normal page is currently loaded."
         }
       ],
@@ -905,6 +932,11 @@
           ],
           "label": "Syntax 3: For windows",
           "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 4: For other controls",
+          "returnType": "long"
         }
       ],
       "eventId": "pbm_lbndblclk, pbm_lvndoubleclicked, pbm_tcndoubleclicked, pbm_tvndoubleclicked, pbm_lbuttondblclk, pbm_bndoubleclicked, pbm_cbndblclk, pbm_prndoubleclicked, pbm_rendoubleclicked"
@@ -917,22 +949,22 @@
       "params": [
         {
           "name": "itemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the download item, which starts from 1."
         },
         {
           "name": "operationstate",
-          "type": "any",
+          "type": "integer",
           "description": "The download state. The values are: 0 -- Being downloaded 1 -- Download has completed 2 -- Download was interrupted"
         },
         {
           "name": "interruptReason",
-          "type": "any",
+          "type": "string",
           "description": "The reason why the download was interrupted."
         },
         {
           "name": "canResume",
-          "type": "any",
+          "type": "boolean",
           "description": "Specifies whether the current download operation can be resumed. TRUE -- The current download operation can be resumed. FALSE -- The current download operation cannot be resumed."
         }
       ],
@@ -949,32 +981,32 @@
       "params": [
         {
           "name": "itemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the download item, which starts from 1."
         },
         {
           "name": "fileName",
-          "type": "any",
+          "type": "string",
           "description": "The full path name of the file to be downloaded and saved locally."
         },
         {
           "name": "uri",
-          "type": "any",
+          "type": "string",
           "description": "The URI of the download item."
         },
         {
           "name": "mimeType",
-          "type": "any",
+          "type": "string",
           "description": "The MIME type of the download item."
         },
         {
           "name": "contentDisposition",
-          "type": "any",
+          "type": "string",
           "description": "The value of the HTTP response header Content-Disposition of the download request."
         },
         {
           "name": "total",
-          "type": "any",
+          "type": "longlong",
           "description": "The size of the file to be downloaded."
         }
       ],
@@ -991,27 +1023,27 @@
       "params": [
         {
           "name": "itemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the download item, starting from 1."
         },
         {
           "name": "speed",
-          "type": "any",
+          "type": "longlong",
           "description": "The download speed estimated in bytes every second. This argument is reserved for later use and is always 0 now."
         },
         {
           "name": "received",
-          "type": "any",
+          "type": "longlong",
           "description": "The size of the content that has been downloaded."
         },
         {
           "name": "total",
-          "type": "any",
+          "type": "longlong",
           "description": "The total size of the content to be downloaded."
         },
         {
           "name": "percent",
-          "type": "any",
+          "type": "integer",
           "description": "A rough percentage of completion or -1 if the total size is unknown."
         }
       ],
@@ -1639,12 +1671,12 @@
       "params": [
         {
           "name": "itemId",
-          "type": "any",
+          "type": "integer",
           "description": "The ID of the download item, which starts from 1."
         },
         {
           "name": "estimateEndTime",
-          "type": "time",
+          "type": "string",
           "description": "The estimated end time."
         }
       ],
@@ -1661,12 +1693,12 @@
       "params": [
         {
           "name": "isFinish",
-          "type": "any",
+          "type": "Boolean",
           "description": "Evaluates whether all JavaScript codes are executed. The values are: TRUE -- All JavaScript codes are executed. FALSE -- Not all of the JavaScript codes are executed."
         },
         {
           "name": "result",
-          "type": "any",
+          "type": "string",
           "description": "The result of script execution. The execution result is represented in JSON format. The supported JavaScript data types are bool, int, double, string, date, array. When the above types are mapped to the PowerBuilder data types, they are boolean, integer, double, string, datetime, array. If there is no result, \"null\" will be displayed."
         },
         {
@@ -1957,7 +1989,7 @@
       "params": [
         {
           "name": "isOpen",
-          "type": "any",
+          "type": "boolean",
           "description": "Whether the default download dialog is currently opened. TRUE indicates the default download dialog is opened. FALSE indicates the default download dialog is not opened."
         }
       ],
@@ -2324,6 +2356,24 @@
         "InkEdit",
         "RichTextEdit"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "ItemHandle",
+              "type": "long",
+              "description": "Long. The handle of the item."
+            }
+          ],
+          "label": "Syntax 1: For Ribbon item controls",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For all other controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_cbnmodified, pbm_enmodified, pbm_inkemodified, pbm_renmodified"
     },
     {
@@ -2351,6 +2401,34 @@
       "appliesTo": [
         "RichTextEdit",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For RichTextEdit controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the MouseDown event, the left mouse button is always down, so 1 is always summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_renlbuttondown, pbm_lbuttondown"
     },
@@ -2380,6 +2458,34 @@
         "RichTextEdit",
         "Window"
       ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For RichTextEdit controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button Flags is the sum of all the buttons and keys that are pressed."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_renmousemove, pbm_mousemove"
     },
     {
@@ -2407,6 +2513,34 @@
       "appliesTo": [
         "RichTextEdit",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For RichTextEdit controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the MouseUp event, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_renlbuttonup, pbm_lbuttonup"
     },
@@ -2438,17 +2572,17 @@
       "params": [
         {
           "name": "isSuccess",
-          "type": "any",
+          "type": "Boolean",
           "description": "Whether the navigation is successful. TRUE indicates success. FALSE indicates failure."
         },
         {
           "name": "httpCode",
-          "type": "any",
+          "type": "int",
           "description": "The HTTP response code when navigation is completed."
         },
         {
           "name": "webError",
-          "type": "any",
+          "type": "string",
           "description": "If isSuccess is false, this value shows the specific reason why navigation failed."
         }
       ],
@@ -2509,17 +2643,17 @@
       "params": [
         {
           "name": "IsRedirected",
-          "type": "any",
+          "type": "boolean",
           "description": "Whether the navigation is redirected. TRUE indicates the navigation is redirected. FALSE indicates the navigation is not redirected."
         },
         {
           "name": "requestHeaders",
-          "type": "any",
+          "type": "string",
           "description": "The HTTP headers in the navigation request."
         },
         {
           "name": "uri",
-          "type": "any",
+          "type": "string",
           "description": "The address of the web page to navigate to."
         }
       ],
@@ -2580,17 +2714,17 @@
       "params": [
         {
           "name": "handle",
-          "type": "any",
+          "type": "long",
           "description": "The return handle of the SendAsync function."
         },
         {
           "name": "errornumber",
-          "type": "any",
+          "type": "integer",
           "description": "The return error number. Returns 1 if sending email succeeds and one of these negative numbers if it fails. 1 -- Success. -1 -- A general error occurred. -2 -- Unable to connect to service through proxy. -3 -- Couldn’t resolve proxy. The given proxy host could not be resolved. -4 -- Couldn’t resolve host. The given remote host could not be resolved. -5 -- Failed to connect to host. -6 -- Host using bad/illegal format or missing host. -7 -- Protocol is not supported. -8 -- Error occurred when connecting with SSL. -9 -- Server certificate is revoked. -10 -- Service certificate authentication failed. -11 -- Operation timeout. -12 -- The remote server denied the Curl login. -13 -- Failed to send the network data. -14 – Failure in receiving network data. -15 -- Incorrect username or password. -16 -- Error reading local file. -17 -- No sender has been specified. -18 -- No recipients have been specified. -19 -- Failed to convert the parameter with its current encoding. The parameter is invalid. -20 -- Failed to convert the email with its current encoding due to insufficient memory. -21 -- Failed to send the email because its encoding is unsupported. -22 -- Failed to convert the email with its current encoding. A general error occurred."
         },
         {
           "name": "errortext",
-          "type": "any",
+          "type": "string",
           "description": "The return error text. Returns null if sending email succeeds and one of the error texts if it fails."
         }
       ],
@@ -2614,6 +2748,24 @@
       "appliesTo": [
         "Application",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "commandline",
+              "type": "string",
+              "description": "String by value. Additional arguments are included on the command line after the name of the executable program."
+            }
+          ],
+          "label": "Syntax 1: For the application object",
+          "returnType": "none"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_open"
     },
@@ -2695,17 +2847,17 @@
       "params": [
         {
           "name": "pdfFile",
-          "type": "any",
+          "type": "string",
           "description": "The path and file name of the PDF file to be saved."
         },
         {
           "name": "result",
-          "type": "any",
+          "type": "boolean",
           "description": "The result of operation. TRUE indicates success; FALSE indicates failure."
         },
         {
           "name": "errorcode",
-          "type": "any",
+          "type": "integer",
           "description": "The error code when printing failed."
         }
       ],
@@ -2885,6 +3037,34 @@
         "Window",
         "except RichTextEdit",
         "RichTextEdit"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the RButtonDown event, the right mouse button is always pressed, so 2 is always summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 1: For controls and windows, except RichTextEdit",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For RichTextEdit controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_rbuttondown, pbm_renrbuttondown"
     },
@@ -3174,6 +3354,34 @@
         "RibbonComboBoxItem",
         "RibbonMenuItem",
         "Menu"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "ItemHandle",
+              "type": "long",
+              "description": "Long. The handle of the button the menu is associated with."
+            },
+            {
+              "name": "Index",
+              "type": "long",
+              "description": "Long. The index of the menu item the mouse is on."
+            },
+            {
+              "name": "SubIndex",
+              "type": "long",
+              "description": "Long. The index of the submenu item the mouse is on. 0 indicates the event is triggered by the main menu."
+            }
+          ],
+          "label": "Syntax 1: For Ribbon item controls",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: for all other controls",
+          "returnType": "none"
+        }
       ],
       "eventId": null
     },
@@ -3507,6 +3715,24 @@
         "Animation",
         "Compression"
       ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: for Animation controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "TotalSize",
+              "type": "longlong",
+              "description": "For CompressorObject, it is a longlong whose value is the total number of bytes in the file that will be compressed, plus the size of some additional meta data. For ExtractorObject, it is a longlong whose value is the original size of all files in the compressed archive."
+            }
+          ],
+          "label": "Syntax 2: for CompressorObject and ExtractorObject objects",
+          "returnType": "none"
+        }
+      ],
       "eventId": "pbm_animatestart"
     },
     {
@@ -3739,12 +3965,12 @@
       "params": [
         {
           "name": "uri",
-          "type": "any",
+          "type": "string",
           "description": "The URI of the DOM webpage that sends this message."
         },
         {
           "name": "isJson",
-          "type": "any",
+          "type": "boolean",
           "description": "Whether the message is in the JSON format. TRUE indicates that the message is in the JSON format; FALSE indicates the message is not in the JSON format."
         },
         {

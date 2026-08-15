@@ -129,6 +129,9 @@ const DIAG_DOC = [
   'ls_undeclared = 5',
   'MessageBox(42, "m")',
   'MessageBox("t", "m", OKCancel!)',
+  'string ls_out',
+  'CloudAppGet("key", ls_out)',
+  'CloudAppGet("key", "literal")',
   'end event'
 ].join('\n');
 
@@ -164,7 +167,12 @@ const FEATURE_DOC = [
   /*11*/ 'this.Title',
   /*12*/ 'end event',
   /*13*/ '',
-  /*14*/ 'event '
+  /*14*/ 'event ',
+  /*15*/ 'event ue_variant;',
+  /*16*/ 'listview llv_x',
+  /*17*/ 'llv_x.EVENT Clicked(',
+  /*18*/ 'this.EVENT Clicked(',
+  /*19*/ 'end event'
 ].join('\n');
 const FEATURE_URI = 'file:///virtual/w_feat.srw';
 
@@ -459,6 +467,42 @@ async function main() {
   });
   check('hover on DataWindow method', !!dwHover && /GetItemString/.test(dwHover.contents.value), JSON.stringify(dwHover)?.slice(0, 100));
   check('DW hover wins over same-named JSONParser one', !/JSONParser/i.test(dwHover?.contents?.value ?? ''), (dwHover?.contents?.value ?? '').slice(0, 90));
+
+  // --- ref arguments ---
+  const refDiags = diagnosticsByUri.get(DIAG_URI) ?? [];
+  const refOn = (line) => refDiags.filter((d) => d.range.start.line === line);
+  check('ref argument accepts a variable', refOn(11).length === 0, JSON.stringify(refOn(11)));
+  check('ref argument rejects a literal', refOn(12).some((d) => /by reference and must be a variable/i.test(d.message)), JSON.stringify(refOn(12)));
+
+  const refSig = await request('textDocument/signatureHelp', {
+    textDocument: { uri: DIAG_URI }, position: { line: 11, character: 'CloudAppGet('.length }
+  });
+  check('signature help marks ref parameters', /\bref\b/.test(JSON.stringify(refSig?.signatures?.[0] ?? {})), JSON.stringify(refSig?.signatures?.[0]?.label));
+
+  const gcHover = await request('textDocument/hover', {
+    textDocument: { uri: W2_URI }, position: { line: 8, character: 'dw_shared.GetCh'.length }
+  });
+  check('hover flags by-reference arguments', /by reference/i.test(gcHover?.contents?.value ?? ''), (gcHover?.contents?.value ?? '').slice(0, 100));
+
+  // --- event variant selection by object type ---
+  const lvSig = await request('textDocument/signatureHelp', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 17, character: 'llv_x.EVENT Clicked('.length }
+  });
+  const lvActive = lvSig?.signatures?.[lvSig.activeSignature ?? 0];
+  check('Clicked on a ListView picks the ListView variant', /ListView/i.test(lvActive?.documentation?.value ?? ''), lvActive?.documentation?.value?.split('\n')[0]);
+
+  const winSig = await request('textDocument/signatureHelp', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 18, character: 'this.EVENT Clicked('.length }
+  });
+  const winActive = winSig?.signatures?.[winSig.activeSignature ?? 0];
+  check('Clicked on a window picks the window variant', /window/i.test(winActive?.documentation?.value ?? ''), winActive?.documentation?.value?.split('\n')[0]);
+  check('window Clicked variant exposes xpos/ypos', (winActive?.parameters ?? []).some((p) => /xpos/i.test(p.label)), JSON.stringify(winActive?.parameters?.map((p) => p.label)));
+
+  const stubs2 = await request('textDocument/completion', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 14, character: 'event '.length }
+  });
+  const clickedStub2 = (stubs2.items ?? stubs2).find((i) => i.label === 'Clicked');
+  check('event stub detail uses the window variant', /window/i.test(clickedStub2?.detail ?? ''), clickedStub2?.detail);
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   fs.rmSync(fixtureDir, { recursive: true, force: true });

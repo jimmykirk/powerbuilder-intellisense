@@ -2,7 +2,7 @@
   "name": "powerbuilder-intellisense",
   "displayName": "PowerBuilder IntelliSense",
   "description": "Language support for Appeon PowerBuilder 2022/2025: completion, hover, signature help, diagnostics, and navigation from the official PowerScript reference.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "jimmykirk",
   "license": "MIT",
   "icon": "images/icon.png",

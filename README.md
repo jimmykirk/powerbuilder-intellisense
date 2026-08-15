@@ -39,8 +39,15 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
   functions and events, signatures for custom functions, variable types/scopes,
   and type inheritance chains
 - Signature help (parameter hints) while typing a function call, with the
-  active argument highlighted — multi-syntax built-ins (Open, Close, Clicked,
-  ...) show every documented variant with the best match preselected
+  active argument highlighted — multi-syntax built-ins (Open, Close, ...) show
+  every documented variant, and events documented per object type (Clicked,
+  DoubleClicked, DragDrop, ...) preselect the variant matching the enclosing
+  object or the receiver, so a window's Clicked shows `xpos`/`ypos` while a
+  ListView's shows `index`
+- By-reference arguments are marked throughout: `ref` appears in signatures and
+  hover, and passing a literal where the documented syntax declares `REF`
+  (`GetChild`, `FileRead`, ...) is flagged, since PowerBuilder requires a
+  variable there
 - Hover on properties through receiver chains (`this.Title`) and on enumerated
   values (`Information!` shows its enum and sibling values)
 - Workspace-wide **Go to Definition** for custom functions, subroutines,
@@ -113,5 +120,5 @@ The extension is a thin client (`src/extension.ts`) that launches a Language Ser
 - Validate against a real exported PowerBuilder workspace
 - Publish to the VS Code Marketplace (requires the `jimmykirk` publisher
   account; `npx @vscode/vsce publish`)
-- `ref`-argument awareness in signature help and diagnostics
-- Event variant selection based on the enclosing object's type
+- DataWindow expression functions for `dw.Object.<column>.<property>` chains
+- Unused local/instance variable hints

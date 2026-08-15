@@ -409,6 +409,11 @@
       ],
       "variants": [
         {
+          "params": [],
+          "label": "Syntax 1: For menus",
+          "returnType": "none"
+        },
+        {
           "params": [
             {
               "name": "index",
@@ -482,6 +487,11 @@
           ],
           "label": "Syntax 6: For Ribbon controls",
           "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 7: For other controls",
+          "returnType": "long"
         }
       ],
       "eventId": "pbm_lvnclicked, pbm_tcnclicked, pbm_tvnclicked, pbm_lbuttonclk, pbm_lbuttondwn, pbm_bnclicked, pbm_lbuttondown"
@@ -496,6 +506,23 @@
         "Application",
         "OLE",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For the application object",
+          "returnType": "none"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For OLE controls",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 3: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_omnclose, pbm_close"
     },
@@ -844,6 +871,11 @@
             }
           ],
           "label": "Syntax 3: For windows",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 4: For other controls",
           "returnType": "long"
         }
       ],
@@ -2133,6 +2165,24 @@
         "InkEdit",
         "RichTextEdit"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "ItemHandle",
+              "type": "long",
+              "description": "Long. The handle of the item."
+            }
+          ],
+          "label": "Syntax 1: For Ribbon controls",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For all other controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_cbnmodified, pbm_enmodified, pbm_inkemodified, pbm_renmodified"
     },
     {
@@ -2160,6 +2210,34 @@
       "appliesTo": [
         "RichTextEdit",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For RichTextEdit controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the MouseDown event, the left mouse button is always down, so 1 is always summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_renlbuttondown, pbm_lbuttondown"
     },
@@ -2189,6 +2267,34 @@
         "RichTextEdit",
         "Window"
       ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For RichTextEdit controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button Flags is the sum of all the buttons and keys that are pressed."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_renmousemove, pbm_mousemove"
     },
     {
@@ -2216,6 +2322,34 @@
       "appliesTo": [
         "RichTextEdit",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: For RichTextEdit controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the MouseUp event, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_renlbuttonup, pbm_lbuttonup"
     },
@@ -2353,6 +2487,24 @@
       "appliesTo": [
         "Application",
         "Window"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "commandline",
+              "type": "string",
+              "description": "String by value. Additional arguments are included on the command line after the name of the executable program."
+            }
+          ],
+          "label": "Syntax 1: For the application object",
+          "returnType": "none"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_open"
     },
@@ -2619,6 +2771,34 @@
         "Window",
         "except RichTextEdit",
         "RichTextEdit"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the RButtonDown event, the right mouse button is always pressed, so 2 is always summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 1: For controls and windows, except RichTextEdit",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: For RichTextEdit controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_rbuttondown, pbm_renrbuttondown"
     },
@@ -2908,6 +3088,34 @@
         "RibbonComboBoxItem",
         "RibbonMenuItem",
         "Menu"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "ItemHandle",
+              "type": "long",
+              "description": "Long. The handle of the button the menu is associated with."
+            },
+            {
+              "name": "Index",
+              "type": "long",
+              "description": "Long. The index of the menu item the mouse is on."
+            },
+            {
+              "name": "SubIndex",
+              "type": "long",
+              "description": "Long. The index of the submenu item the mouse is on. 0 indicates the event is triggered by the main menu."
+            }
+          ],
+          "label": "Syntax 1: For Ribbon controls",
+          "returnType": "long"
+        },
+        {
+          "params": [],
+          "label": "Syntax 2: for all other controls",
+          "returnType": "none"
+        }
       ],
       "eventId": null
     },
@@ -3240,6 +3448,24 @@
       "appliesTo": [
         "Animation",
         "Compression"
+      ],
+      "variants": [
+        {
+          "params": [],
+          "label": "Syntax 1: for Animation controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "TotalSize",
+              "type": "longlong",
+              "description": "For CompressorObject, it is a longlong whose value is the total number of bytes in the file that will be compressed, plus the size of some additional meta data. For ExtractorObject, it is a longlong whose value is the original size of all files in the compressed archive."
+            }
+          ],
+          "label": "Syntax 2: for CompressorObject and ExtractorObject objects",
+          "returnType": "none"
+        }
       ],
       "eventId": "pbm_animatestart"
     },

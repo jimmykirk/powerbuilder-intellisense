@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.2.1
+
+- By-reference arguments: the scrapers now read `REF` markers (and the declared
+  types) straight from the documented syntax lines, so `ref` shows in
+  signatures and hover, and passing a literal to a by-reference parameter is
+  flagged as a warning.
+- Events documented per object type now preselect the right variant in
+  signature help and event-stub completion, chosen from the receiver or the
+  enclosing object's inheritance chain — a window's `Clicked` shows
+  `flags/xpos/ypos`, a ListView's shows `index`. A bare `event clicked;`
+  implementation no longer hides the documented arguments.
+
 ## 0.2.0
 
 - Renamed the extension to **PowerBuilder IntelliSense** (identifier

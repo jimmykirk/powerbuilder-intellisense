@@ -228,6 +228,11 @@ export interface SemanticContext {
    * undefined disables literal-vs-type checking.
    */
   paramTypesOf(name: string): string[] | undefined;
+  /**
+   * Which parameters are declared by reference, when arity is trustworthy.
+   * PowerBuilder requires a variable for these — a literal will not compile.
+   */
+  refParamsOf(name: string): boolean[] | undefined;
   /** The enum an `Identifier!` value belongs to, or undefined. */
   enumNameOf(valueToken: string): string | undefined;
   /** True when typeName is a known enumerated datatype. */
@@ -425,9 +430,20 @@ function semanticDiagnostics(
       }
 
       const paramTypes = semantic.paramTypesOf(name);
+      const refParams = semantic.refParamsOf(name);
       if (paramTypes) {
         for (let a = 0; a < args.length && a < paramTypes.length; a++) {
-          const mismatch = literalMismatch(semantic, paramTypes[a], literalKindOf(args[a]));
+          const literal = literalKindOf(args[a]);
+          if (refParams?.[a] && literal.kind !== 'other') {
+            diagnostics.push({
+              severity: DiagnosticSeverity.Warning,
+              range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+              message: `Argument ${a + 1} of '${name}' is passed by reference and must be a variable, not a ${literal.kind} literal.`,
+              source: 'powerbuilder'
+            });
+            continue;
+          }
+          const mismatch = literalMismatch(semantic, paramTypes[a], literal);
           if (mismatch) {
             diagnostics.push({
               severity: DiagnosticSeverity.Warning,

@@ -15,6 +15,7 @@ import warnings
 from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
 
 from parse import (
+    apply_syntax_hints,
     collect,
     infer_param_type,
     optional_depths,
@@ -143,6 +144,8 @@ def parse_page(path, name, kind):
                 or depth_map.get(pname.lower(), 0) > 0:
             param["optional"] = True
         params.append(param)
+
+    apply_syntax_hints(params, syntax)
 
     applies_elems = collect(sections, lambda h: h == "Applies to")
     applies_to = []
