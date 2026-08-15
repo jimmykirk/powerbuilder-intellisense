@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build output
+out/
+dist/
+*.vsix
+
+# IDE and Editor
+.vscode/
+.vscode-test/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+Thumbs.db
+.Thumbs.db
+
+# Environment and config
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+scratch*.js
+scratch*.txt
+tsc-errors.txt
+runner*.js
+runner-err.txt
+
+# Development artifacts
+.claude/worktrees/
+*.output
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# macOS
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+*.lnk
+
+# Linux
+.directory

@@ -1,0 +1,30 @@
+{
+  "if block": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition} then",
+      "    ${2:// code}",
+      "end if"
+    ],
+    "description": "If statement block"
+  },
+  "for loop": {
+    "prefix": "for",
+    "body": [
+      "for ${1:li_i} = ${2:1} to ${3:10}",
+      "    ${4:// code}",
+      "next"
+    ],
+    "description": "For loop"
+  },
+  "function": {
+    "prefix": "func",
+    "body": [
+      "public function ${1:integer} ${2:uf_name}(${3:string as_arg})",
+      "    ${4:// code}",
+      "    return ${5:0}",
+      "end function"
+    ],
+    "description": "Function skeleton"
+  }
+}

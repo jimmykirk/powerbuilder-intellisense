@@ -1,0 +1,127 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "PowerBuilder",
+  "scopeName": "source.powerbuilder",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#sql" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#functions" },
+    { "include": "#operators" },
+    { "include": "#variables" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.powerbuilder",
+          "match": "//.*$"
+        },
+        {
+          "name": "comment.block.powerbuilder",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.powerbuilder",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.powerbuilder",
+              "match": "~~.|~[nrt\"']"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.powerbuilder",
+          "begin": "'",
+          "end": "'"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.powerbuilder",
+          "match": "\\b\\d+(?:\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.powerbuilder",
+          "match": "(?i)\\b(if|then|else|elseif|end if|choose case|case|end choose|for|to|step|next|do|while|loop|exit|continue|return|try|catch|finally|throw|create|destroy|open|close|on|trigger|event|function|subroutine|end function|end subroutine|forward|prototypes|end prototypes|global|shared|private|public|protected|readonly)\\b"
+        },
+        {
+          "name": "keyword.operator.logical.powerbuilder",
+          "match": "(?i)\\b(and|or|not|is|null)\\b"
+        }
+      ]
+    },
+    "sql": {
+      "patterns": [
+        {
+          "name": "keyword.sql.dml.powerbuilder",
+          "match": "(?i)\\b(SELECT|INSERT|UPDATE|DELETE|MERGE|WITH)\\b"
+        },
+        {
+          "name": "keyword.sql.clauses.powerbuilder",
+          "match": "(?i)\\b(FROM|WHERE|GROUP BY|HAVING|ORDER BY|INTO|VALUES|SET|JOIN|INNER|LEFT|RIGHT|FULL|OUTER|ON|UNION|INTERSECT|EXCEPT|LIMIT|OFFSET|FETCH)\\b"
+        },
+        {
+          "name": "keyword.sql.functions.powerbuilder",
+          "match": "(?i)\\b(COUNT|SUM|AVG|MIN|MAX|CAST|CONVERT|SUBSTRING|UPPER|LOWER|TRIM|ABS|ROUND|COALESCE|NULLIF|CASE|WHEN|THEN|ELSE|END)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.powerbuilder",
+          "match": "(?i)\\b(any|blob|boolean|byte|char|date|datetime|decimal|double|integer|long|longlong|object|real|string|time|uint|ulong|ulonglong|window|menu|datawindow|transaction)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "support.function.powerbuilder",
+          "match": "(?i)\\b(messagebox|setnull|isnull|upper|lower|len|left|right|mid|string|int|long|dec|abs|mod|trim|today|now|openwithparm|closewithreturn)\\b(?=\\s*\\()"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.powerbuilder",
+          "match": ":="
+        },
+        {
+          "name": "keyword.operator.arithmetic.powerbuilder",
+          "match": "\\+|-|\\*|/"
+        },
+        {
+          "name": "keyword.operator.comparison.powerbuilder",
+          "match": "<=|>=|<>|=|<|>"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.other.powerbuilder",
+          "match": "\\b(this|parent|super|sqlca|sqlcode|sqlnrows)\\b"
+        }
+      ]
+    }
+  }
+}

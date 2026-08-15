@@ -1,0 +1,4 @@
+**/*.ts
+**/*.map
+.vscode/**
+node_modules/**/.bin/**
