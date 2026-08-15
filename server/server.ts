@@ -39,10 +39,9 @@ import {
   findBuiltin2025,
   findBuiltinEvent2025
 } from './builtins-2025';
-import { SymbolDefinition, WorkspaceIndex } from './indexer';
+import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
 import { computeDiagnostics } from './diagnostics';
 import { findActiveCall, getWordAtPosition } from './textutils';
-import { discoverWorkspace } from './workspace';
 
 const connection = createConnection(ProposedFeatures.all);
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
@@ -133,6 +132,25 @@ connection.onDidChangeWatchedFiles((params: DidChangeWatchedFilesParams): void =
 });
 
 connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] => {
+  // Member completion when the cursor sits after `receiver.`
+  const doc = documents.get(params.textDocument.uri);
+  if (doc) {
+    const linePrefix = doc.getText({
+      start: { line: params.position.line, character: 0 },
+      end: params.position
+    });
+    // DataWindow object-expression chain: `dw_ctrl.object.<column>`
+    const objectChain = /([A-Za-z_]\w*)\s*\.\s*object\s*\.\s*\w*$/i.exec(linePrefix);
+    if (objectChain) {
+      return dataWindowColumnCompletion(doc, params.position, objectChain[1]);
+    }
+
+    const dot = /([A-Za-z_]\w*)\s*\.\s*(\w*)$/.exec(linePrefix);
+    if (dot) {
+      return memberCompletion(doc, params.position, dot[1]);
+    }
+  }
+
   const keywordItems: CompletionItem[] = KEYWORDS.map((keyword) => ({
     label: keyword,
     kind: CompletionItemKind.Keyword
@@ -335,6 +353,280 @@ connection.onWorkspaceSymbol((params: WorkspaceSymbolParams): SymbolInformation[
     containerName: def.container
   }));
 });
+
+// ------------------------------------------------------- member completion
+
+/**
+ * Built-in object types whose catalog category differs from the type name.
+ * Everything else matches by case-insensitive type name === category.
+ */
+const TYPE_CATEGORY_ALIASES: Record<string, string[]> = {
+  datastore: ['DataWindow'],
+  datawindowchild: ['DataWindow'],
+  dropdownlistbox: ['ListBox'],
+  dropdownpicturelistbox: ['PictureListBox', 'ListBox'],
+  picturelistbox: ['PictureListBox', 'ListBox'],
+  olecontrol: ['OLE'],
+  olecustomcontrol: ['OLE'],
+  restclient: ['RESTClient', 'RestClient'],
+  crypterobject: ['Encryption'],
+  coderobject: ['Encoding'],
+  compressorobject: ['Compression'],
+  extractorobject: ['Compression'],
+  progressbar: ['Progress bar'],
+  hprogressbar: ['Progress bar'],
+  vprogressbar: ['Progress bar'],
+  mdiclient: ['MDI frame'],
+  inet: ['Inet (Obsolete)']
+};
+
+/** Member functions every PowerObject descendant understands. */
+const UNIVERSAL_MEMBERS = ['TriggerEvent', 'PostEvent', 'ClassName', 'GetParent'];
+
+/** Statement keywords that must never be mistaken for a declaration type. */
+const NON_TYPE_KEYWORDS = new Set([
+  'return', 'if', 'then', 'else', 'elseif', 'end', 'for', 'next', 'do', 'loop',
+  'while', 'until', 'choose', 'case', 'try', 'catch', 'finally', 'throw',
+  'call', 'create', 'destroy', 'open', 'close', 'halt', 'goto', 'exit',
+  'continue', 'not', 'and', 'or', 'event', 'function', 'subroutine', 'on'
+]);
+
+/**
+ * Resolves the declared type of an identifier at a position: local declarations
+ * in the enclosing script first (scanning backwards, stopping at a script
+ * boundary), then indexed instance/shared/global variables, then `this`/`super`.
+ */
+function resolveReceiverType(doc: TextDocument, position: { line: number }, receiver: string): string | undefined {
+  const lower = receiver.toLowerCase();
+
+  if (lower === 'this' || lower === 'super') {
+    const mainType = index
+      .symbolsIn(doc.uri)
+      .find((def) => def.kind === 'type' && !!def.container);
+    if (!mainType) {
+      return undefined;
+    }
+    return lower === 'this' ? mainType.name : mainType.container;
+  }
+
+  const lines = doc.getText().split(/\r?\n/);
+  const stop = Math.max(0, position.line - 400);
+  for (let i = position.line - 1; i >= stop; i--) {
+    const line = lines[i];
+    if (/^\s*end\s+(function|subroutine|event)\b/i.test(line)) {
+      break; // left the enclosing script
+    }
+    for (const decl of parseVariableDeclaration(line, i, doc.uri, 'local')) {
+      if (decl.name.toLowerCase() === lower && !NON_TYPE_KEYWORDS.has(decl.type.toLowerCase())) {
+        return decl.type;
+      }
+    }
+  }
+
+  const indexed = index.findVariables(receiver);
+  if (indexed.length > 0) {
+    return indexed[0].type;
+  }
+  return undefined;
+}
+
+/** Completion items for the members of one built-in object type. */
+function builtinMemberItems(typeName: string): CompletionItem[] {
+  const lower = typeName.toLowerCase();
+  const categories = new Set(
+    (TYPE_CATEGORY_ALIASES[lower] ?? [typeName]).map((c) => c.toLowerCase())
+  );
+
+  const applies = (fn: { category: string; appliesTo?: string[] }): boolean =>
+    (fn.appliesTo ?? [fn.category]).some((t) => categories.has(t.toLowerCase()));
+
+  const fnItems: CompletionItem[] = activeFunctions
+    .filter((fn) => fn.member !== false && applies(fn))
+    .map((fn) => ({
+      label: fn.name,
+      kind: CompletionItemKind.Method,
+      detail: formatSignature(fn),
+      documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
+      insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
+      insertTextFormat: 2
+    }));
+
+  const evItems: CompletionItem[] = activeEvents
+    .filter((ev) => applies(ev))
+    .map((ev) => ({
+      label: ev.name,
+      kind: CompletionItemKind.Event,
+      detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')})`,
+      documentation: { kind: MarkupKind.Markdown, value: formatEventHover(ev) }
+    }));
+
+  return [...fnItems, ...evItems];
+}
+
+/**
+ * Members offered after `receiver.` — walks the resolved type's inheritance
+ * chain, mixing workspace-defined functions/events with the built-in catalog
+ * members of any ancestor that is a built-in object type.
+ */
+function memberCompletion(doc: TextDocument, position: { line: number }, receiver: string): CompletionItem[] {
+  const typeName = resolveReceiverType(doc, position, receiver);
+  const items: CompletionItem[] = [];
+  const seen = new Set<string>();
+  const push = (item: CompletionItem): void => {
+    const key = item.label.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      items.push(item);
+    }
+  };
+
+  if (typeName) {
+    if (DATAWINDOW_TYPES.has(typeName.toLowerCase())) {
+      push({
+        label: 'Object',
+        kind: CompletionItemKind.Field,
+        detail: 'DataWindow object expression — dw.Object.<column> reaches columns and properties'
+      });
+      push({
+        label: 'DataObject',
+        kind: CompletionItemKind.Field,
+        detail: 'string DataObject — name of the DataWindow object bound to this control'
+      });
+    }
+    const chain = index.getInheritanceChain(typeName);
+    const walk = chain.length > 0 ? chain : [typeName.toLowerCase()];
+    for (const t of walk) {
+      const uri = index.uriForType(t);
+      if (uri) {
+        for (const def of index.symbolsIn(uri)) {
+          if (def.kind === 'type') {
+            continue;
+          }
+          push({
+            label: def.name,
+            kind: def.kind === 'event' ? CompletionItemKind.Event : CompletionItemKind.Method,
+            detail: def.signature,
+            documentation: { kind: MarkupKind.Markdown, value: describeCustom(def) },
+            insertText: `${def.name}(${def.params.length > 0 ? '$1' : ''})`,
+            insertTextFormat: 2
+          });
+        }
+        for (const v of index.variablesIn(uri).filter((iv) => iv.scope === 'instance')) {
+          push({
+            label: v.name,
+            kind: CompletionItemKind.Field,
+            detail: `${v.type} ${v.name} (instance)`
+          });
+        }
+      }
+      for (const item of builtinMemberItems(t)) {
+        push(item);
+      }
+    }
+  } else {
+    // Unresolved receiver: fall back to every documented member function/event
+    // plus workspace callables, so completion stays useful on library types.
+    for (const fn of activeFunctions.filter((f) => f.member)) {
+      push({
+        label: fn.name,
+        kind: CompletionItemKind.Method,
+        detail: formatSignature(fn),
+        documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
+        insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
+        insertTextFormat: 2
+      });
+    }
+    for (const def of index.all()) {
+      if (def.kind === 'function' || def.kind === 'subroutine' || def.kind === 'event') {
+        push({
+          label: def.name,
+          kind: def.kind === 'event' ? CompletionItemKind.Event : CompletionItemKind.Method,
+          detail: def.signature,
+          insertText: `${def.name}(${def.params.length > 0 ? '$1' : ''})`,
+          insertTextFormat: 2
+        });
+      }
+    }
+  }
+
+  for (const name of UNIVERSAL_MEMBERS) {
+    const fn = findActiveBuiltin(name);
+    if (fn) {
+      push({
+        label: fn.name,
+        kind: CompletionItemKind.Method,
+        detail: formatSignature(fn),
+        documentation: { kind: MarkupKind.Markdown, value: formatHover(fn) },
+        insertText: `${fn.name}(${fn.params.length > 0 ? '$1' : ''})`,
+        insertTextFormat: 2
+      });
+    }
+  }
+
+  return items;
+}
+
+/** Built-in types that carry a DataWindow object expression (`.object.`). */
+const DATAWINDOW_TYPES = new Set(['datawindow', 'datastore', 'datawindowchild', 'u_dw']);
+
+/**
+ * Finds the DataWindow object bound to a control: an explicit
+ * `receiver.dataobject = "d_x"` assignment in the current document first, then
+ * a `dataobject = "d_x"` property inside the control's exported type block.
+ */
+function resolveDataObject(doc: TextDocument, receiver: string): string | undefined {
+  const text = doc.getText();
+  const assign = new RegExp(`\\b${receiver}\\s*\\.\\s*dataobject\\s*=\\s*['"]([\\w$#%-]+)['"]`, 'i').exec(text);
+  if (assign) {
+    return assign[1];
+  }
+  const typeBlock = new RegExp(
+    `\\btype\\s+${receiver}\\s+from\\b[\\s\\S]*?dataobject\\s*=\\s*"([\\w$#%-]+)"`,
+    'i'
+  ).exec(text);
+  return typeBlock?.[1];
+}
+
+/**
+ * Column completion for `dw.object.` — columns of the bound DataWindow object
+ * when the binding is known and indexed, otherwise the union of every indexed
+ * .srd's columns (labeled with their source object).
+ */
+function dataWindowColumnCompletion(
+  doc: TextDocument,
+  position: { line: number },
+  receiver: string
+): CompletionItem[] {
+  const receiverType = resolveReceiverType(doc, position, receiver)?.toLowerCase();
+  if (receiverType && !DATAWINDOW_TYPES.has(receiverType) && !index.uriForType(receiverType)) {
+    return [];
+  }
+
+  const bound = resolveDataObject(doc, receiver);
+  if (bound) {
+    const columns = index.columnsForDataObject(bound);
+    if (columns.length > 0) {
+      return columns.map((col) => ({
+        label: col,
+        kind: CompletionItemKind.Field,
+        detail: `column (${bound})`
+      }));
+    }
+  }
+
+  const items: CompletionItem[] = [];
+  const seen = new Set<string>();
+  for (const [dataObject, columns] of index.allDataObjects()) {
+    for (const col of columns) {
+      const key = col.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        items.push({ label: col, kind: CompletionItemKind.Field, detail: `column (${dataObject})` });
+      }
+    }
+  }
+  return items;
+}
 
 // ---------------------------------------------------------------- helpers
 

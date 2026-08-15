@@ -7,6 +7,9 @@
       "category": "Window",
       "documentation": "Occurs just before the window becomes active.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_activate"
     },
     {
@@ -21,6 +24,9 @@
           "description": "The frame’s new address."
         }
       ],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -29,6 +35,10 @@
       "category": "MLSynchronization",
       "documentation": "Occurs at the beginning of a download procedure",
       "params": [],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -47,6 +57,10 @@
           "type": "long",
           "description": "Long by value (handle of the TreeView item being dragged)"
         }
+      ],
+      "appliesTo": [
+        "ListView",
+        "TreeView"
       ],
       "eventId": "pbm_lvnbegindrag, pbm_tvnbegindrag"
     },
@@ -67,6 +81,10 @@
           "description": "Long by value (the handle of the selected TreeView item)"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "TreeView"
+      ],
       "eventId": "pbm_lvnbeginlabeledit, pbm_tvnbeginlabeledit"
     },
     {
@@ -80,6 +98,9 @@
           "type": "boolean",
           "description": "Boolean indicating whether the log has already been scanned for the current synchronization."
         }
+      ],
+      "appliesTo": [
+        "MLSync"
       ],
       "eventId": null
     },
@@ -100,6 +121,10 @@
           "description": "Long by value (the handle of the TreeView item being dragged)"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "TreeView"
+      ],
       "eventId": "pbm_lvnbeginrightdrag, pbm_tvnbeginrightdrag"
     },
     {
@@ -119,6 +144,10 @@
           "description": "Read-only string identifying the publication to be synchronized. If there is more than one publication, this is a comma-separated list."
         }
       ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -127,6 +156,10 @@
       "category": "MLSynchronization",
       "documentation": "Occurs at the beginning of the synchronization upload procedure.",
       "params": [],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -141,6 +174,9 @@
           "description": "Long by value (the index of the currently collapsed category)"
         }
       ],
+      "appliesTo": [
+        "RibbonBar"
+      ],
       "eventId": null
     },
     {
@@ -154,6 +190,9 @@
           "type": "long",
           "description": "Long by value (the index of the currently popup category)"
         }
+      ],
+      "appliesTo": [
+        "RibbonBar"
       ],
       "eventId": null
     },
@@ -174,6 +213,9 @@
           "description": "Long by value (the index of the category that has become selected)"
         }
       ],
+      "appliesTo": [
+        "RibbonBar"
+      ],
       "eventId": null
     },
     {
@@ -192,6 +234,9 @@
           "type": "long",
           "description": "Long by value (the index of the category that is about to be selected)"
         }
+      ],
+      "appliesTo": [
+        "RibbonBar"
       ],
       "eventId": null
     },
@@ -216,6 +261,9 @@
           "type": "time",
           "description": "The certificate information which includes certificate issuer, certificate subject, certificate expiration time, and certificate PEM encoding."
         }
+      ],
+      "appliesTo": [
+        "WebBrowser"
       ],
       "eventId": null
     },
@@ -261,6 +309,32 @@
           "description": "Long. The index of the submenu item clicked. 0 indicates the event is triggered by the main menu."
         }
       ],
+      "appliesTo": [
+        "Ribbon",
+        "RibbonLargeButtonItem",
+        "RibbonSmallButtonItem",
+        "RibbonCheckBoxItem",
+        "RibbonMenuItem",
+        "Menu",
+        "ListView",
+        "Tab",
+        "TreeView",
+        "Window",
+        "HProgressBar",
+        "VProgressBar",
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "OLE",
+        "Picture",
+        "PictureHyperLink",
+        "PictureButton",
+        "RadioButton",
+        "StaticText",
+        "StaticHyperLink",
+        "DatePicker",
+        "MonthCalendar"
+      ],
       "eventId": "pbm_lvnclicked, pbm_tcnclicked, pbm_tvnclicked, pbm_lbuttonclk, pbm_lbuttondwn, pbm_bnclicked, pbm_lbuttondown"
     },
     {
@@ -269,6 +343,11 @@
       "category": "Application",
       "documentation": "The Close event has different arguments for different objects: Occurs when the user closes the application. Occurs when the object in an OLE control has been activated offsite (the OLE server displays the object in the server's window) and that server is closed. Occurs just before a window is removed from display.",
       "params": [],
+      "appliesTo": [
+        "Application",
+        "OLE",
+        "Window"
+      ],
       "eventId": "pbm_omnclose, pbm_close"
     },
     {
@@ -277,6 +356,9 @@
       "category": "Window",
       "documentation": "Occurs when a window is closed, before the Close event.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_closequery"
     },
     {
@@ -285,6 +367,9 @@
       "category": "DatePicker",
       "documentation": "Occurs when the user has selected a date from the drop-down calendar and the calendar closes.",
       "params": [],
+      "appliesTo": [
+        "DatePicker"
+      ],
       "eventId": "pbm_dtpcloseup"
     },
     {
@@ -299,6 +384,9 @@
           "description": "The index of the clicked column"
         }
       ],
+      "appliesTo": [
+        "ListView"
+      ],
       "eventId": "pbm_lvncolumnclick"
     },
     {
@@ -307,6 +395,10 @@
       "category": "MLSynchronization",
       "documentation": "Occurs when the MobiLink synchronization server connects to the consolidated database server.",
       "params": [],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -323,6 +415,9 @@
       "category": "OLE",
       "documentation": "Occurs when the server application notifies the control that data has changed.",
       "params": [],
+      "appliesTo": [
+        "OLE"
+      ],
       "eventId": "pbm_omndatachange"
     },
     {
@@ -331,6 +426,9 @@
       "category": "MonthCalendar",
       "documentation": "Occurs immediately after a date is selected.",
       "params": [],
+      "appliesTo": [
+        "MonthCalendar"
+      ],
       "eventId": "pbm_mcdatechanged"
     },
     {
@@ -339,6 +437,9 @@
       "category": "MonthCalendar",
       "documentation": "Occurs when the user selects a date using the mouse.",
       "params": [],
+      "appliesTo": [
+        "MonthCalendar"
+      ],
       "eventId": "pbm_mcdatesel"
     },
     {
@@ -362,6 +463,9 @@
           "type": "string",
           "description": "String by value. The full text of the SQL statement being sent to the DBMS when the error occurred."
         }
+      ],
+      "appliesTo": [
+        "Transaction"
       ],
       "eventId": null
     },
@@ -387,6 +491,9 @@
           "description": "A string that describes the reason why the event occurred."
         }
       ],
+      "appliesTo": [
+        "Transaction"
+      ],
       "eventId": "pbm_dbnotification"
     },
     {
@@ -395,6 +502,9 @@
       "category": "Window",
       "documentation": "Occurs when the window becomes inactive.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_deactivate"
     },
     {
@@ -422,6 +532,10 @@
           "description": "Long by value (the handle of the deleted item)"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "TreeView"
+      ],
       "eventId": "pbm_lvndeleteitem, pbm_tvndeleteitem"
     },
     {
@@ -438,6 +552,10 @@
       "category": "MLSynchronization",
       "documentation": "Occurs when the MobiLink synchronization server disconnects from the consolidated database server.",
       "params": [],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -451,6 +569,10 @@
           "type": "string",
           "description": "Read-only string containing the text of an informational message returned from the synchronization server."
         }
+      ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
       ],
       "eventId": null
     },
@@ -486,6 +608,27 @@
           "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
         }
       ],
+      "appliesTo": [
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "Tab",
+        "TreeView",
+        "Window",
+        "Graph",
+        "OLE",
+        "Picture",
+        "PictureHyperLink",
+        "StaticText",
+        "StaticHyperLink",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DatePicker",
+        "MonthCalendar",
+        "HProgressBar",
+        "VProgressBar",
+        "RichTextEdit"
+      ],
       "eventId": "pbm_lbndblclk, pbm_lvndoubleclicked, pbm_tcndoubleclicked, pbm_tvndoubleclicked, pbm_lbuttondblclk, pbm_bndoubleclicked, pbm_cbndblclk, pbm_prndoubleclicked, pbm_rendoubleclicked"
     },
     {
@@ -504,6 +647,9 @@
           "type": "any",
           "description": "The full path name of the file to be downloaded and saved locally."
         }
+      ],
+      "appliesTo": [
+        "WebBrowser"
       ],
       "eventId": null
     },
@@ -539,6 +685,9 @@
           "description": "A rough percentage of completion or -1 if the received total size is unknown."
         }
       ],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -563,6 +712,41 @@
           "description": "Long by value (the handle of the target TreeView item)"
         }
       ],
+      "appliesTo": [
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "Tab",
+        "TreeView",
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "InkEdit",
+        "InkPicture",
+        "Picture",
+        "PictureHyperLink",
+        "PictureButton",
+        "RadioButton",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DatePicker",
+        "MonthCalendar",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "StaticText",
+        "StaticHyperLink",
+        "OLE",
+        "HProgressBar",
+        "VProgressBar",
+        "RichTextEdit",
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar",
+        "UserObject",
+        "Window"
+      ],
       "eventId": "pbm_lbndragdrop, pbm_lvndragdrop, pbm_tcndragdrop, pbm_tvndragdrop, pbm_bndragdrop, pbm_cbndragdrop, pbm_dragdrop, pbm_endragdrop, pbm_omndragdrop, pbm_prndragdrop, pbm_rendragdrop, pbm_sbndragdrop, pbm_uondragdrop"
     },
     {
@@ -577,6 +761,42 @@
           "description": "DragObject by value (a reference to the control being dragged)"
         }
       ],
+      "appliesTo": [
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "InkEdit",
+        "InkPicture",
+        "Picture",
+        "PictureHyperlink",
+        "PictureButton",
+        "RadioButton",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DatePicker",
+        "MonthCalendar",
+        "DataWindow",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "StaticText",
+        "StaticHyperLink",
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "OLE",
+        "HProgressBar",
+        "VProgressBar",
+        "RichTextEdit",
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar",
+        "Tab",
+        "TreeView",
+        "UserObject",
+        "Window"
+      ],
       "eventId": "pbm_bndragenter, pbm_cbndragenter, pbm_dragenter, pbm_dwndragenter, pbm_endragenter, pbm_lbndragenter, pbm_lvndragenter, pbm_omndragenter, pbm_prndragenter, pbm_rendragenter, pbm_sbndragenter, pbm_tcndragenter, pbm_tvndragenter, pbm_uondragenter"
     },
     {
@@ -590,6 +810,42 @@
           "type": "dragobject",
           "description": "DragObject by value (a reference to the control being dragged)"
         }
+      ],
+      "appliesTo": [
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "InkEdit",
+        "InkPicture",
+        "Picture",
+        "PictureHyperLink",
+        "PictureButton",
+        "RadioButton",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DatePicker",
+        "MonthCalendar",
+        "DataWindow",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "StaticText",
+        "StaticHyperLink",
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "OLE",
+        "HProgressBar",
+        "VProgressBar",
+        "RichTextEdit",
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar",
+        "Tab",
+        "TreeView",
+        "UserObject",
+        "Window"
       ],
       "eventId": "pbm_bndragleave, pbm_cbndragleave, pbm_dragleave, pbm_dwndragleave, pbm_endragleave, pbm_lbndragleave, pbm_lvndragleave, pbm_omndragleave, pbm_prndragleave, pbm_rendragleave, pbm_sbndragleave, pbm_tcndragleave, pbm_tvndragleave, pbm_uondragleave"
     },
@@ -615,6 +871,41 @@
           "description": "Long (a reference to the ListView item under the pointer in the TreeView control)"
         }
       ],
+      "appliesTo": [
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "Tab",
+        "TreeView",
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "InkEdit",
+        "InkPicture",
+        "Picture",
+        "PictureHyperLink",
+        "PictureButton",
+        "RadioButton",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DatePicker",
+        "MonthCalendar",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "StaticText",
+        "StaticHyperLink",
+        "OLE",
+        "HProgressBar",
+        "VProgressBar",
+        "RichTextEdit",
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar",
+        "UserObject",
+        "Window"
+      ],
       "eventId": "pbm_lbndragwithin, pbm_lvndragwithin, pbm_tcndragwithin, pbm_tvndragwithin, pbm_bndragwithin, pbm_cbndragwithin, pbm_dragwithin, pbm_endragwithin, pbm_omndragwithin, pbm_prndragwithin, pbm_rendragwithin, pbm_sbndragwithin, pbm_uondragwithin"
     },
     {
@@ -623,6 +914,9 @@
       "category": "DatePicker",
       "documentation": "Occurs when the user has clicked the drop-down arrow in a DatePicker control just before the drop-down calendar displays.",
       "params": [],
+      "appliesTo": [
+        "DatePicker"
+      ],
       "eventId": "pbm_dtpdropdown"
     },
     {
@@ -641,6 +935,10 @@
           "type": "long",
           "description": "Long identifying the deleted rows."
         }
+      ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
       ],
       "eventId": null
     },
@@ -671,6 +969,10 @@
           "description": "The string that represents the new label for the TreeView item."
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "TreeView"
+      ],
       "eventId": "pbm_lvnendlabeledit, pbm_tvnendlabeledit"
     },
     {
@@ -679,6 +981,9 @@
       "category": "MLSync",
       "documentation": "Occurs after the scan of the transaction log completes for upload.",
       "params": [],
+      "appliesTo": [
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -698,6 +1003,10 @@
           "description": "Boolean value passed by reference that, if true, causes dbmlsync to restart the synchronization."
         }
       ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -706,6 +1015,10 @@
       "category": "MLSynchronization",
       "documentation": "Occurs after transmission of the upload to the synchronization server.",
       "params": [],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -755,6 +1068,15 @@
           "description": "Any by reference (a value whose datatype matches the expected value that the OLE server or DataWindow would have returned). This value is used when the value of action is ExceptionSubstituteReturnValue!."
         }
       ],
+      "appliesTo": [
+        "Connection",
+        "DataWindow",
+        "DataStore",
+        "OLE",
+        "OLEObject",
+        "OLETxnObject",
+        "Compression"
+      ],
       "eventId": null
     },
     {
@@ -768,6 +1090,10 @@
           "type": "string",
           "description": "Read-only string containing the text of the error message returned from the synchronization server."
         }
+      ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
       ],
       "eventId": null
     },
@@ -787,6 +1113,9 @@
           "type": "string",
           "description": "The error information if an error occurs during execution or an empty string if there is no error."
         }
+      ],
+      "appliesTo": [
+        "WebBrowser"
       ],
       "eventId": null
     },
@@ -837,6 +1166,11 @@
           "description": "Any by reference. A value whose datatype matches the expected value that the OLE server would have returned. This value is used when the value of action is ExceptionSubstituteReturnValue!."
         }
       ],
+      "appliesTo": [
+        "OLE",
+        "OLEObject",
+        "OLETxnObject"
+      ],
       "eventId": null
     },
     {
@@ -850,6 +1184,9 @@
           "type": "any",
           "description": "The name of the file"
         }
+      ],
+      "appliesTo": [
+        "RichTextEdit"
       ],
       "eventId": "pbm_renfileexists"
     },
@@ -865,6 +1202,10 @@
           "description": "Read-only string containing the text of the message returned from the synchronization server."
         }
       ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -878,6 +1219,9 @@
           "type": "boolean",
           "description": "A boolean value specifying the file compression or decompression result: True -- Success False -- Failed"
         }
+      ],
+      "appliesTo": [
+        "Compression"
       ],
       "eventId": null
     },
@@ -893,6 +1237,10 @@
           "description": "Integer identifying the gesture recognized. See the tables in the Usage section for argument values."
         }
       ],
+      "appliesTo": [
+        "InkEdit",
+        "InkPicture"
+      ],
       "eventId": "pbm_inkegesture, pbm_inkpgesture"
     },
     {
@@ -901,6 +1249,40 @@
       "category": "CheckBox",
       "documentation": "Occurs just before the control receives focus (before it is selected and becomes active). GetFocus applies to all controls",
       "params": [],
+      "appliesTo": [
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "OLE",
+        "Picture",
+        "PictureHyperLink",
+        "PictureButton",
+        "RadioButton",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DataWindow",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "StaticText",
+        "StaticHyperLink",
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "RichTextEdit",
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar",
+        "HProgressBar",
+        "VProgressBar",
+        "DatePicker",
+        "MonthCalendar",
+        "InkEdit",
+        "InkPicture",
+        "Tab",
+        "TreeView"
+      ],
       "eventId": "pbm_bnsetfocus, pbm_cbnsetfocus, pbm_dwnsetfocus, pbm_ensetfocus, pbm_lbnsetfocus, pbm_lvnsetfocus, pbm_rensetfocus, pbm_sbnsetfocus, pbm_setfocus, pbm_tcnsetfocus, pbm_tvnsetfocus"
     },
     {
@@ -920,6 +1302,11 @@
           "description": "Integer by value (the distance of the Help message from the top of the screen, in PowerBuilder units)"
         }
       ],
+      "appliesTo": [
+        "Window",
+        "Menu",
+        "DragObject"
+      ],
       "eventId": "pbm_help"
     },
     {
@@ -928,6 +1315,9 @@
       "category": "Window",
       "documentation": "Occurs just before the window is hidden.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_hidewindow"
     },
     {
@@ -936,6 +1326,9 @@
       "category": "Window",
       "documentation": "Occurs after a Dynamic Data Exchange (DDE) server application has sent new (changed) data and the client DDE application has received it.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_ddedata"
     },
     {
@@ -944,6 +1337,9 @@
       "category": "Application",
       "documentation": "Occurs when the Idle function has been called in an application object script and the specified number of seconds have elapsed with no mouse or keyboard activity.",
       "params": [],
+      "appliesTo": [
+        "Application"
+      ],
       "eventId": null
     },
     {
@@ -957,6 +1353,9 @@
           "type": "string",
           "description": "String by value (the name of the input field that was selected)"
         }
+      ],
+      "appliesTo": [
+        "RichTextEdit"
       ],
       "eventId": "pbm_reninputfieldselected"
     },
@@ -972,6 +1371,9 @@
           "description": "An integer that represents the index of the item being inserted into the ListView"
         }
       ],
+      "appliesTo": [
+        "ListView"
+      ],
       "eventId": "pbm_lvninsertitem"
     },
     {
@@ -985,6 +1387,9 @@
           "type": "integer",
           "description": "An integer that represents the index of the item being inserted into the ListView"
         }
+      ],
+      "appliesTo": [
+        "ListView"
       ],
       "eventId": "pbm_lvnitemactivate"
     },
@@ -1025,6 +1430,9 @@
           "description": "Boolean (specifies if anything other than focus or selection has changed for the item)"
         }
       ],
+      "appliesTo": [
+        "ListView"
+      ],
       "eventId": "pbm_lvnitemchanged"
     },
     {
@@ -1064,6 +1472,9 @@
           "description": "Boolean (specifies if anything other than focus or selection has changed for the item)"
         }
       ],
+      "appliesTo": [
+        "ListView"
+      ],
       "eventId": "pbm_lvnitemchanging"
     },
     {
@@ -1077,6 +1488,9 @@
           "type": "long",
           "description": "Long by reference (the handle of the collapsed TreeViewItem)"
         }
+      ],
+      "appliesTo": [
+        "TreeView"
       ],
       "eventId": "pbm_tvnitemcollapsed"
     },
@@ -1092,6 +1506,9 @@
           "description": "Long by reference (the handle of the collapsing item)"
         }
       ],
+      "appliesTo": [
+        "TreeView"
+      ],
       "eventId": "pbm_tvnitemcollapsing"
     },
     {
@@ -1105,6 +1522,9 @@
           "type": "long",
           "description": "Long by reference (the handle of the expanded item)"
         }
+      ],
+      "appliesTo": [
+        "TreeView"
       ],
       "eventId": "pbm_tvnitemexpanded"
     },
@@ -1120,6 +1540,9 @@
           "description": "Long by reference (the handle of the expanding TreeView item)"
         }
       ],
+      "appliesTo": [
+        "TreeView"
+      ],
       "eventId": "pbm_tvnitemexpanding"
     },
     {
@@ -1134,6 +1557,9 @@
           "description": "Long by reference (the handle of the TreeView item being populated)"
         }
       ],
+      "appliesTo": [
+        "TreeView"
+      ],
       "eventId": "pbm_tvnitempopulate"
     },
     {
@@ -1142,6 +1568,9 @@
       "category": "RibbonBar",
       "documentation": "Occurs when an item changes from highlight to another state.",
       "params": [],
+      "appliesTo": [
+        "RibbonBar"
+      ],
       "eventId": null
     },
     {
@@ -1161,6 +1590,13 @@
           "description": "UnsignedLong by value (the modifier keys that were pressed with the key). Values are: 1 Shift key 2 Ctrl key 3 Shift and Ctrl keys"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "RichTextEdit",
+        "Tab",
+        "TreeView",
+        "Window"
+      ],
       "eventId": "pbm_lvnkeydown, pbm_renkey, pbm_tcnkeydown, pbm_tvnkeydown, pbm_keydown"
     },
     {
@@ -1169,6 +1605,10 @@
       "category": "VScrollBar",
       "documentation": "Occurs when the user clicks the down arrow of the vertical scroll bar or presses the down arrow on the keyboard when the focus is on a track bar.",
       "params": [],
+      "appliesTo": [
+        "VScrollBar",
+        "VTrackBar"
+      ],
       "eventId": "pbm_sbnlinedown"
     },
     {
@@ -1177,6 +1617,10 @@
       "category": "HScrollBar",
       "documentation": "Occurs when the user clicks in the left arrow of the horizontal scroll bar or presses the left arrow key on the keyboard when focus is on a horizontal track bar.",
       "params": [],
+      "appliesTo": [
+        "HScrollBar",
+        "HTrackBar"
+      ],
       "eventId": "pbm_sbnlineup"
     },
     {
@@ -1185,6 +1629,10 @@
       "category": "HScrollBar",
       "documentation": "Occurs when the user clicks in the right arrow of the horizontal scroll bar or presses the right arrow key on the keyboard when focus is on a horizontal track bar.",
       "params": [],
+      "appliesTo": [
+        "HScrollBar",
+        "HTrackBar"
+      ],
       "eventId": "pbm_sbnlinedown"
     },
     {
@@ -1193,14 +1641,52 @@
       "category": "VScrollBar",
       "documentation": "Occurs when the user clicks the up arrow of the vertical scroll bar or presses the up arrow on the keyboard when the focus is on a track bar",
       "params": [],
+      "appliesTo": [
+        "VScrollBar",
+        "VTrackBar"
+      ],
       "eventId": "pbm_sbnlineup"
     },
     {
       "name": "LoseFocus",
       "returnType": "long",
-      "category": "UserObject (standard visual user )",
+      "category": "System",
       "documentation": "Occurs just before a control loses focus (before it becomes inactive).",
       "params": [],
+      "appliesTo": [
+        "CheckBox",
+        "CommandButton",
+        "Graph",
+        "OLE",
+        "Picture",
+        "PictureHyperLink",
+        "PictureButton",
+        "RadioButton",
+        "StaticText",
+        "StaticHyperLink",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "DataWindow",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "HProgressBar",
+        "VProgressBar",
+        "DatePicker",
+        "MonthCalendar",
+        "InkEdit",
+        "InkPicture",
+        "ListBox",
+        "PictureListBox",
+        "ListView",
+        "RichTextEdit",
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar",
+        "Tab",
+        "TreeView"
+      ],
       "eventId": "pbm_controltypekillfocus, pbm_bnkillfocus, pbm_cbnkillfocus, pbm_dwnkillfocus, pbm_enkillfocus, pbm_killfocus, pbm_lbnkillfocus, pbm_lvnkillfocus, pbm_renkillfocus, pbm_sbnkillfocus, pbm_tcnkillfocus, pbm_tvnkillfocus"
     },
     {
@@ -1214,6 +1700,16 @@
           "type": "long",
           "description": "Long. The handle of the item."
         }
+      ],
+      "appliesTo": [
+        "RibbonComboBoxItem",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "SingleLineEdit",
+        "EditMask",
+        "MultiLineEdit",
+        "InkEdit",
+        "RichTextEdit"
       ],
       "eventId": "pbm_cbnmodified, pbm_enmodified, pbm_inkemodified, pbm_renmodified"
     },
@@ -1239,6 +1735,10 @@
           "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
         }
       ],
+      "appliesTo": [
+        "RichTextEdit",
+        "Window"
+      ],
       "eventId": "pbm_renlbuttondown, pbm_lbuttondown"
     },
     {
@@ -1262,6 +1762,10 @@
           "type": "integer",
           "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
         }
+      ],
+      "appliesTo": [
+        "RichTextEdit",
+        "Window"
       ],
       "eventId": "pbm_renmousemove, pbm_mousemove"
     },
@@ -1287,6 +1791,10 @@
           "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
         }
       ],
+      "appliesTo": [
+        "RichTextEdit",
+        "Window"
+      ],
       "eventId": "pbm_renlbuttonup, pbm_lbuttonup"
     },
     {
@@ -1300,6 +1808,12 @@
           "type": "integer",
           "description": "Integer by value (a number indicating position of the scroll box within the range of values specified by the MinPosition and MaxPosition properties)"
         }
+      ],
+      "appliesTo": [
+        "HScrollBar",
+        "HTrackBar",
+        "VScrollBar",
+        "VTrackBar"
       ],
       "eventId": "pbm_sbnthumbtrack"
     },
@@ -1325,6 +1839,9 @@
           "description": "The URL that the browser failed to load."
         }
       ],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -1339,6 +1856,9 @@
           "description": "The page loading progress."
         }
       ],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -1347,6 +1867,9 @@
       "category": "WebBrowser",
       "documentation": "Occurs after a navigation has been committed and before the browser begins loading contents in the frame.",
       "params": [],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -1365,6 +1888,9 @@
           "type": "boolean",
           "description": "A boolean value specifying whether to be able to move forward to the next page: True -- To be able to move forward False -- Not to be able to move forward"
         }
+      ],
+      "appliesTo": [
+        "WebBrowser"
       ],
       "eventId": null
     },
@@ -1385,6 +1911,9 @@
           "description": "Long by value containing a pointer to a structure that contains the window handle and identifier of the control sending a message and a notification code."
         }
       ],
+      "appliesTo": [
+        "TreeView"
+      ],
       "eventId": "pbm_notify"
     },
     {
@@ -1398,6 +1927,10 @@
           "type": "string",
           "description": "String by value. Additional arguments are included on the command line after the name of the executable program."
         }
+      ],
+      "appliesTo": [
+        "Application",
+        "Window"
       ],
       "eventId": "pbm_open"
     },
@@ -1418,6 +1951,9 @@
           "description": "Long by value"
         }
       ],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_other"
     },
     {
@@ -1426,6 +1962,10 @@
       "category": "VScrollBar",
       "documentation": "Occurs when the user clicks in the open space below the scroll box.",
       "params": [],
+      "appliesTo": [
+        "VScrollBar",
+        "VTrackBar"
+      ],
       "eventId": "pbm_sbnpagedown"
     },
     {
@@ -1434,6 +1974,10 @@
       "category": "HScrollBar",
       "documentation": "Occurs when the open space to the left of the scroll box is clicked.",
       "params": [],
+      "appliesTo": [
+        "HScrollBar",
+        "HTrackBar"
+      ],
       "eventId": "pbm_sbnpageup"
     },
     {
@@ -1442,6 +1986,10 @@
       "category": "HScrollBar",
       "documentation": "Occurs when the open space to the right of the scroll box is clicked.",
       "params": [],
+      "appliesTo": [
+        "HScrollBar",
+        "HTrackBar"
+      ],
       "eventId": "pbm_sbnpagedown"
     },
     {
@@ -1450,6 +1998,10 @@
       "category": "VScrollBar",
       "documentation": "Occurs when the user clicks in the open space above the scroll box (also called the thumb).",
       "params": [],
+      "appliesTo": [
+        "VScrollBar",
+        "VTrackBar"
+      ],
       "eventId": "pbm_sbnpageup"
     },
     {
@@ -1469,6 +2021,9 @@
           "description": "The result of operation. TRUE indicates success; FALSE indicates failure."
         }
       ],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -1477,6 +2032,9 @@
       "category": "RichTextEdit",
       "documentation": "Occurs when the user selects a picture in the RichTextEdit control by clicking it.",
       "params": [],
+      "appliesTo": [
+        "RichTextEdit"
+      ],
       "eventId": "pbm_renpictureselected"
     },
     {
@@ -1485,6 +2043,9 @@
       "category": "Pipeline",
       "documentation": "Occurs when pipeline processing is completed.",
       "params": [],
+      "appliesTo": [
+        "Pipeline"
+      ],
       "eventId": "pbm_pipeend"
     },
     {
@@ -1493,6 +2054,9 @@
       "category": "Pipeline",
       "documentation": "Occurs during pipeline processing after each block of rows is read or written. The Commit factor specified for the Pipeline in the Pipeline painter determines the size of each block.",
       "params": [],
+      "appliesTo": [
+        "Pipeline"
+      ],
       "eventId": "pbm_pipemeter"
     },
     {
@@ -1501,6 +2065,9 @@
       "category": "Pipeline",
       "documentation": "Occurs when pipeline processing begins.",
       "params": [],
+      "appliesTo": [
+        "Pipeline"
+      ],
       "eventId": "pbm_pipestart"
     },
     {
@@ -1509,6 +2076,9 @@
       "category": "RichTextEdit",
       "documentation": "Occurs when the footer of a page of the document in the RichTextEdit control is about to be printed.",
       "params": [],
+      "appliesTo": [
+        "RichTextEdit"
+      ],
       "eventId": "pbm_renprintfooter"
     },
     {
@@ -1517,6 +2087,9 @@
       "category": "RichTextEdit",
       "documentation": "Occurs when the header of a page of the document in the RichTextEdit control is about to be printed.",
       "params": [],
+      "appliesTo": [
+        "RichTextEdit"
+      ],
       "eventId": "pbm_renprintheader"
     },
     {
@@ -1530,6 +2103,9 @@
           "type": "string",
           "description": "A readonly string whose value is the full path name of the file that is being compressed or decompressed."
         }
+      ],
+      "appliesTo": [
+        "Compression"
       ],
       "eventId": null
     },
@@ -1550,6 +2126,10 @@
           "description": "Long value indicating the progress limit of the synchronization."
         }
       ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -1563,6 +2143,9 @@
           "type": "string",
           "description": "The name of the property whose value changed. If propertyname is an empty string, a more general change occurred, such as changes to more than one property."
         }
+      ],
+      "appliesTo": [
+        "OLE"
       ],
       "eventId": null
     },
@@ -1582,6 +2165,9 @@
           "type": "boolean",
           "description": "Boolean by reference; determines whether the change will be canceled. Values are: FALSE -- (Default) the change is allowed. TRUE -- the change is canceled."
         }
+      ],
+      "appliesTo": [
+        "OLE"
       ],
       "eventId": null
     },
@@ -1607,6 +2193,11 @@
           "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
         }
       ],
+      "appliesTo": [
+        "Window",
+        "except RichTextEdit",
+        "RichTextEdit"
+      ],
       "eventId": "pbm_rbuttondown, pbm_renrbuttondown"
     },
     {
@@ -1615,6 +2206,9 @@
       "category": "RichTextEdit",
       "documentation": "Occurs when the right mouse button is released.",
       "params": [],
+      "appliesTo": [
+        "RichTextEdit"
+      ],
       "eventId": "pbm_renrbuttonup"
     },
     {
@@ -1623,6 +2217,9 @@
       "category": "InkEdit",
       "documentation": "Occurs when an InkEdit control gets results from a call to the RecognizeText function.",
       "params": [],
+      "appliesTo": [
+        "InkEdit"
+      ],
       "eventId": "pbm_inkerecognition"
     },
     {
@@ -1631,6 +2228,9 @@
       "category": "Window",
       "documentation": "Occurs when a DDE client application has sent a command.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_ddeexecute"
     },
     {
@@ -1639,6 +2239,9 @@
       "category": "Window",
       "documentation": "Occurs when a DDE client application wants to start a hot link.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_ddeadvise"
     },
     {
@@ -1647,6 +2250,9 @@
       "category": "Window",
       "documentation": "Occurs when a DDE client application wants to end a hot link.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_ddeunadvise"
     },
     {
@@ -1655,6 +2261,9 @@
       "category": "Window",
       "documentation": "Occurs when a DDE client application requests data.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_dderequest"
     },
     {
@@ -1663,6 +2272,9 @@
       "category": "Window",
       "documentation": "Occurs when a DDE client application has sent data.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_ddepoke"
     },
     {
@@ -1671,6 +2283,9 @@
       "category": "OLE",
       "documentation": "Occurs when the server application notifies the control that the object has been renamed.",
       "params": [],
+      "appliesTo": [
+        "OLE"
+      ],
       "eventId": "pbm_omnrename"
     },
     {
@@ -1695,6 +2310,10 @@
           "description": "Integer by value (the height of the client area of a window or DataWindow control in PowerBuilder units)."
         }
       ],
+      "appliesTo": [
+        "DataWindow",
+        "Window"
+      ],
       "eventId": "pbm_dwnresize, pbm_size"
     },
     {
@@ -1713,6 +2332,9 @@
           "type": "any",
           "description": "The response headers."
         }
+      ],
+      "appliesTo": [
+        "WebBrowser"
       ],
       "eventId": null
     },
@@ -1733,6 +2355,11 @@
           "description": "Long by value (the handle of the item the user clicked)"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "Tab",
+        "TreeView"
+      ],
       "eventId": "pbm_lvnrclicked, pbm_tcnrclicked, pbm_tvnrclicked"
     },
     {
@@ -1752,6 +2379,11 @@
           "description": "Long by value (the handle of the item the user double-clicked)"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "Tab",
+        "TreeView"
+      ],
       "eventId": "pbm_lvnrdoubleclicked, pbm_tcnrdoubleclicked, pbm_tvnrdoubleclicked"
     },
     {
@@ -1760,6 +2392,9 @@
       "category": "OLE",
       "documentation": "Occurs when the server application notifies the control that the data has been saved.",
       "params": [],
+      "appliesTo": [
+        "OLE"
+      ],
       "eventId": "pbm_omnsave"
     },
     {
@@ -1768,6 +2403,9 @@
       "category": "OLE",
       "documentation": "Occurs when the server application saves the object in the control.",
       "params": [],
+      "appliesTo": [
+        "OLE"
+      ],
       "eventId": "pbm_omnsaveobject"
     },
     {
@@ -1791,6 +2429,15 @@
           "type": "long",
           "description": "Long. The index of the submenu item the mouse is on. 0 indicates the event is triggered by the main menu."
         }
+      ],
+      "appliesTo": [
+        "Ribbon",
+        "RibbonLargeButtonItem",
+        "RibbonSmallButtonItem",
+        "RibbonCheckBoxItem",
+        "RibbonComboBoxItem",
+        "RibbonMenuItem",
+        "Menu"
       ],
       "eventId": null
     },
@@ -1831,6 +2478,15 @@
           "description": "Long. The handle of the item."
         }
       ],
+      "appliesTo": [
+        "RibbonComboBoxItem",
+        "DropDownListBox",
+        "DropDownPictureListBox",
+        "ListBox",
+        "PictureListBox",
+        "Tab",
+        "TreeView"
+      ],
       "eventId": "pbm_cbnselchange, pbm_lbnselchange, pbm_tcnselchanged, pbm_tvnselchanged"
     },
     {
@@ -1860,6 +2516,10 @@
           "description": "Long by value (the handle of the item that is about to be selected)"
         }
       ],
+      "appliesTo": [
+        "Tab",
+        "TreeView"
+      ],
       "eventId": "pbm_tcnselchanging, pbm_tvnselchanging"
     },
     {
@@ -1879,6 +2539,9 @@
           "description": "Long by value (the status of the window). Values are: 0 -- The current window is the only one affected. 1 -- The window's parent is also being minimized or a pop-up window is being hidden. 3 -- The window's parent is also being displayed or maximized or a pop-up window is being shown."
         }
       ],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_showwindow"
     },
     {
@@ -1892,6 +2555,9 @@
           "type": "longlong",
           "description": "A longlong whose value is the total number of bytes in the file that has been compressed or decompressed."
         }
+      ],
+      "appliesTo": [
+        "Compression"
       ],
       "eventId": null
     },
@@ -1927,6 +2593,10 @@
           "description": "Long by value (the handle of the second item being compared)"
         }
       ],
+      "appliesTo": [
+        "ListView",
+        "TreeView"
+      ],
       "eventId": "pbm_lvnsort, pbm_tvnsort"
     },
     {
@@ -1946,6 +2616,9 @@
           "description": "String by value. The full text of the SQL statement."
         }
       ],
+      "appliesTo": [
+        "Transaction"
+      ],
       "eventId": null
     },
     {
@@ -1960,6 +2633,10 @@
           "description": "For CompressorObject, it is a longlong whose value is the total number of bytes in the file that will be compressed, plus the size of some additional meta data. For ExtractorObject, it is a longlong whose value is the original size of all files in the compressed archive."
         }
       ],
+      "appliesTo": [
+        "Animation",
+        "Compression"
+      ],
       "eventId": "pbm_animatestart"
     },
     {
@@ -1968,6 +2645,9 @@
       "category": "Animation",
       "documentation": "Occurs when an animation has stopped playing.",
       "params": [],
+      "appliesTo": [
+        "Animation"
+      ],
       "eventId": "pbm_animatestop"
     },
     {
@@ -1976,6 +2656,10 @@
       "category": "InkEdit",
       "documentation": "Occurs when the user draws a new stroke.",
       "params": [],
+      "appliesTo": [
+        "InkEdit",
+        "InkPicture"
+      ],
       "eventId": "pbm_inkestroke, pbm_inkpstroke"
     },
     {
@@ -1990,6 +2674,10 @@
           "description": "String passed by reference that includes dbmlsync command arguments for launching the synchronization process."
         }
       ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -1998,6 +2686,9 @@
       "category": "Application",
       "documentation": "Occurs when a serious runtime error occurs (such as trying to open a nonexistent window) if the error is not handled in a try-catch block.",
       "params": [],
+      "appliesTo": [
+        "Application"
+      ],
       "eventId": null
     },
     {
@@ -2017,6 +2708,9 @@
           "description": "UnsignedLong by value (the modifier keys that were pressed with the key). The only modifier key is the Shift key."
         }
       ],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_syskeydown"
     },
     {
@@ -2025,6 +2719,10 @@
       "category": "Timing",
       "documentation": "Occurs when a specified number of seconds elapses after the Start or Timer function has been called.",
       "params": [],
+      "appliesTo": [
+        "Timing",
+        "Window"
+      ],
       "eventId": "pbm_timer"
     },
     {
@@ -2039,6 +2737,9 @@
           "description": "The title of the page you browse."
         }
       ],
+      "appliesTo": [
+        "WebBrowser"
+      ],
       "eventId": null
     },
     {
@@ -2047,6 +2748,9 @@
       "category": "Window",
       "documentation": "Occurs in an MDI frame window when the user moves any FrameBar or SheetBar.",
       "params": [],
+      "appliesTo": [
+        "Window"
+      ],
       "eventId": "pbm_tbnmoved"
     },
     {
@@ -2060,6 +2764,10 @@
           "type": "long",
           "description": "Long indicating the status returned by MobiLink to the remote after the upload stream is processed. Values are: 0 for StatCommitted 1 for StatFailed 248 for StatRetry See the Usage note for the meaning of these values."
         }
+      ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
       ],
       "eventId": null
     },
@@ -2085,6 +2793,9 @@
           "description": "A DateTime value by reference to which the validated date should be assigned."
         }
       ],
+      "appliesTo": [
+        "DatePicker"
+      ],
       "eventId": "pbm_dtpuserstring"
     },
     {
@@ -2104,6 +2815,9 @@
           "description": "The new DateTime value"
         }
       ],
+      "appliesTo": [
+        "DatePicker"
+      ],
       "eventId": "pbm_dtpvaluechanged"
     },
     {
@@ -2112,6 +2826,9 @@
       "category": "OLE",
       "documentation": "Occurs when the server application notifies the control that the view shown to the user has changed.",
       "params": [],
+      "appliesTo": [
+        "OLE"
+      ],
       "eventId": "pbm_omnviewchange"
     },
     {
@@ -2120,6 +2837,10 @@
       "category": "MLSynchronization",
       "documentation": "Occurs when the synchronization process starts a new waiting period for upload acknowledgement.",
       "params": [],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
+      ],
       "eventId": null
     },
     {
@@ -2133,6 +2854,10 @@
           "type": "string",
           "description": "Read-only string containing the text of the warning message returned from the synchronization server."
         }
+      ],
+      "appliesTo": [
+        "MLSynchronization",
+        "MLSync"
       ],
       "eventId": null
     }

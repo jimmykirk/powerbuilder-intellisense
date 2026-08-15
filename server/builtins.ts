@@ -21,6 +21,10 @@ export interface FunctionInfo {
   params: ParamInfo[];
   documentation: string;
   category: string;
+  /** True for object member functions (documented as receiver dot-calls). */
+  member?: boolean;
+  /** Every object type the docs list this function/event as applying to. */
+  appliesTo?: string[];
 }
 
 /**
@@ -76,6 +80,7 @@ export interface RawFunctionEntry {
   /** Call signature as printed in the docs, e.g. `controlname.AddData ( ... )`. */
   syntax: string;
   params: ParamInfo[];
+  appliesTo?: string[];
 }
 
 /**
@@ -98,7 +103,9 @@ export function loadFunctionCatalog(catalog: { functions: RawFunctionEntry[] }):
       returnType: fn.returnType,
       category: fn.category,
       documentation: fn.documentation,
-      params
+      params,
+      member: receiver !== undefined,
+      appliesTo: fn.appliesTo
     };
   });
 }
@@ -125,6 +132,8 @@ export interface EventInfo {
   documentation: string;
   eventId: string | null;
   params: ParamInfo[];
+  /** Every object type the docs list this event as applying to. */
+  appliesTo?: string[];
 }
 
 export function loadEventCatalog(catalog: { events: EventInfo[] }): EventInfo[] {

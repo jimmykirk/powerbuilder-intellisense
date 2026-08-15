@@ -156,6 +156,29 @@ export function parseVariableDeclaration(
 }
 
 /**
+ * Extracts the column names of a DataWindow export (.srd). Column definitions
+ * appear both in the `table(column=(type=... name=emp_name ...))` section and
+ * as visual `column(band=detail ... name=emp_name ...)` objects; both are
+ * matched by scanning a bounded window after each `column` opener so nested
+ * parens like `type=char(10)` don't end the search early.
+ */
+export function parseDataWindowColumns(text: string): string[] {
+  const columns: string[] = [];
+  const seen = new Set<string>();
+  const opener = /\bcolumn\s*[=(]/g;
+  let match: RegExpExecArray | null;
+  while ((match = opener.exec(text)) !== null) {
+    const window = text.slice(match.index, match.index + 800);
+    const name = /\bname=([a-zA-Z_]\w*)/.exec(window);
+    if (name && !seen.has(name[1].toLowerCase())) {
+      seen.add(name[1].toLowerCase());
+      columns.push(name[1]);
+    }
+  }
+  return columns;
+}
+
+/**
  * Parses all indexable symbol definitions out of a single document's text.
  * Definitions inside `prototypes ... end prototypes` blocks are skipped so that
  * navigation lands on the real implementation rather than the forward declaration.
@@ -270,6 +293,8 @@ export class WorkspaceIndex {
   private byName = new Map<string, SymbolDefinition[]>();
   private varsByUri = new Map<string, VariableDefinition[]>();
   private varsByName = new Map<string, VariableDefinition[]>();
+  // DataWindow object name (from the .srd basename) -> column names
+  private dwColumns = new Map<string, string[]>();
   // Type inheritance: maps type name -> immediate ancestor name
   private typeAncestors = new Map<string, string>();
   // Reverse mapping: ancestor -> all direct children
@@ -279,9 +304,24 @@ export class WorkspaceIndex {
   updateDocument(uri: string, text: string): void {
     const { symbols, variables } = parseSymbols(uri, text);
     this.setEntries(uri, symbols, variables);
+
+    if (uri.toLowerCase().endsWith('.srd')) {
+      const dataObject = path.basename(URI.parse(uri).fsPath, path.extname(URI.parse(uri).fsPath));
+      const columns = parseDataWindowColumns(text);
+      if (columns.length > 0) {
+        this.dwColumns.set(dataObject.toLowerCase(), columns);
+      } else {
+        this.dwColumns.delete(dataObject.toLowerCase());
+      }
+    }
   }
 
   removeDocument(uri: string): void {
+    if (uri.toLowerCase().endsWith('.srd')) {
+      const dataObject = path.basename(URI.parse(uri).fsPath, path.extname(URI.parse(uri).fsPath));
+      this.dwColumns.delete(dataObject.toLowerCase());
+    }
+
     const existing = this.byUri.get(uri);
     if (existing) {
       for (const def of existing) {
@@ -379,6 +419,26 @@ export class WorkspaceIndex {
   /** Returns the variables declared in one document. */
   variablesIn(uri: string): VariableDefinition[] {
     return this.varsByUri.get(uri) ?? [];
+  }
+
+  /** Returns the symbols declared in one document. */
+  symbolsIn(uri: string): SymbolDefinition[] {
+    return this.byUri.get(uri) ?? [];
+  }
+
+  /** Returns the URI of the file whose primary `type` declaration defines typeName. */
+  uriForType(typeName: string): string | undefined {
+    return this.find(typeName).find((def) => def.kind === 'type')?.uri;
+  }
+
+  /** Returns the columns of an indexed DataWindow object (.srd basename). */
+  columnsForDataObject(name: string): string[] {
+    return this.dwColumns.get(name.toLowerCase()) ?? [];
+  }
+
+  /** Returns every indexed DataWindow object name with its columns. */
+  allDataObjects(): Map<string, string[]> {
+    return this.dwColumns;
   }
 
   /** Returns the immediate ancestor type name, or undefined if not found or if it's a base type. */

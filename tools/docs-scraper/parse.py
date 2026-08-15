@@ -205,21 +205,41 @@ def applies_to_category(elems):
     return normalize_applies_text(text)
 
 
-def normalize_applies_text(text):
-    if not text:
+def normalize_applies_token(token):
+    token = re.sub(r"\b(any|all|the|a|an|controls?|objects?|types?|only)\b",
+                   "", token, flags=re.I)
+    token = re.sub(r"\bin (windows?|user)\b.*$", "", token, flags=re.I)
+    token = re.sub(r"\(including\b.*$", "", token, flags=re.I)
+    token = token.strip("()")
+    token = squash(token)
+    # Reject prose fragments that leak out of irregular tables — a real object
+    # name is one or two capitalized words with no sentence punctuation.
+    if not token or len(token) > 32 or re.search(r"[.:]", token) \
+            or len(token.split()) > 3:
         return None
-    first = re.split(r"[,;]| and | or ", text)[0]
-    first = re.sub(r"\b(any|all|the|a|an|controls?|objects?|types?|only)\b",
-                   "", first, flags=re.I)
-    first = re.sub(r"\bin (windows?|user)\b.*$", "", first, flags=re.I)
-    first = squash(first)
-    if not first:
-        return None
-    key = first.lower().replace(" ", "")
+    key = token.lower().replace(" ", "")
     if key in OBJECT_CATEGORY_OVERRIDES:
         return OBJECT_CATEGORY_OVERRIDES[key]
     fixes = {"windows": "Window", "datawindows": "DataWindow", "menus": "Menu"}
-    return fixes.get(first.lower(), first)
+    return fixes.get(token.lower(), token)
+
+
+def normalize_applies_text(text):
+    if not text:
+        return None
+    return normalize_applies_token(re.split(r"[,;]| and | or ", text)[0])
+
+
+def normalize_applies_list(text):
+    """Every object named in an Applies-to / Objects cell, normalized."""
+    if not text:
+        return []
+    out = []
+    for raw in re.split(r"[,;]| and | or ", text):
+        token = normalize_applies_token(raw)
+        if token and token not in out:
+            out.append(token)
+    return out
 
 
 def parse_event_id_tables(elems):
@@ -307,12 +327,20 @@ def parse_page(path, kind="func"):
     return_type = parse_return_type(ret_elems) or "none"
 
     applies_elems = collect(sections, lambda h: h == "Applies to")
+    applies_text = ", ".join(
+        squash(e.get_text(" ")) for e in applies_elems if hasattr(e, "get_text"))
+    applies_to = normalize_applies_list(applies_text)
     category = NAME_TO_CATEGORY.get(name.lower()) if kind == "func" else None
-    if category is None and kind == "event":
+    if kind == "event":
         id_rows = list(parse_event_id_tables(
             collect(sections, lambda h: h == "Event ID")))
         objs = next((o for _, o in id_rows if o and o.lower() != "none"), None)
         category = normalize_applies_text(objs)
+        for _, o in id_rows:
+            if o and o.lower() != "none":
+                for token in normalize_applies_list(o):
+                    if token not in applies_to:
+                        applies_to.append(token)
     if category is None and applies_elems:
         category = applies_to_category(applies_elems)
     if category is None:
@@ -326,6 +354,8 @@ def parse_page(path, kind="func"):
         "syntax": syntax,
         "params": params,
     }
+    if applies_to:
+        record["appliesTo"] = applies_to
     if kind == "event":
         del record["syntax"]
         ids = list(dict.fromkeys(
