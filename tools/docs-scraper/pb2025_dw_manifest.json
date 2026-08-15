@@ -1,0 +1,1254 @@
+{
+  "ch09s01.html": {
+    "kind": "method",
+    "name": "AboutBox (obsolete)"
+  },
+  "dwmeth_AcceptText.html": {
+    "kind": "method",
+    "name": "AcceptText"
+  },
+  "dwmeth_CanUndo.html": {
+    "kind": "method",
+    "name": "CanUndo"
+  },
+  "dwmeth_ClassName.html": {
+    "kind": "method",
+    "name": "ClassName"
+  },
+  "dwmeth_Clear.html": {
+    "kind": "method",
+    "name": "Clear"
+  },
+  "dwmeth_ClearValues.html": {
+    "kind": "method",
+    "name": "ClearValues"
+  },
+  "dwmeth_Collapse.html": {
+    "kind": "method",
+    "name": "Collapse"
+  },
+  "dwmeth_CollapseAll.html": {
+    "kind": "method",
+    "name": "CollapseAll"
+  },
+  "dwmeth_CollapseAllChildren.html": {
+    "kind": "method",
+    "name": "CollapseAllChildren"
+  },
+  "dwmeth_CollapseLevel.html": {
+    "kind": "method",
+    "name": "CollapseLevel"
+  },
+  "dwmeth_Copy.html": {
+    "kind": "method",
+    "name": "Copy"
+  },
+  "dwmeth_CopyRTF.html": {
+    "kind": "method",
+    "name": "CopyRTF"
+  },
+  "dwmeth_Create.html": {
+    "kind": "method",
+    "name": "Create"
+  },
+  "ch09s14.html": {
+    "kind": "method",
+    "name": "CreateError (obsolete)"
+  },
+  "dwmeth_CreateFrom.html": {
+    "kind": "method",
+    "name": "CreateFrom"
+  },
+  "dwmeth_CrosstabDialog.html": {
+    "kind": "method",
+    "name": "CrosstabDialog"
+  },
+  "dwmeth_Cut.html": {
+    "kind": "method",
+    "name": "Cut"
+  },
+  "dwmeth_DBCancel.html": {
+    "kind": "method",
+    "name": "DBCancel"
+  },
+  "dwmeth_DBErrorCode.html": {
+    "kind": "method",
+    "name": "DBErrorCode (obsolete)"
+  },
+  "dwmeth_DBErrorMessage.html": {
+    "kind": "method",
+    "name": "DBErrorMessage (obsolete)"
+  },
+  "dwmeth_DeletedCount.html": {
+    "kind": "method",
+    "name": "DeletedCount"
+  },
+  "dwmeth_DeleteRow.html": {
+    "kind": "method",
+    "name": "DeleteRow"
+  },
+  "dwmeth_Describe.html": {
+    "kind": "method",
+    "name": "Describe"
+  },
+  "dwmeth_Drag.html": {
+    "kind": "method",
+    "name": "Drag"
+  },
+  "dwmeth_Expand.html": {
+    "kind": "method",
+    "name": "Expand"
+  },
+  "dwmeth_ExpandAll.html": {
+    "kind": "method",
+    "name": "ExpandAll"
+  },
+  "dwmeth_ExpandAllChildren.html": {
+    "kind": "method",
+    "name": "ExpandAllChildren"
+  },
+  "dwmeth_ExpandLevel.html": {
+    "kind": "method",
+    "name": "ExpandLevel"
+  },
+  "dwmeth_ExportJson.html": {
+    "kind": "method",
+    "name": "ExportJson"
+  },
+  "dwmeth_ExportRowAsJson.html": {
+    "kind": "method",
+    "name": "ExportRowAsJson"
+  },
+  "dwmeth_Filter.html": {
+    "kind": "method",
+    "name": "Filter"
+  },
+  "dwmeth_FilteredCount.html": {
+    "kind": "method",
+    "name": "FilteredCount"
+  },
+  "dwmeth_Find.html": {
+    "kind": "method",
+    "name": "Find"
+  },
+  "dwmeth_FindGroupChange.html": {
+    "kind": "method",
+    "name": "FindGroupChange"
+  },
+  "dwmeth_FindNext.html": {
+    "kind": "method",
+    "name": "FindNext"
+  },
+  "dwmeth_FindRequired.html": {
+    "kind": "method",
+    "name": "FindRequired"
+  },
+  "dwmeth_FindRequiredColumn.html": {
+    "kind": "method",
+    "name": "FindRequiredColumn (obsolete)"
+  },
+  "dwmeth_FindRequiredColumnName.html": {
+    "kind": "method",
+    "name": "FindRequiredColumnName (obsolete)"
+  },
+  "dwmeth_FindRequiredRow.html": {
+    "kind": "method",
+    "name": "FindRequiredRow (obsolete)"
+  },
+  "dwmeth_Generate.html": {
+    "kind": "method",
+    "name": "Generate (obsolete)"
+  },
+  "dwmeth_GenerateHTMLForm.html": {
+    "kind": "method",
+    "name": "GenerateHTMLForm (obsolete)"
+  },
+  "dwmeth_GenerateResultSet.html": {
+    "kind": "method",
+    "name": "GenerateResultSet"
+  },
+  "dwmeth_GenerateXHTML.html": {
+    "kind": "method",
+    "name": "GenerateXHTML (obsolete)"
+  },
+  "dwmeth_GenerateXMLWeb.html": {
+    "kind": "method",
+    "name": "GenerateXMLWeb (obsolete)"
+  },
+  "dwmeth_GetBandAtPointer.html": {
+    "kind": "method",
+    "name": "GetBandAtPointer"
+  },
+  "dwmeth_GetBorderStyle.html": {
+    "kind": "method",
+    "name": "GetBorderStyle"
+  },
+  "dwmeth_GetChanges.html": {
+    "kind": "method",
+    "name": "GetChanges"
+  },
+  "ch09s48.html": {
+    "kind": "method",
+    "name": "GetChangesBlob (obsolete)"
+  },
+  "dwmeth_GetChild.html": {
+    "kind": "method",
+    "name": "GetChild"
+  },
+  "dwmeth_GetChildObject.html": {
+    "kind": "method",
+    "name": "GetChildObject (obsolete)"
+  },
+  "dwmeth_GetClickedColumn.html": {
+    "kind": "method",
+    "name": "GetClickedColumn"
+  },
+  "dwmeth_GetClickedRow.html": {
+    "kind": "method",
+    "name": "GetClickedRow"
+  },
+  "dwmeth_GetColumn.html": {
+    "kind": "method",
+    "name": "GetColumn"
+  },
+  "dwmeth_GetColumnName.html": {
+    "kind": "method",
+    "name": "GetColumnName"
+  },
+  "dwmeth_GetContextService.html": {
+    "kind": "method",
+    "name": "GetContextService"
+  },
+  "dwmeth_GetFormat.html": {
+    "kind": "method",
+    "name": "GetFormat"
+  },
+  "ch09s57.html": {
+    "kind": "method",
+    "name": "GetFullContext (obsolete)"
+  },
+  "dwmeth_GetFullState.html": {
+    "kind": "method",
+    "name": "GetFullState"
+  },
+  "dwmeth_GetFullStateBlob.html": {
+    "kind": "method",
+    "name": "GetFullStateBlob (obsolete)"
+  },
+  "ch09s60.html": {
+    "kind": "method",
+    "name": "GetItem (obsolete)"
+  },
+  "dwmeth_GetItemDate.html": {
+    "kind": "method",
+    "name": "GetItemDate"
+  },
+  "dwmeth_GetItemDateTime.html": {
+    "kind": "method",
+    "name": "GetItemDateTime"
+  },
+  "dwmeth_GetItemDecimal.html": {
+    "kind": "method",
+    "name": "GetItemDecimal"
+  },
+  "dwmeth_GetItemFormattedString.html": {
+    "kind": "method",
+    "name": "GetItemFormattedString"
+  },
+  "dwmeth_GetItemNumber.html": {
+    "kind": "method",
+    "name": "GetItemNumber"
+  },
+  "dwmeth_GetItemStatus.html": {
+    "kind": "method",
+    "name": "GetItemStatus"
+  },
+  "dwmeth_GetItemString.html": {
+    "kind": "method",
+    "name": "GetItemString"
+  },
+  "dwmeth_GetItemTime.html": {
+    "kind": "method",
+    "name": "GetItemTime"
+  },
+  "dwmeth_GetItemUnformattedString.html": {
+    "kind": "method",
+    "name": "GetItemUnformattedString"
+  },
+  "dwmeth_GetLastError.html": {
+    "kind": "method",
+    "name": "GetLastError (obsolete)"
+  },
+  "dwmeth_GetLastErrorString.html": {
+    "kind": "method",
+    "name": "GetLastErrorString (obsolete)"
+  },
+  "dwmeth_GetMessageText.html": {
+    "kind": "method",
+    "name": "GetMessageText (obsolete)"
+  },
+  "dwmeth_GetNextModified.html": {
+    "kind": "method",
+    "name": "GetNextModified"
+  },
+  "dwmeth_GetObjectAtPointer.html": {
+    "kind": "method",
+    "name": "GetObjectAtPointer"
+  },
+  "dwmeth_GetParent.html": {
+    "kind": "method",
+    "name": "GetParent"
+  },
+  "dwmeth_GetRichTextAlign.html": {
+    "kind": "method",
+    "name": "GetRichTextAlign"
+  },
+  "dwmeth_GetRichTextColor.html": {
+    "kind": "method",
+    "name": "GetRichTextColor"
+  },
+  "dwmeth_GetRichTextFaceName.html": {
+    "kind": "method",
+    "name": "GetRichTextFaceName"
+  },
+  "dwmeth_GetRichTextSize.html": {
+    "kind": "method",
+    "name": "GetRichTextSize"
+  },
+  "dwmeth_GetRichTextStyle.html": {
+    "kind": "method",
+    "name": "GetRichTextStyle"
+  },
+  "dwmeth_GetRow.html": {
+    "kind": "method",
+    "name": "GetRow"
+  },
+  "dwmeth_GetRowFromRowId.html": {
+    "kind": "method",
+    "name": "GetRowFromRowId"
+  },
+  "dwmeth_GetRowIdFromRow.html": {
+    "kind": "method",
+    "name": "GetRowIdFromRow"
+  },
+  "dwmeth_GetSelectedRow.html": {
+    "kind": "method",
+    "name": "GetSelectedRow"
+  },
+  "dwmeth_GetSQLPreview.html": {
+    "kind": "method",
+    "name": "GetSQLPreview (obsolete)"
+  },
+  "dwmeth_GetSQLSelect.html": {
+    "kind": "method",
+    "name": "GetSQLSelect"
+  },
+  "dwmeth_GetStateStatus.html": {
+    "kind": "method",
+    "name": "GetStateStatus (obsolete)"
+  },
+  "dwmeth_GetText.html": {
+    "kind": "method",
+    "name": "GetText"
+  },
+  "dwmeth_GetTrans.html": {
+    "kind": "method",
+    "name": "GetTrans"
+  },
+  "dwmeth_GetUpdateStatus.html": {
+    "kind": "method",
+    "name": "GetUpdateStatus (obsolete)"
+  },
+  "dwmeth_GetValidate.html": {
+    "kind": "method",
+    "name": "GetValidate"
+  },
+  "dwmeth_GetValue.html": {
+    "kind": "method",
+    "name": "GetValue"
+  },
+  "dwmeth_GroupCalc.html": {
+    "kind": "method",
+    "name": "GroupCalc"
+  },
+  "dwmeth_Hide.html": {
+    "kind": "method",
+    "name": "Hide"
+  },
+  "dwmeth_ImportClipboard.html": {
+    "kind": "method",
+    "name": "ImportClipboard"
+  },
+  "dwmeth_ImportFile.html": {
+    "kind": "method",
+    "name": "ImportFile"
+  },
+  "dwmeth_ImportJson.html": {
+    "kind": "method",
+    "name": "ImportJson"
+  },
+  "dwmeth_ImportJsonByKey.html": {
+    "kind": "method",
+    "name": "ImportJsonByKey"
+  },
+  "dwmeth_ImportRowFromJson.html": {
+    "kind": "method",
+    "name": "ImportRowFromJson"
+  },
+  "dwmeth_ImportString.html": {
+    "kind": "method",
+    "name": "ImportString"
+  },
+  "dwmeth_InsertDocument.html": {
+    "kind": "method",
+    "name": "InsertDocument"
+  },
+  "dwmeth_InsertRow.html": {
+    "kind": "method",
+    "name": "InsertRow"
+  },
+  "dwmeth_IsExpanded.html": {
+    "kind": "method",
+    "name": "IsExpanded"
+  },
+  "ch09s104.html": {
+    "kind": "method",
+    "name": "IsRowSelected (obsolete)"
+  },
+  "dwmeth_IsSelected.html": {
+    "kind": "method",
+    "name": "IsSelected"
+  },
+  "dwmeth_LineCount.html": {
+    "kind": "method",
+    "name": "LineCount"
+  },
+  "dwmeth_ModifiedCount.html": {
+    "kind": "method",
+    "name": "ModifiedCount"
+  },
+  "dwmeth_Modify.html": {
+    "kind": "method",
+    "name": "Modify"
+  },
+  "dwmeth_Move.html": {
+    "kind": "method",
+    "name": "Move"
+  },
+  "dwmeth_OLEActivate.html": {
+    "kind": "method",
+    "name": "OLEActivate"
+  },
+  "dwmeth_OneTrip.html": {
+    "kind": "method",
+    "name": "OneTrip (obsolete)"
+  },
+  "dwmeth_Paste.html": {
+    "kind": "method",
+    "name": "Paste"
+  },
+  "dwmeth_PasteRTF.html": {
+    "kind": "method",
+    "name": "PasteRTF"
+  },
+  "dwmeth_PointerX.html": {
+    "kind": "method",
+    "name": "PointerX"
+  },
+  "dwmeth_PointerY.html": {
+    "kind": "method",
+    "name": "PointerY"
+  },
+  "dwmeth_Position.html": {
+    "kind": "method",
+    "name": "Position"
+  },
+  "dwmeth_PostEvent.html": {
+    "kind": "method",
+    "name": "PostEvent"
+  },
+  "dwmeth_Print.html": {
+    "kind": "method",
+    "name": "Print"
+  },
+  "dwmeth_PrintCancel.html": {
+    "kind": "method",
+    "name": "PrintCancel"
+  },
+  "dwmeth_ReplaceText.html": {
+    "kind": "method",
+    "name": "ReplaceText"
+  },
+  "dwmeth_ReselectRow.html": {
+    "kind": "method",
+    "name": "ReselectRow"
+  },
+  "dwmeth_Reset.html": {
+    "kind": "method",
+    "name": "Reset"
+  },
+  "dwmeth_ResetInk.html": {
+    "kind": "method",
+    "name": "ResetInk"
+  },
+  "dwmeth_ResetTransObject.html": {
+    "kind": "method",
+    "name": "ResetTransObject"
+  },
+  "dwmeth_ResetUpdate.html": {
+    "kind": "method",
+    "name": "ResetUpdate"
+  },
+  "dwmeth_Resize.html": {
+    "kind": "method",
+    "name": "Resize"
+  },
+  "dwmeth_Retrieve.html": {
+    "kind": "method",
+    "name": "Retrieve"
+  },
+  "dwmeth_RowCount.html": {
+    "kind": "method",
+    "name": "RowCount"
+  },
+  "dwmeth_RowsCopy.html": {
+    "kind": "method",
+    "name": "RowsCopy"
+  },
+  "dwmeth_RowsDiscard.html": {
+    "kind": "method",
+    "name": "RowsDiscard"
+  },
+  "dwmeth_RowsMove.html": {
+    "kind": "method",
+    "name": "RowsMove"
+  },
+  "dwmeth_SaveAs.html": {
+    "kind": "method",
+    "name": "SaveAs"
+  },
+  "dwmeth_SaveAsAscii.html": {
+    "kind": "method",
+    "name": "SaveAsAscii"
+  },
+  "dwmeth_SaveAsFormattedText.html": {
+    "kind": "method",
+    "name": "SaveAsFormattedText"
+  },
+  "dwmeth_SaveDisplayedDataAs.html": {
+    "kind": "method",
+    "name": "SaveDisplayedDataAs"
+  },
+  "dwmeth_SaveInk.html": {
+    "kind": "method",
+    "name": "SaveInk"
+  },
+  "dwmeth_SaveInkPic.html": {
+    "kind": "method",
+    "name": "SaveInkPic"
+  },
+  "dwmeth_SaveNativePDFToBlob.html": {
+    "kind": "method",
+    "name": "SaveNativePDFToBlob"
+  },
+  "dwmeth_Scroll.html": {
+    "kind": "method",
+    "name": "Scroll"
+  },
+  "dwmeth_ScrollFirstPage.html": {
+    "kind": "method",
+    "name": "ScrollFirstPage (obsolete)"
+  },
+  "dwmeth_ScrollLastPage.html": {
+    "kind": "method",
+    "name": "ScrollLastPage (obsolete)"
+  },
+  "dwmeth_ScrollNextPage.html": {
+    "kind": "method",
+    "name": "ScrollNextPage"
+  },
+  "dwmeth_ScrollNextRow.html": {
+    "kind": "method",
+    "name": "ScrollNextRow"
+  },
+  "dwmeth_ScrollPriorPage.html": {
+    "kind": "method",
+    "name": "ScrollPriorPage"
+  },
+  "dwmeth_ScrollPriorRow.html": {
+    "kind": "method",
+    "name": "ScrollPriorRow"
+  },
+  "dwmeth_ScrollToRow.html": {
+    "kind": "method",
+    "name": "ScrollToRow"
+  },
+  "dwmeth_SelectedLength.html": {
+    "kind": "method",
+    "name": "SelectedLength"
+  },
+  "dwmeth_SelectedLine.html": {
+    "kind": "method",
+    "name": "SelectedLine"
+  },
+  "dwmeth_SelectedStart.html": {
+    "kind": "method",
+    "name": "SelectedStart"
+  },
+  "dwmeth_SelectedText.html": {
+    "kind": "method",
+    "name": "SelectedText"
+  },
+  "dwmeth_SelectRow.html": {
+    "kind": "method",
+    "name": "SelectRow"
+  },
+  "dwmeth_SelectText.html": {
+    "kind": "method",
+    "name": "SelectText"
+  },
+  "dwmeth_SelectTextAll.html": {
+    "kind": "method",
+    "name": "SelectTextAll"
+  },
+  "dwmeth_SelectTextLine.html": {
+    "kind": "method",
+    "name": "SelectTextLine"
+  },
+  "dwmeth_SelectTextWord.html": {
+    "kind": "method",
+    "name": "SelectTextWord"
+  },
+  "ch09s156.html": {
+    "kind": "method",
+    "name": "SelectTreeNode"
+  },
+  "dwmeth_SetAction.html": {
+    "kind": "method",
+    "name": "SetAction (obsolete)"
+  },
+  "dwmeth_SetActionCode.html": {
+    "kind": "method",
+    "name": "SetActionCode (obsolete)"
+  },
+  "dwmeth_SetBorderStyle.html": {
+    "kind": "method",
+    "name": "SetBorderStyle"
+  },
+  "dwmeth_SetBrowser.html": {
+    "kind": "method",
+    "name": "SetBrowser (obsolete)"
+  },
+  "dwmeth_SetChanges.html": {
+    "kind": "method",
+    "name": "SetChanges"
+  },
+  "dwmeth_SetColumn.html": {
+    "kind": "method",
+    "name": "SetColumn"
+  },
+  "dwmeth_SetColumnLink.html": {
+    "kind": "method",
+    "name": "SetColumnLink (obsolete)"
+  },
+  "ch09s164.html": {
+    "kind": "method",
+    "name": "SetCultureFormat"
+  },
+  "dwmeth_SetDetailHeight.html": {
+    "kind": "method",
+    "name": "SetDetailHeight"
+  },
+  "dwmeth_SetDWObject.html": {
+    "kind": "method",
+    "name": "SetDWObject (obsolete)"
+  },
+  "dwmeth_SetFilter.html": {
+    "kind": "method",
+    "name": "SetFilter"
+  },
+  "dwmeth_SetFormat.html": {
+    "kind": "method",
+    "name": "SetFormat"
+  },
+  "dwmeth_SetFullState.html": {
+    "kind": "method",
+    "name": "SetFullState"
+  },
+  "dwmeth_SetHTMLAction.html": {
+    "kind": "method",
+    "name": "SetHTMLAction (obsolete)"
+  },
+  "dwmeth_SetHTMLObjectName.html": {
+    "kind": "method",
+    "name": "SetHTMLObjectName (obsolete)"
+  },
+  "dwmeth_SetItem.html": {
+    "kind": "method",
+    "name": "SetItem"
+  },
+  "dwmeth_SetItemDate.html": {
+    "kind": "method",
+    "name": "SetItemDate (obsolete)"
+  },
+  "dwmeth_SetItemDateTime.html": {
+    "kind": "method",
+    "name": "SetItemDateTime (obsolete)"
+  },
+  "ch09s175.html": {
+    "kind": "method",
+    "name": "SetItemNumber (obsolete)"
+  },
+  "dwmeth_SetItemStatus.html": {
+    "kind": "method",
+    "name": "SetItemStatus"
+  },
+  "ch09s177.html": {
+    "kind": "method",
+    "name": "SetItemString (obsolete)"
+  },
+  "dwmeth_SetItemTime.html": {
+    "kind": "method",
+    "name": "SetItemTime (obsolete)"
+  },
+  "dwmeth_SetPageSize.html": {
+    "kind": "method",
+    "name": "SetPageSize (obsolete)"
+  },
+  "dwmeth_SetPosition.html": {
+    "kind": "method",
+    "name": "SetPosition"
+  },
+  "dwmeth_SetRedraw.html": {
+    "kind": "method",
+    "name": "SetRedraw"
+  },
+  "dwmeth_SetRichTextAlign.html": {
+    "kind": "method",
+    "name": "SetRichTextAlign"
+  },
+  "dwmeth_SetRichTextColor.html": {
+    "kind": "method",
+    "name": "SetRichTextColor"
+  },
+  "dwmeth_SetRichTextFaceName.html": {
+    "kind": "method",
+    "name": "SetRichTextFaceName"
+  },
+  "dwmeth_SetRichTextSize.html": {
+    "kind": "method",
+    "name": "SetRichTextSize"
+  },
+  "dwmeth_SetRichTextStyle.html": {
+    "kind": "method",
+    "name": "SetRichTextStyle"
+  },
+  "dwmeth_SetRow.html": {
+    "kind": "method",
+    "name": "SetRow"
+  },
+  "dwmeth_SetRowFocusIndicator.html": {
+    "kind": "method",
+    "name": "SetRowFocusIndicator"
+  },
+  "dwmeth_SetSelfLink.html": {
+    "kind": "method",
+    "name": "SetSelfLink (obsolete)"
+  },
+  "ch09s190.html": {
+    "kind": "method",
+    "name": "SetServerServiceClasses (obsolete)"
+  },
+  "dwmeth_SetServerSideState.html": {
+    "kind": "method",
+    "name": "SetServerSideState (obsolete)"
+  },
+  "dwmeth_SetSort.html": {
+    "kind": "method",
+    "name": "SetSort"
+  },
+  "dwmeth_SetSQLPreview.html": {
+    "kind": "method",
+    "name": "SetSQLPreview"
+  },
+  "dwmeth_SetSQLSelect.html": {
+    "kind": "method",
+    "name": "SetSQLSelect"
+  },
+  "dwmeth_SetTabOrder.html": {
+    "kind": "method",
+    "name": "SetTabOrder"
+  },
+  "dwmeth_SetText.html": {
+    "kind": "method",
+    "name": "SetText"
+  },
+  "dwmeth_SetTrans.html": {
+    "kind": "method",
+    "name": "SetTrans"
+  },
+  "dwmeth_SetTransObject.html": {
+    "kind": "method",
+    "name": "SetTransObject"
+  },
+  "dwmeth_SetValidate.html": {
+    "kind": "method",
+    "name": "SetValidate"
+  },
+  "dwmeth_SetValue.html": {
+    "kind": "method",
+    "name": "SetValue"
+  },
+  "dwmeth_SetWeight.html": {
+    "kind": "method",
+    "name": "SetWeight (obsolete)"
+  },
+  "dwmeth_ShareData.html": {
+    "kind": "method",
+    "name": "ShareData"
+  },
+  "dwmeth_ShareDataOff.html": {
+    "kind": "method",
+    "name": "ShareDataOff"
+  },
+  "dwmeth_Show.html": {
+    "kind": "method",
+    "name": "Show"
+  },
+  "dwmeth_ShowHeadFoot.html": {
+    "kind": "method",
+    "name": "ShowHeadFoot"
+  },
+  "dwmeth_Sort.html": {
+    "kind": "method",
+    "name": "Sort"
+  },
+  "dwmeth_TextLine.html": {
+    "kind": "method",
+    "name": "TextLine"
+  },
+  "dwmeth_TriggerEvent.html": {
+    "kind": "method",
+    "name": "TriggerEvent"
+  },
+  "dwmeth_TypeOf.html": {
+    "kind": "method",
+    "name": "TypeOf"
+  },
+  "dwmeth_Undo.html": {
+    "kind": "method",
+    "name": "Undo"
+  },
+  "dwmeth_Update.html": {
+    "kind": "method",
+    "name": "Update"
+  },
+  "dwmeth_CategoryCount.html": {
+    "kind": "graph-method",
+    "name": "CategoryCount"
+  },
+  "dwmeth_CategoryName.html": {
+    "kind": "graph-method",
+    "name": "CategoryName"
+  },
+  "dwmeth_Clipboard.html": {
+    "kind": "graph-method",
+    "name": "Clipboard"
+  },
+  "dwmeth_DataCount.html": {
+    "kind": "graph-method",
+    "name": "DataCount"
+  },
+  "dwmeth_FindCategory.html": {
+    "kind": "graph-method",
+    "name": "FindCategory"
+  },
+  "dwmeth_FindSeries.html": {
+    "kind": "graph-method",
+    "name": "FindSeries"
+  },
+  "dwmeth_GetData.html": {
+    "kind": "graph-method",
+    "name": "GetData"
+  },
+  "ch10s08.html": {
+    "kind": "graph-method",
+    "name": "GetDataDateVariable"
+  },
+  "dwmeth_GetDataLabelling.html": {
+    "kind": "graph-method",
+    "name": "GetDataLabelling"
+  },
+  "ch10s10.html": {
+    "kind": "graph-method",
+    "name": "GetDataNumberVariable"
+  },
+  "dwmeth_GetDataPieExplode.html": {
+    "kind": "graph-method",
+    "name": "GetDataPieExplode"
+  },
+  "dwmeth_GetDataPieExplodePercentage.html": {
+    "kind": "graph-method",
+    "name": "GetDataPieExplodePercentage"
+  },
+  "ch10s13.html": {
+    "kind": "graph-method",
+    "name": "GetDataStringVariable"
+  },
+  "dwmeth_GetDataStyle.html": {
+    "kind": "graph-method",
+    "name": "GetDataStyle"
+  },
+  "ch10s15.html": {
+    "kind": "graph-method",
+    "name": "GetDataStyleColorValue"
+  },
+  "dwmeth_GetDataStyleFillPattern.html": {
+    "kind": "graph-method",
+    "name": "GetDataStyleFillPattern"
+  },
+  "dwmeth_GetDataStyleLineStyle.html": {
+    "kind": "graph-method",
+    "name": "GetDataStyleLineStyle"
+  },
+  "dwmeth_GetDataStyleLineWidth.html": {
+    "kind": "graph-method",
+    "name": "GetDataStyleLineWidth"
+  },
+  "dwmeth_GetDataStyleSymbolValue.html": {
+    "kind": "graph-method",
+    "name": "GetDataStyleSymbolValue"
+  },
+  "dwmeth_GetDataTransparency.html": {
+    "kind": "graph-method",
+    "name": "GetDataTransparency"
+  },
+  "dwmeth_GetDataValue.html": {
+    "kind": "graph-method",
+    "name": "GetDataValue"
+  },
+  "dwmeth_GetSeriesLabelling.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesLabelling"
+  },
+  "dwmeth_GetSeriesStyle.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyle"
+  },
+  "dwmeth_GetSeriesStyleColorValue.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyleColorValue"
+  },
+  "dwmeth_GetSeriesStyleFillPattern.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyleFillPattern"
+  },
+  "dwmeth_GetSeriesStyleLineStyle.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyleLineStyle"
+  },
+  "dwmeth_GetSeriesStyleLineWidth.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyleLineWidth"
+  },
+  "dwmeth_GetSeriesStyleOverlayValue.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyleOverlayValue"
+  },
+  "dwmeth_GetSeriesStyleSymbolValue.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesStyleSymbolValue"
+  },
+  "dwmeth_GetSeriesTransparency.html": {
+    "kind": "graph-method",
+    "name": "GetSeriesTransparency"
+  },
+  "dwmeth_ObjectAtPointer.html": {
+    "kind": "graph-method",
+    "name": "ObjectAtPointer"
+  },
+  "dwmeth_ObjectAtPointerDataPoint.html": {
+    "kind": "graph-method",
+    "name": "ObjectAtPointerDataPoint"
+  },
+  "dwmeth_ObjectAtPointerSeries.html": {
+    "kind": "graph-method",
+    "name": "ObjectAtPointerSeries"
+  },
+  "dwgrmeth_Reset.html": {
+    "kind": "graph-method",
+    "name": "Reset"
+  },
+  "dwmeth_ResetDataColors.html": {
+    "kind": "graph-method",
+    "name": "ResetDataColors"
+  },
+  "dwgrmeth_SaveAs.html": {
+    "kind": "graph-method",
+    "name": "SaveAs"
+  },
+  "dwmeth_SeriesCount.html": {
+    "kind": "graph-method",
+    "name": "SeriesCount"
+  },
+  "dwmeth_SeriesName.html": {
+    "kind": "graph-method",
+    "name": "SeriesName"
+  },
+  "dwmeth_SetDataLabelling.html": {
+    "kind": "graph-method",
+    "name": "SetDataLabelling"
+  },
+  "dwmeth_SetDataPieExplode.html": {
+    "kind": "graph-method",
+    "name": "SetDataPieExplode"
+  },
+  "dwmeth_SetDataStyle.html": {
+    "kind": "graph-method",
+    "name": "SetDataStyle"
+  },
+  "dwmeth_SetDataTransparency.html": {
+    "kind": "graph-method",
+    "name": "SetDataTransparency"
+  },
+  "dwmeth_SetSeriesLabelling.html": {
+    "kind": "graph-method",
+    "name": "SetSeriesLabelling"
+  },
+  "dwmeth_SetSeriesStyle.html": {
+    "kind": "graph-method",
+    "name": "SetSeriesStyle"
+  },
+  "dwmeth_SetSeriesTransparency.html": {
+    "kind": "graph-method",
+    "name": "SetSeriesTransparency"
+  },
+  "dwevt_BackTabOut.html": {
+    "kind": "event",
+    "name": "BackTabOut"
+  },
+  "dwevt_ButtonClicked.html": {
+    "kind": "event",
+    "name": "ButtonClicked"
+  },
+  "dwevt_ButtonClicking.html": {
+    "kind": "event",
+    "name": "ButtonClicking"
+  },
+  "dwevt_Clicked.html": {
+    "kind": "event",
+    "name": "Clicked"
+  },
+  "dwevt_Collapsed.html": {
+    "kind": "event",
+    "name": "Collapsed"
+  },
+  "dwevt_Collapsing.html": {
+    "kind": "event",
+    "name": "Collapsing"
+  },
+  "dwevt_Constructor.html": {
+    "kind": "event",
+    "name": "Constructor"
+  },
+  "dwevt_DBError.html": {
+    "kind": "event",
+    "name": "DBError"
+  },
+  "dwevt_Destructor.html": {
+    "kind": "event",
+    "name": "Destructor"
+  },
+  "dwevt_DoubleClicked.html": {
+    "kind": "event",
+    "name": "DoubleClicked"
+  },
+  "dwevt_DragDrop.html": {
+    "kind": "event",
+    "name": "DragDrop"
+  },
+  "dwevt_DragEnter.html": {
+    "kind": "event",
+    "name": "DragEnter"
+  },
+  "dwevt_DragLeave.html": {
+    "kind": "event",
+    "name": "DragLeave"
+  },
+  "dwevt_DragWithin.html": {
+    "kind": "event",
+    "name": "DragWithin"
+  },
+  "dwevt_DropDown.html": {
+    "kind": "event",
+    "name": "DropDown"
+  },
+  "dwevt_EditChanged.html": {
+    "kind": "event",
+    "name": "EditChanged"
+  },
+  "dwevt_Error.html": {
+    "kind": "event",
+    "name": "Error"
+  },
+  "dwevt_Expanded.html": {
+    "kind": "event",
+    "name": "Expanded"
+  },
+  "dwevt_Expanding.html": {
+    "kind": "event",
+    "name": "Expanding"
+  },
+  "dwevt_GetFocus.html": {
+    "kind": "event",
+    "name": "GetFocus"
+  },
+  "dwevt_GraphCreate.html": {
+    "kind": "event",
+    "name": "GraphCreate"
+  },
+  "dwevt_HTMLContextApplied.html": {
+    "kind": "event",
+    "name": "HTMLContextApplied"
+  },
+  "dwevt_ItemChanged.html": {
+    "kind": "event",
+    "name": "ItemChanged"
+  },
+  "dwevt_ItemError.html": {
+    "kind": "event",
+    "name": "ItemError"
+  },
+  "dwevt_ItemFocusChanged.html": {
+    "kind": "event",
+    "name": "ItemFocusChanged"
+  },
+  "dwevt_KeyDown.html": {
+    "kind": "event",
+    "name": "KeyDown"
+  },
+  "dwevt_LoseFocus.html": {
+    "kind": "event",
+    "name": "LoseFocus"
+  },
+  "dwevt_MessageText.html": {
+    "kind": "event",
+    "name": "MessageText"
+  },
+  "dwevt_MouseMove.html": {
+    "kind": "event",
+    "name": "MouseMove"
+  },
+  "dwevt_MouseUp.html": {
+    "kind": "event",
+    "name": "MouseUp"
+  },
+  "ch08s35.html": {
+    "kind": "event",
+    "name": "OnSubmit"
+  },
+  "dwevt_Printend.html": {
+    "kind": "event",
+    "name": "Printend"
+  },
+  "dwevt_PrintMarginChange.html": {
+    "kind": "event",
+    "name": "PrintMarginChange"
+  },
+  "dwevt_PrintPage.html": {
+    "kind": "event",
+    "name": "PrintPage"
+  },
+  "dwevt_PrintStart.html": {
+    "kind": "event",
+    "name": "PrintStart"
+  },
+  "dwevt_ProcessEnter.html": {
+    "kind": "event",
+    "name": "ProcessEnter"
+  },
+  "dwevt_RButtonDown.html": {
+    "kind": "event",
+    "name": "RButtonDown"
+  },
+  "dwevt_Resize.html": {
+    "kind": "event",
+    "name": "Resize"
+  },
+  "dwevt_RetrieveEnd.html": {
+    "kind": "event",
+    "name": "RetrieveEnd"
+  },
+  "dwevt_RetrieveRow.html": {
+    "kind": "event",
+    "name": "RetrieveRow"
+  },
+  "dwevt_RetrieveStart.html": {
+    "kind": "event",
+    "name": "RetrieveStart"
+  },
+  "dwevt_RichTextCurrentStyleChanged.html": {
+    "kind": "event",
+    "name": "RichTextCurrentStyleChanged"
+  },
+  "dwevt_RichTextLoseFocus.html": {
+    "kind": "event",
+    "name": "RichTextLoseFocus"
+  },
+  "dwevt_RichTextLimitError.html": {
+    "kind": "event",
+    "name": "RichTextLimitError"
+  },
+  "dwevt_RowFocusChanged.html": {
+    "kind": "event",
+    "name": "RowFocusChanged"
+  },
+  "dwevt_RowFocusChanging.html": {
+    "kind": "event",
+    "name": "RowFocusChanging"
+  },
+  "dwevt_ScrollHorizontal.html": {
+    "kind": "event",
+    "name": "ScrollHorizontal"
+  },
+  "dwevt_ScrollVertical.html": {
+    "kind": "event",
+    "name": "ScrollVertical"
+  },
+  "dwevt_SQLPreview.html": {
+    "kind": "event",
+    "name": "SQLPreview"
+  },
+  "dwevt_TabDownOut.html": {
+    "kind": "event",
+    "name": "TabDownOut"
+  },
+  "dwevt_TabOut.html": {
+    "kind": "event",
+    "name": "TabOut"
+  },
+  "dwevt_TabUpOut.html": {
+    "kind": "event",
+    "name": "TabUpOut"
+  },
+  "dwevt_TreeNodeSelected.html": {
+    "kind": "event",
+    "name": "TreeNodeSelected"
+  },
+  "dwevt_TreeNodeSelecting.html": {
+    "kind": "event",
+    "name": "TreeNodeSelecting"
+  },
+  "dwevt_UpdateEnd.html": {
+    "kind": "event",
+    "name": "UpdateEnd"
+  },
+  "dwevt_UpdateStart.html": {
+    "kind": "event",
+    "name": "UpdateStart"
+  },
+  "dwevt_WSError.html": {
+    "kind": "event",
+    "name": "WSError (Obsolete)"
+  }
+}

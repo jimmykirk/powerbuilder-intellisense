@@ -143,7 +143,9 @@ const W2_DOC = [
   /*7*/ 'powerobject lpo_c',
   /*8*/ 'dw_shared.GetChild("emp_id", lpo_c)',
   /*9*/ 'lpo_c.',
-  /*10*/ 'end event'
+  /*10*/ 'string ls_v',
+  /*11*/ 'ls_v = dw_shared.GetItemString(',
+  /*12*/ 'end event'
 ].join('\n');
 const W2_URI = 'file:///virtual/w_second.srw';
 
@@ -433,6 +435,30 @@ async function main() {
   check('structure members exclude catalog noise', !structLabels.has('triggerevent'), [...structLabels].slice(0, 8).join(','));
   const structChain = labels(await request('textDocument/completion', scopeAt(12, 'lstr_cfg.cfg_dw.'.length)));
   check('chain through structure member type', structChain.has('object') && structChain.has('dataobject'), [...structChain].slice(0, 8).join(','));
+
+  // --- DataWindow Reference API (separate docs book) ---
+  const dwMembers = await request('textDocument/completion', at(15, 'idw_main.'.length));
+  const dwItems = dwMembers.items ?? dwMembers;
+  const dwLabels = new Set(dwItems.map((i) => i.label.toLowerCase()));
+  check('DataWindow offers Retrieve/Update/InsertRow', dwLabels.has('retrieve') && dwLabels.has('update') && dwLabels.has('insertrow'), [...dwLabels].slice(0, 10).join(','));
+  check('DataWindow offers GetItemString/RowCount', dwLabels.has('getitemstring') && dwLabels.has('rowcount'), '');
+  check('DataWindow offers DW events (ItemChanged)', dwLabels.has('itemchanged') && dwLabels.has('retrieveend'), '');
+  const retrieveItem = dwItems.find((i) => i.label === 'Retrieve');
+  check('DataWindow methods rank above generic catalog', retrieveItem?.sortText < (dwItems.find((i) => i.label === 'TriggerEvent')?.sortText ?? 'zz'), `${retrieveItem?.sortText}`);
+  check('Retrieve carries its real signature', (retrieveItem?.detail ?? '').startsWith('long Retrieve('), retrieveItem?.detail);
+  const retrieveDoc = await request('completionItem/resolve', retrieveItem);
+  check('Retrieve resolves DataWindow Reference docs', /Retrieves rows from the database/i.test(retrieveDoc?.documentation?.value ?? ''), (retrieveDoc?.documentation?.value ?? '').slice(0, 80));
+
+  const dwSig = await request('textDocument/signatureHelp', {
+    textDocument: { uri: W2_URI }, position: { line: 11, character: 'ls_v = dw_shared.GetItemString('.length }
+  });
+  check('signature help for DataWindow method', !!dwSig && /GetItemString/.test(dwSig.signatures[0].label), JSON.stringify(dwSig?.signatures?.[0]?.label));
+  check('DW signature wins over same-named JSONParser one', /\brow\b/i.test(dwSig?.signatures?.[0]?.label ?? ''), dwSig?.signatures?.[0]?.label);
+  const dwHover = await request('textDocument/hover', {
+    textDocument: { uri: W2_URI }, position: { line: 11, character: 'ls_v = dw_shared.GetItem'.length }
+  });
+  check('hover on DataWindow method', !!dwHover && /GetItemString/.test(dwHover.contents.value), JSON.stringify(dwHover)?.slice(0, 100));
+  check('DW hover wins over same-named JSONParser one', !/JSONParser/i.test(dwHover?.contents?.value ?? ''), (dwHover?.contents?.value ?? '').slice(0, 90));
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   fs.rmSync(fixtureDir, { recursive: true, force: true });

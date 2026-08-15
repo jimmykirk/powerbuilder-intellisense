@@ -63,3 +63,6 @@ coverage/
 # Docs scraper: raw HTML page cache and venv (regenerable, see tools/docs-scraper/README.md)
 tools/docs-scraper/cache/
 tools/docs-scraper/venv/
+
+tools/docs-scraper/cache-oc/
+tools/docs-scraper/cache-dw/

@@ -37,3 +37,21 @@ python3 -m venv venv
 `cache/` holds the raw HTML pages (~620 MB); delete it and re-run `crawl.py`
 to refresh against updated docs. `crawl.py` discovers pages from the
 `pb20XX_index.html` copies — delete those too for a full refresh.
+
+## DataWindow Reference
+
+`crawl_dw.py` + `parse_dw.py` cover a second book — the DataWindow Reference —
+which documents the DataWindow control/DataStore API (Retrieve, Update,
+InsertRow, GetItemString, ...) and DataWindow events. The PowerScript
+Reference only cross-links to it, so these entries are absent from
+`*_functions.json` and live in `server/data/pbXXXX_datawindow.json`
+(253/254 methods, 57 events).
+
+```
+./venv/bin/python crawl_dw.py   # populates cache-dw/ + *_dw_manifest.json
+./venv/bin/python parse_dw.py   # writes server/data/pbXXXX_datawindow.json
+```
+
+Note that several names appear in both books for different objects
+(`Retrieve` on RestClient vs DataWindow, `GetItemString` on JSONParser vs
+DataWindow); the language server disambiguates by the resolved receiver type.

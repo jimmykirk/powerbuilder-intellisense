@@ -51,17 +51,25 @@ import {
 import {
   builtinEvents2022,
   builtinFunctions2022,
+  dwEvents2022,
+  dwMethods2022,
   enumMap2022,
   findBuiltin2022,
   findBuiltinEvent2022,
+  findDWEvent2022,
+  findDWMethod2022,
   propertyMap2022
 } from './builtins-2022';
 import {
   builtinEvents2025,
   builtinFunctions2025,
+  dwEvents2025,
+  dwMethods2025,
   enumMap2025,
   findBuiltin2025,
   findBuiltinEvent2025,
+  findDWEvent2025,
+  findDWMethod2025,
   propertyMap2025
 } from './builtins-2025';
 import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
@@ -86,6 +94,10 @@ let activeEvents = builtinEvents2025;
 let findActiveEvent = findBuiltinEvent2025;
 let activeProperties = propertyMap2025;
 let activeEnums = enumMap2025;
+let activeDWMethods = dwMethods2025;
+let activeDWEvents = dwEvents2025;
+let findActiveDWMethod = findDWMethod2025;
+let findActiveDWEvent = findDWEvent2025;
 let otherFindBuiltin = findBuiltin2022;
 let otherFindEvent = findBuiltinEvent2022;
 let otherVersion: '2022' | '2025' = '2022';
@@ -243,6 +255,8 @@ function buildSemanticContext(text: string): SemanticContext {
     isKnown: (name) =>
       !!findActiveBuiltin(name) ||
       !!findActiveEvent(name) ||
+      !!findActiveDWMethod(name) ||
+      !!findActiveDWEvent(name) ||
       index.find(name).length > 0 ||
       index.findVariables(name).length > 0 ||
       localNames.has(name.toLowerCase()),
@@ -422,12 +436,16 @@ connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
   let value: string | undefined;
   switch (data.kind) {
     case 'fn': {
-      const fn = findActiveBuiltin(data.name);
+      const fn = data.dw
+        ? findActiveDWMethod(data.name)
+        : findActiveBuiltin(data.name) ?? findActiveDWMethod(data.name);
       value = fn ? formatHover(fn) : undefined;
       break;
     }
     case 'event': {
-      const ev = findActiveEvent(data.name);
+      const ev = data.dw
+        ? findActiveDWEvent(data.name)
+        : findActiveEvent(data.name) ?? findActiveDWEvent(data.name);
       value = ev ? formatEventHover(ev) : undefined;
       break;
     }
@@ -471,6 +489,18 @@ connection.onHover((params): Hover | null => {
     return null;
   }
 
+  // DataWindow methods/events win when accessed on a DataWindow receiver.
+  if (isDataWindowReceiver(doc, params.position)) {
+    const dwm = findActiveDWMethod(word);
+    if (dwm) {
+      return { contents: { kind: MarkupKind.Markdown, value: formatHover(dwm) } };
+    }
+    const dwe = findActiveDWEvent(word);
+    if (dwe) {
+      return { contents: { kind: MarkupKind.Markdown, value: formatEventHover(dwe) } };
+    }
+  }
+
   // Check built-in functions first
   const builtIn = findActiveBuiltin(word);
   if (builtIn) {
@@ -487,6 +517,16 @@ connection.onHover((params): Hover | null => {
   const builtinEvent = findActiveEvent(word);
   if (builtinEvent) {
     return { contents: { kind: MarkupKind.Markdown, value: formatEventHover(builtinEvent) } };
+  }
+
+  // DataWindow control/DataStore methods and events
+  const dwMethod = findActiveDWMethod(word);
+  if (dwMethod) {
+    return { contents: { kind: MarkupKind.Markdown, value: formatHover(dwMethod) } };
+  }
+  const dwEvent = findActiveDWEvent(word);
+  if (dwEvent) {
+    return { contents: { kind: MarkupKind.Markdown, value: formatEventHover(dwEvent) } };
   }
 
   // Check variables
@@ -615,6 +655,20 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
     return null;
   }
 
+  // DataWindow methods win when the call is on a DataWindow receiver.
+  if (isDataWindowReceiver(doc, params.position, call.name)) {
+    const dwm = findActiveDWMethod(call.name);
+    if (dwm) {
+      return buildSignatureHelp(
+        dwm.name,
+        formatSignature(dwm),
+        dwm.params,
+        call.activeParam,
+        dwm.documentation
+      );
+    }
+  }
+
   const builtIn = findActiveBuiltin(call.name);
   if (builtIn) {
     if ((builtIn.variants?.length ?? 0) >= 2) {
@@ -626,6 +680,18 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
   const custom = index.findCallable(call.name);
   if (custom) {
     return buildSignatureHelp(custom.name, custom.signature, custom.params, call.activeParam, describeCustom(custom));
+  }
+
+  // DataWindow control / DataStore methods
+  const dwMethod = findActiveDWMethod(call.name);
+  if (dwMethod) {
+    return buildSignatureHelp(
+      dwMethod.name,
+      formatSignature(dwMethod),
+      dwMethod.params,
+      call.activeParam,
+      dwMethod.documentation
+    );
   }
 
   // Built-in object events, for call sites like `obj.EVENT Clicked(...)`.
@@ -861,6 +927,9 @@ interface CompletionData {
   uri?: string;
   line?: number;
   owner?: string;
+  /** Set when the entry came from the DataWindow Reference catalog, whose
+   *  names (Retrieve, GetItemString, Update) collide with PowerScript ones. */
+  dw?: boolean;
 }
 
 function fnItem(fn: FunctionInfo, rank: string): CompletionItem {
@@ -1071,7 +1140,23 @@ function builtinMemberItems(typeName: string): CompletionItem[] {
     .filter((ev) => applies(ev))
     .map((ev) => eventItem(ev, MEMBER_RANK.catalog));
 
-  return [...fnItems, ...evItems];
+  // DataWindow controls, DataStores, and child DataWindows get their API from
+  // the separate DataWindow Reference catalog (Retrieve, Update, InsertRow...).
+  const dwFnItems: CompletionItem[] = activeDWMethods
+    .filter((m) => applies(m))
+    .map((m) => ({
+      ...fnItem(m, MEMBER_RANK.own),
+      kind: CompletionItemKind.Method,
+      data: { kind: 'fn', name: m.name, dw: true } as CompletionData
+    }));
+  const dwEvItems: CompletionItem[] = activeDWEvents
+    .filter((e) => applies(e))
+    .map((e) => ({
+      ...eventItem(e, MEMBER_RANK.property),
+      data: { kind: 'event', name: e.name, dw: true } as CompletionData
+    }));
+
+  return [...dwFnItems, ...fnItems, ...evItems, ...dwEvItems];
 }
 
 /** Splits `a.b(x).c` into [{name:'a'},{name:'b',call:true},{name:'c'}]. */
@@ -1252,6 +1337,49 @@ function memberCompletion(
   }
 
   return items;
+}
+
+/**
+ * True when the identifier at `position` is accessed on a DataWindow-ish
+ * receiver (`dw_1.Retrieve`). Several DataWindow method names also exist in
+ * the PowerScript catalog for other objects (Retrieve on RestClient,
+ * GetItemString on JSONParser), so the receiver decides which docs are right.
+ */
+function isDataWindowReceiver(
+  doc: TextDocument,
+  position: { line: number; character: number },
+  callName?: string
+): boolean {
+  const line = doc.getText({
+    start: { line: position.line, character: 0 },
+    end: { line: position.line + 1, character: 0 }
+  });
+  const prefix = line.slice(0, Math.min(position.character, line.length));
+
+  let chain: string | undefined;
+  if (callName) {
+    // Inside an argument list: find the receiver of the call being typed.
+    const callMatch = new RegExp(
+      `([A-Za-z_]\\w*(?:\\s*\\.\\s*[A-Za-z_]\\w*)*)\\s*\\.\\s*${callName}\\s*\\([^()]*$`,
+      'i'
+    ).exec(prefix);
+    chain = callMatch?.[1];
+  } else {
+    let start = prefix.length;
+    while (start > 0 && /[A-Za-z0-9_]/.test(prefix[start - 1])) {
+      start--;
+    }
+    const chainMatch =
+      /([A-Za-z_]\w*(?:\s*\([^()]*\))?(?:\s*\.\s*[A-Za-z_]\w*(?:\s*\([^()]*\))?)*)\s*\.\s*$/.exec(
+        prefix.slice(0, start)
+      );
+    chain = chainMatch?.[1];
+  }
+  if (!chain) {
+    return false;
+  }
+  const type = resolveChainType(doc, position, parseChainSegments(chain));
+  return !!type && DATAWINDOW_TYPES.has(type.toLowerCase());
 }
 
 /** SQL verbs that begin an embedded SQL statement in PowerScript. */
@@ -1526,6 +1654,10 @@ async function loadConfiguration(): Promise<void> {
       findActiveEvent = findBuiltinEvent2022;
       activeProperties = propertyMap2022;
       activeEnums = enumMap2022;
+      activeDWMethods = dwMethods2022;
+      activeDWEvents = dwEvents2022;
+      findActiveDWMethod = findDWMethod2022;
+      findActiveDWEvent = findDWEvent2022;
       otherFindBuiltin = findBuiltin2025;
       otherFindEvent = findBuiltinEvent2025;
       otherVersion = '2025';
@@ -1537,6 +1669,10 @@ async function loadConfiguration(): Promise<void> {
       findActiveEvent = findBuiltinEvent2025;
       activeProperties = propertyMap2025;
       activeEnums = enumMap2025;
+      activeDWMethods = dwMethods2025;
+      activeDWEvents = dwEvents2025;
+      findActiveDWMethod = findDWMethod2025;
+      findActiveDWEvent = findDWEvent2025;
       otherFindBuiltin = findBuiltin2022;
       otherFindEvent = findBuiltinEvent2022;
       otherVersion = '2022';

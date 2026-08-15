@@ -7,11 +7,15 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 
 - Full built-in catalogs scraped from the official Appeon docs: 914 (PB 2022) /
   1,118 (PB 2025) system functions, 139 / 150 object events (with `pbm_*` IDs),
-  2,235 / 2,446 object properties across 155 / 185 classes, and ~70 enumerated
-  datatypes with their `Value!` lists
-- Auto-completion for keywords, built-in functions and events, instance/shared
-  variables of the current object, workspace-wide globals, and custom
-  functions/events indexed across the workspace
+  2,235 / 2,446 object properties across 155 / 185 classes, ~70 enumerated
+  datatypes with their `Value!` lists, and the full DataWindow API from the
+  separate DataWindow Reference book — 253 / 254 methods (Retrieve, Update,
+  InsertRow, GetItemString, ...) and 57 DataWindow events
+- Auto-completion for keywords, built-in functions and events, script locals
+  and parameters, instance/shared variables, workspace-wide globals, structure
+  members, and custom functions/events indexed across the workspace — ranked so
+  your own identifiers come before the 1,100-entry catalog, with documentation
+  resolved lazily for the highlighted item only
 - Member completion after `.` — resolves the receiver's type from local
   declarations, indexed variables, or `this`/`super`, follows chains like
   `this.idw_main.` and `GetApplication().` through property types and function
@@ -24,7 +28,10 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
   object's type and inserts a ready `name; ... end event` skeleton
 - Embedded SQL host-variable completion: `:` inside a SQL statement offers
   every variable in scope
-- DataWindow-aware completions: `.srd` exports are indexed for column names,
+- DataWindow-aware completions: DataWindow controls, DataStores, and child
+  DataWindows offer their real API with signatures and docs (and win over
+  same-named PowerScript entries like RestClient's `Retrieve` when the
+  receiver is a DataWindow); `.srd` exports are indexed for column names,
   `dw.Object.` completes the bound DataWindow object's columns (bindings are
   resolved across files, from assignments or exported control properties), and
   DataWindow-typed receivers get `Object`/`DataObject` property items

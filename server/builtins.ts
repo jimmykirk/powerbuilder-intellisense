@@ -176,6 +176,48 @@ export function buildEventIndex(events: EventInfo[]): Map<string, EventInfo> {
   return index;
 }
 
+/**
+ * A DataWindow control/DataStore method or event, scraped from the separate
+ * DataWindow Reference book (Retrieve, Update, InsertRow, ... are documented
+ * there, not in the PowerScript Reference).
+ */
+export interface DataWindowEntry {
+  name: string;
+  returnType: string;
+  documentation: string;
+  syntax?: string;
+  params: ParamInfo[];
+  appliesTo: string[];
+  variadic?: boolean;
+}
+
+/** Loads a DataWindow catalog, exposing methods and events as FunctionInfo-alikes. */
+export function loadDataWindowCatalog(catalog: {
+  methods: DataWindowEntry[];
+  events: DataWindowEntry[];
+}): { methods: FunctionInfo[]; events: EventInfo[] } {
+  const methods: FunctionInfo[] = catalog.methods.map((m) => ({
+    name: m.name,
+    returnType: m.returnType,
+    category: 'DataWindow',
+    documentation: m.documentation,
+    params: m.params,
+    member: true,
+    appliesTo: m.appliesTo,
+    variadic: m.variadic
+  }));
+  const events: EventInfo[] = catalog.events.map((e) => ({
+    name: e.name,
+    returnType: e.returnType,
+    category: 'DataWindow',
+    documentation: e.documentation,
+    eventId: null,
+    params: e.params,
+    appliesTo: e.appliesTo
+  }));
+  return { methods, events };
+}
+
 /** A property of a built-in object class (scraped from Objects and Controls). */
 export interface PropertyInfo {
   name: string;

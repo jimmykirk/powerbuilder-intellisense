@@ -1,5 +1,17 @@
 # Change Log
 
+## 0.1.1
+
+- Added the DataWindow Reference catalogs (253/254 methods, 57 events):
+  `dw.Retrieve()`, `Update()`, `InsertRow()`, `GetItemString()` and the rest
+  of the DataWindow API now complete, hover, and show signature help. Where a
+  name exists in both books (RestClient `Retrieve`, JSONParser
+  `GetItemString`), the resolved receiver decides which documentation wins.
+- Completion now includes script locals and parameters, ranks results so your
+  own identifiers precede the built-in catalog, ships without markdown and
+  resolves documentation lazily (~693 KB no longer sent per keystroke), and
+  offers structure members for structure-typed receivers.
+
 ## 0.1.0
 
 - Replaced the hand-written catalogs with full data scraped from the official

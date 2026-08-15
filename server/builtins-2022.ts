@@ -15,6 +15,7 @@ import {
   buildFunctionIndex,
   formatHover,
   formatSignature,
+  loadDataWindowCatalog,
   loadEnumCatalog,
   loadEventCatalog,
   loadFunctionCatalog,
@@ -24,6 +25,7 @@ import catalog2022 from './data/pb2022_functions.json';
 import events2022 from './data/pb2022_events.json';
 import properties2022 from './data/pb2022_properties.json';
 import enums2022 from './data/pb2022_enums.json';
+import datawindow2022 from './data/pb2022_datawindow.json';
 
 // Re-export common formatting functions for use by both versions
 export { formatSignature, formatHover };
@@ -44,3 +46,18 @@ export function findBuiltinEvent2022(name: string): EventInfo | undefined {
 
 export const propertyMap2022: Map<string, PropertyInfo[]> = loadPropertyCatalog(properties2022);
 export const enumMap2022: Map<string, EnumInfo> = loadEnumCatalog(enums2022);
+
+const dw2022 = loadDataWindowCatalog(datawindow2022);
+export const dwMethods2022: FunctionInfo[] = dw2022.methods;
+export const dwEvents2022: EventInfo[] = dw2022.events;
+
+const dwMethodIndex2022 = buildFunctionIndex(dwMethods2022);
+const dwEventIndex2022 = buildEventIndex(dwEvents2022);
+
+export function findDWMethod2022(name: string): FunctionInfo | undefined {
+  return dwMethodIndex2022.get(name.toLowerCase());
+}
+
+export function findDWEvent2022(name: string): EventInfo | undefined {
+  return dwEventIndex2022.get(name.toLowerCase());
+}
