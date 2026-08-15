@@ -111,3 +111,60 @@ export function buildFunctionIndex(functions: FunctionInfo[]): Map<string, Funct
   }
   return index;
 }
+
+/**
+ * A built-in object event from the scraped catalogs (server/data/*_events.json).
+ * Events are not called like functions: `eventId` is the `pbm_*` message the
+ * event maps to (null where the docs list none, e.g. menu events), and params
+ * are the arguments PowerBuilder passes into the event script.
+ */
+export interface EventInfo {
+  name: string;
+  returnType: string;
+  category: string;
+  documentation: string;
+  eventId: string | null;
+  params: ParamInfo[];
+}
+
+export function loadEventCatalog(catalog: { events: EventInfo[] }): EventInfo[] {
+  return catalog.events;
+}
+
+/** Builds the case-insensitive lookup index for an event catalog. */
+export function buildEventIndex(events: EventInfo[]): Map<string, EventInfo> {
+  const index = new Map<string, EventInfo>();
+  for (const ev of events) {
+    index.set(ev.name.toLowerCase(), ev);
+  }
+  return index;
+}
+
+/** Builds a markdown hover body for a built-in event. */
+export function formatEventHover(ev: EventInfo): string {
+  const lines: string[] = [];
+  lines.push(`**${ev.name}** — *${ev.category} event*`);
+  lines.push('');
+  lines.push('```powerbuilder');
+  lines.push(`event ${ev.name}(${ev.params.map(formatParam).join(', ')})`);
+  lines.push('```');
+  lines.push('');
+  lines.push(ev.documentation);
+
+  if (ev.params.length > 0) {
+    lines.push('');
+    lines.push('**Arguments**');
+    for (const param of ev.params) {
+      const desc = param.description ? ` — ${param.description}` : '';
+      lines.push(`- \`${param.name}\` \`${param.type}\`${desc}`);
+    }
+  }
+
+  lines.push('');
+  lines.push(`*Returns* \`${ev.returnType}\``);
+  if (ev.eventId) {
+    lines.push('');
+    lines.push(`*Event ID* \`${ev.eventId}\``);
+  }
+  return lines.join('\n');
+}

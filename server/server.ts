@@ -26,9 +26,19 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import * as fs from 'fs';
-import { formatHover, formatSignature, ParamInfo } from './builtins';
-import { findBuiltin2022, builtinFunctions2022 } from './builtins-2022';
-import { findBuiltin2025, builtinFunctions2025 } from './builtins-2025';
+import { formatEventHover, formatHover, formatParam, formatSignature, ParamInfo } from './builtins';
+import {
+  builtinEvents2022,
+  builtinFunctions2022,
+  findBuiltin2022,
+  findBuiltinEvent2022
+} from './builtins-2022';
+import {
+  builtinEvents2025,
+  builtinFunctions2025,
+  findBuiltin2025,
+  findBuiltinEvent2025
+} from './builtins-2025';
 import { SymbolDefinition, WorkspaceIndex } from './indexer';
 import { computeDiagnostics } from './diagnostics';
 import { findActiveCall, getWordAtPosition } from './textutils';
@@ -42,6 +52,8 @@ let hasConfigurationCapability = false;
 let pbVersion: '2022' | '2025' = '2025'; // Default
 let activeFunctions = builtinFunctions2025;
 let findActiveBuiltin = findBuiltin2025;
+let activeEvents = builtinEvents2025;
+let findActiveEvent = findBuiltinEvent2025;
 
 const KEYWORDS = [
   'if', 'then', 'else', 'elseif', 'end if', 'for', 'to', 'step', 'next',
@@ -135,6 +147,13 @@ connection.onCompletion((_position: TextDocumentPositionParams): CompletionItem[
     insertTextFormat: 2 // Snippet
   }));
 
+  const eventItems: CompletionItem[] = activeEvents.map((ev) => ({
+    label: ev.name,
+    kind: CompletionItemKind.Event,
+    detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')}) — ${ev.category}`,
+    documentation: { kind: MarkupKind.Markdown, value: formatEventHover(ev) }
+  }));
+
   const seen = new Set<string>();
   const customItems: CompletionItem[] = [];
   for (const def of index.all()) {
@@ -156,7 +175,7 @@ connection.onCompletion((_position: TextDocumentPositionParams): CompletionItem[
     });
   }
 
-  return [...keywordItems, ...builtinItems, ...customItems];
+  return [...keywordItems, ...builtinItems, ...eventItems, ...customItems];
 });
 
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => item);
@@ -178,10 +197,16 @@ connection.onHover((params): Hover | null => {
     return { contents: { kind: MarkupKind.Markdown, value: formatHover(builtIn) } };
   }
 
-  // Check custom functions/events
+  // Check custom functions/events (a workspace override beats the generic docs)
   const custom = index.findCallable(word) ?? index.find(word)[0];
   if (custom) {
     return { contents: { kind: MarkupKind.Markdown, value: describeCustom(custom) } };
+  }
+
+  // Check built-in object events
+  const builtinEvent = findActiveEvent(word);
+  if (builtinEvent) {
+    return { contents: { kind: MarkupKind.Markdown, value: formatEventHover(builtinEvent) } };
   }
 
   // Check variables
@@ -263,6 +288,19 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
   const custom = index.findCallable(call.name);
   if (custom) {
     return buildSignatureHelp(custom.name, custom.signature, custom.params, call.activeParam, describeCustom(custom));
+  }
+
+  // Built-in object events, for call sites like `obj.EVENT Clicked(...)`.
+  const builtinEvent = findActiveEvent(call.name);
+  if (builtinEvent && builtinEvent.params.length > 0) {
+    const label = `event ${builtinEvent.name}(${builtinEvent.params.map(formatParam).join(', ')})`;
+    return buildSignatureHelp(
+      builtinEvent.name,
+      label,
+      builtinEvent.params,
+      call.activeParam,
+      formatEventHover(builtinEvent)
+    );
   }
 
   return null;
@@ -375,10 +413,14 @@ async function loadConfiguration(): Promise<void> {
       pbVersion = '2022';
       activeFunctions = builtinFunctions2022;
       findActiveBuiltin = findBuiltin2022;
+      activeEvents = builtinEvents2022;
+      findActiveEvent = findBuiltinEvent2022;
     } else {
       pbVersion = '2025';
       activeFunctions = builtinFunctions2025;
       findActiveBuiltin = findBuiltin2025;
+      activeEvents = builtinEvents2025;
+      findActiveEvent = findBuiltinEvent2025;
     }
 
     connection.console.log(`PowerBuilder version set to: ${pbVersion}`);
