@@ -132,11 +132,29 @@ connection.onDidChangeWatchedFiles((params: DidChangeWatchedFilesParams): void =
   }
 });
 
-connection.onCompletion((_position: TextDocumentPositionParams): CompletionItem[] => {
+connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] => {
   const keywordItems: CompletionItem[] = KEYWORDS.map((keyword) => ({
     label: keyword,
     kind: CompletionItemKind.Keyword
   }));
+
+  // Instance/shared variables from the current object, plus workspace globals.
+  const seenVars = new Set<string>();
+  const variableItems: CompletionItem[] = [];
+  const ownVars = index.variablesIn(params.textDocument.uri);
+  const globalVars = index.allVariables().filter((v) => v.scope === 'global');
+  for (const v of [...ownVars, ...globalVars]) {
+    const key = v.name.toLowerCase();
+    if (seenVars.has(key)) {
+      continue;
+    }
+    seenVars.add(key);
+    variableItems.push({
+      label: v.name,
+      kind: CompletionItemKind.Variable,
+      detail: `${v.type} ${v.name} (${v.scope})`
+    });
+  }
 
   const builtinItems: CompletionItem[] = activeFunctions.map((fn) => ({
     label: fn.name,
@@ -175,7 +193,7 @@ connection.onCompletion((_position: TextDocumentPositionParams): CompletionItem[
     });
   }
 
-  return [...keywordItems, ...builtinItems, ...eventItems, ...customItems];
+  return [...keywordItems, ...variableItems, ...builtinItems, ...eventItems, ...customItems];
 });
 
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => item);

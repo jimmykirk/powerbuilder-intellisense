@@ -49,8 +49,6 @@ const FUNCTION_RE =
   /^\s*(?:(public|private|protected)\s+)?(?:global\s+)?(function|subroutine)\b\s+(?:(\w+)\s+)?(\w+)\s*\(([^)]*)\)/i;
 const EVENT_RE = /^\s*event\s+(?:type\s+(\w+)\s+)?(\w+)\s*(?:\(([^)]*)\))?\s*;/i;
 const TYPE_RE = /^\s*(?:global\s+)?type\s+(\w+)\s+from\s+([\w`.]+)/i;
-const VARIABLE_RE = /^\s*(?:(global|instance|shared|local)\s+)?(\w+)\s+(\w+)(?:\s*=\s*.+)?$/i;
-
 const PROTOTYPES_START_RE = /^\s*(?:forward\s+|type\s+|global\s+)?prototypes\b/i;
 const PROTOTYPES_END_RE = /^\s*end\s+prototypes\b/i;
 
@@ -80,6 +78,81 @@ function buildFunctionSignature(
     .join(', ');
   const prefix = kind === 'function' && returnType ? `${returnType} ` : '';
   return `${prefix}${name}(${paramText})`;
+}
+
+/** Access-level and storage keywords that may precede a declaration's type. */
+const DECLARATION_MODIFIERS = new Set([
+  'public', 'private', 'protected', 'privatewrite', 'privateread',
+  'protectedwrite', 'protectedread', 'constant', 'readonly'
+]);
+
+/**
+ * Parses one line inside a variables block into zero or more declarations.
+ * Handles access modifiers (`private integer ii_x`), access-section markers
+ * (`private:`), multi-declaration lines (`integer a, b = 1, c`), array
+ * suffixes (`string is_names[]`), and decimal precision (`decimal {2} ld_amt`).
+ */
+export function parseVariableDeclaration(
+  line: string,
+  lineNumber: number,
+  uri: string,
+  scope: VariableDefinition['scope']
+): VariableDefinition[] {
+  let text = line.trim();
+  if (!text || text.startsWith('//') || text.startsWith('/*')) {
+    return [];
+  }
+  // Access-section markers like `private:` / `public:`
+  if (/^(public|private|protected)\s*:/i.test(text)) {
+    return [];
+  }
+  // Strip trailing line comment
+  text = text.replace(/\/\/.*$/, '').trim();
+
+  const tokens = text.split(/\s+/);
+  let idx = 0;
+  while (idx < tokens.length && DECLARATION_MODIFIERS.has(tokens[idx].toLowerCase())) {
+    idx++;
+  }
+  if (idx >= tokens.length - 1) {
+    return [];
+  }
+
+  let type = tokens[idx];
+  idx++;
+  // Decimal precision: `decimal {2} ld_amt`
+  if (tokens[idx]?.startsWith('{')) {
+    while (idx < tokens.length && !tokens[idx].includes('}')) {
+      idx++;
+    }
+    idx++;
+  }
+  if (!/^[a-zA-Z_]\w*$/.test(type)) {
+    return [];
+  }
+
+  const rest = tokens.slice(idx).join(' ');
+  if (!rest) {
+    return [];
+  }
+
+  const declarations: VariableDefinition[] = [];
+  // Split on top-level commas; initializers with commas inside braces/quotes are
+  // rare in exports and a wrong split only drops that name, never invents one.
+  for (const segment of rest.split(',')) {
+    const name = segment.trim().split('=')[0].trim().replace(/\[.*$/, '').trim();
+    if (name && /^[a-zA-Z_]\w*$/.test(name) && !DECLARATION_MODIFIERS.has(name.toLowerCase())) {
+      declarations.push({
+        name,
+        type,
+        scope,
+        uri,
+        line: lineNumber,
+        character: Math.max(line.indexOf(name), 0)
+      });
+    }
+  }
+  return declarations;
 }
 
 /**
@@ -166,9 +239,15 @@ export function parseSymbols(uri: string, text: string): {
       });
     }
 
-    // Track variable declarations (global, instance, local, shared)
-    if (/^\s*(type\s+|end\s+)?variables\b/i.test(line)) {
-      inVariables = /^\s*type\s+variables\b/i.test(line) || /^\s*variables\b/i.test(line);
+    // Track variable declaration blocks. PowerBuilder exports use
+    //   global variables ... end variables
+    //   shared variables ... end variables
+    //   type variables ... end variables   (these are the INSTANCE variables)
+    const blockStart = /^\s*(global|shared|type)\s+variables\b/i.exec(line);
+    if (blockStart) {
+      inVariables = true;
+      const blockKind = blockStart[1].toLowerCase();
+      currentScope = blockKind === 'type' ? 'instance' : (blockKind as 'global' | 'shared');
       continue;
     }
     if (/^\s*end\s+variables\b/i.test(line)) {
@@ -176,43 +255,9 @@ export function parseSymbols(uri: string, text: string): {
       continue;
     }
 
-    if (inVariables && line.trim() && !line.trim().startsWith('//')) {
-      // Try to parse a variable declaration
-      const parts = line.trim().split(/\s+/);
-      if (parts.length >= 2) {
-        let scope: 'global' | 'instance' | 'local' | 'shared' = currentScope;
-        let typeAndName = parts;
-
-        // Check if first part is a scope keyword
-        if (parts[0].toLowerCase() === 'global') {
-          scope = 'global';
-          typeAndName = parts.slice(1);
-        } else if (parts[0].toLowerCase() === 'instance') {
-          scope = 'instance';
-          typeAndName = parts.slice(1);
-        } else if (parts[0].toLowerCase() === 'local') {
-          scope = 'local';
-          typeAndName = parts.slice(1);
-        } else if (parts[0].toLowerCase() === 'shared') {
-          scope = 'shared';
-          typeAndName = parts.slice(1);
-        }
-
-        if (typeAndName.length >= 2) {
-          const type = typeAndName[0];
-          const name = typeAndName[1].split('=')[0].split(/[,;]/)[0].trim();
-
-          if (name && /^[a-zA-Z_]\w*$/.test(name)) {
-            variables.push({
-              name,
-              type,
-              scope,
-              uri,
-              line: i,
-              character: Math.max(line.indexOf(name), 0)
-            });
-          }
-        }
+    if (inVariables) {
+      for (const decl of parseVariableDeclaration(line, i, uri, currentScope)) {
+        variables.push(decl);
       }
     }
   }
@@ -320,6 +365,20 @@ export class WorkspaceIndex {
   /** Returns all variables matching a name (case-insensitive). */
   findVariables(name: string): VariableDefinition[] {
     return this.varsByName.get(name.toLowerCase()) ?? [];
+  }
+
+  /** Returns every indexed variable declaration across the workspace. */
+  allVariables(): VariableDefinition[] {
+    const result: VariableDefinition[] = [];
+    for (const vars of this.varsByUri.values()) {
+      result.push(...vars);
+    }
+    return result;
+  }
+
+  /** Returns the variables declared in one document. */
+  variablesIn(uri: string): VariableDefinition[] {
+    return this.varsByUri.get(uri) ?? [];
   }
 
   /** Returns the immediate ancestor type name, or undefined if not found or if it's a base type. */
