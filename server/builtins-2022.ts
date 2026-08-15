@@ -7,17 +7,23 @@
  */
 
 import {
+  EnumInfo,
   EventInfo,
   FunctionInfo,
+  PropertyInfo,
   buildEventIndex,
   buildFunctionIndex,
   formatHover,
   formatSignature,
+  loadEnumCatalog,
   loadEventCatalog,
-  loadFunctionCatalog
+  loadFunctionCatalog,
+  loadPropertyCatalog
 } from './builtins';
 import catalog2022 from './data/pb2022_functions.json';
 import events2022 from './data/pb2022_events.json';
+import properties2022 from './data/pb2022_properties.json';
+import enums2022 from './data/pb2022_enums.json';
 
 // Re-export common formatting functions for use by both versions
 export { formatSignature, formatHover };
@@ -35,3 +41,6 @@ export function findBuiltin2022(name: string): FunctionInfo | undefined {
 export function findBuiltinEvent2022(name: string): EventInfo | undefined {
   return eventIndex2022.get(name.toLowerCase());
 }
+
+export const propertyMap2022: Map<string, PropertyInfo[]> = loadPropertyCatalog(properties2022);
+export const enumMap2022: Map<string, EnumInfo> = loadEnumCatalog(enums2022);

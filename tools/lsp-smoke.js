@@ -76,7 +76,11 @@ const DOC = [
   /*17*/ 'MessageBox(',
   /*18*/ 'idw_main.dataobject = "d_emp"',
   /*19*/ 'idw_main.object.',
-  /*20*/ 'end event'
+  /*20*/ 'end event',
+  /*21*/ '',
+  /*22*/ 'event ue_chain;',
+  /*23*/ 'this.idw_main.',
+  /*24*/ 'end event'
 ].join('\n');
 
 const SRD = [
@@ -97,8 +101,28 @@ const DIAG_DOC = [
   'wf_missing(1)',
   'MessageBox("t", "m", Information!, OKCancel!, 2, 99)',
   'MessageBox("t", "m")',
+  'BeginTransaction(1)',
   'end event'
 ].join('\n');
+
+const FEATURE_DOC = [
+  /* 0*/ 'type variables',
+  /* 1*/ 'string is_title',
+  /* 2*/ 'end variables',
+  /* 3*/ '',
+  /* 4*/ 'global type w_feat from window',
+  /* 5*/ 'end type',
+  /* 6*/ '',
+  /* 7*/ 'event ue_go;',
+  /* 8*/ 'string ls_emp',
+  /* 9*/ 'SELECT emp_name INTO :',
+  /*10*/ 'MessageBox("t", "m", ',
+  /*11*/ 'this.Title',
+  /*12*/ 'end event',
+  /*13*/ '',
+  /*14*/ 'event '
+].join('\n');
+const FEATURE_URI = 'file:///virtual/w_feat.srw';
 
 const URI = 'file:///virtual/w_main.srw';
 const SRD_URI = 'file:///virtual/d_emp.srd';
@@ -145,6 +169,10 @@ async function main() {
   check('this. offers window catalog members', self.has('changemenu') || self.has('arrangesheets'), [...self].slice(0, 12).join(','));
   check('this. offers instance variables', self.has('idw_main'), '');
 
+  // Chained member access: this.idw_main. resolves through two hops
+  const chained = labels(await request('textDocument/completion', at(23, 'this.idw_main.'.length)));
+  check('chained this.idw_main. resolves to DataWindow members', chained.has('object') && !chained.has('upper'), [...chained].slice(0, 8).join(','));
+
   // Top-level completion: variables, builtins, events
   const top = labels(await request('textDocument/completion', at(11, 0)));
   check('top-level offers instance variable is_title', top.has('is_title'), '');
@@ -170,7 +198,8 @@ async function main() {
   const sig = await request('textDocument/signatureHelp', at(17, 'MessageBox('.length));
   check('signature help for MessageBox', !!sig && sig.signatures[0].label.includes('MessageBox'), JSON.stringify(sig)?.slice(0, 80));
 
-  // Semantic diagnostics
+  // Semantic diagnostics (server defaults to PB 2025; AccessToken is checked
+  // against a separate doc below after nothing overrides the version)
   notify('textDocument/didOpen', {
     textDocument: { uri: DIAG_URI, languageId: 'powerbuilder', version: 1, text: DIAG_DOC }
   });
@@ -180,6 +209,50 @@ async function main() {
   check('unknown call flagged as Information', onLine(3).some((d) => d.severity === 3 && d.message.includes('wf_missing')), JSON.stringify(diags).slice(0, 200));
   check('MessageBox with 6 args flagged as Warning', onLine(4).some((d) => d.severity === 2 && d.message.includes('at most 5')), JSON.stringify(onLine(4)));
   check('valid calls produce no diagnostics', onLine(2).length === 0 && onLine(5).length === 0, JSON.stringify([...onLine(2), ...onLine(5)]));
+
+  // New-feature checks
+  notify('textDocument/didOpen', {
+    textDocument: { uri: FEATURE_URI, languageId: 'powerbuilder', version: 1, text: FEATURE_DOC }
+  });
+  await new Promise((r) => setTimeout(r, 300));
+
+  // Property completion from the Objects and Controls catalog
+  const winDot = labels(await request('textDocument/completion', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 11, character: 'this.'.length }
+  }));
+  check('this. offers Window properties (Title)', winDot.has('title'), [...winDot].slice(0, 10).join(','));
+
+  // SQL host-variable completion after ':'
+  const hostVars = labels(await request('textDocument/completion', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 9, character: 'SELECT emp_name INTO :'.length }
+  }));
+  check('SQL : offers local and instance vars', hostVars.has('ls_emp') && hostVars.has('is_title'), [...hostVars].join(','));
+  check('SQL : omits builtin functions', !hostVars.has('messagebox'), '');
+
+  // Enum values floated for the active argument (MessageBox icon param)
+  const enumComp = await request('textDocument/completion', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 10, character: 'MessageBox("t", "m", '.length }
+  });
+  const enumLabels = labels(enumComp);
+  check('enum values offered for Icon argument', enumLabels.has('information!') && enumLabels.has('stopsign!'), [...enumLabels].slice(0, 8).join(','));
+
+  // Event stub completion
+  const stubs = await request('textDocument/completion', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 14, character: 'event '.length }
+  });
+  const stubItems = stubs.items ?? stubs;
+  const clickedStub = stubItems.find((i) => i.label.toLowerCase() === 'clicked');
+  check('event stub offered for window events', !!clickedStub, stubItems.slice(0, 5).map((i) => i.label).join(','));
+  check('event stub inserts end event skeleton', (clickedStub?.insertText ?? '').includes('end event'), clickedStub?.insertText);
+
+  // Document symbols and folding
+  const symbols = await request('textDocument/documentSymbol', { textDocument: { uri: URI } });
+  check('document symbols include wf_calc and w_main', symbols.some((s) => s.name === 'wf_calc') && symbols.some((s) => s.name === 'w_main'), JSON.stringify(symbols.map((s) => s.name)));
+  const folds = await request('textDocument/foldingRange', { textDocument: { uri: FEATURE_URI } });
+  check('folding ranges cover variables block and event', folds.some((f) => f.startLine === 0) && folds.some((f) => f.startLine === 7), JSON.stringify(folds));
+
+  // Version-availability: AccessToken exists in 2022 but not 2025
+  check('2022-only builtin flagged with version note', onLine(6).some((d) => d.severity === 2 && /PB 2022/i.test(d.message)), JSON.stringify(onLine(6)));
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   child.kill();

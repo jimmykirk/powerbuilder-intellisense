@@ -214,6 +214,11 @@ export interface SemanticContext {
   /** True when the name resolves to any callable or declared identifier. */
   isKnown(name: string): boolean;
   /**
+   * For an unknown name: a message when it exists in the *other* PB version's
+   * catalog ("added in PB 2025" / "removed after PB 2022"), else undefined.
+   */
+  versionNote(name: string): string | undefined;
+  /**
    * Maximum accepted argument count when the name is a built-in whose arity is
    * trustworthy (single-syntax, non-variadic); undefined disables the check.
    */
@@ -276,10 +281,12 @@ function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diag
       }
 
       if (!semantic.isKnown(name)) {
+        const note = semantic.versionNote(name);
         diagnostics.push({
-          severity: DiagnosticSeverity.Information,
+          severity: note ? DiagnosticSeverity.Warning : DiagnosticSeverity.Information,
           range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
-          message: `Unknown function '${name}' — not a PowerBuilder ${semantic.version} built-in or an indexed workspace symbol.`,
+          message: note ??
+            `Unknown function '${name}' — not a PowerBuilder ${semantic.version} built-in or an indexed workspace symbol.`,
           source: 'powerbuilder'
         });
         continue;
@@ -411,6 +418,62 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
   }
 
   return diagnostics;
+}
+
+/**
+ * Foldable line ranges: every matched block pair from the structural matcher,
+ * plus variables/prototypes sections (which the block stack ignores).
+ */
+export function computeFoldingRanges(text: string): { startLine: number; endLine: number }[] {
+  const lines = text.split(/\r?\n/);
+  const cleaned = stripCommentsAndStrings(lines);
+  const ranges: { startLine: number; endLine: number }[] = [];
+  const stack: OpenBlock[] = [];
+  let sectionStart = -1;
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const clean = cleaned[i];
+    const trimmed = clean.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    if (/^(?:global|shared|type)\s+variables\b/i.test(trimmed) || PROTOTYPES_START_RE.test(clean)) {
+      sectionStart = i;
+      continue;
+    }
+    if (/^end\s+(?:variables|prototypes)\b/i.test(trimmed)) {
+      if (sectionStart >= 0 && i > sectionStart) {
+        ranges.push({ startLine: sectionStart, endLine: i - 1 });
+      }
+      sectionStart = -1;
+      continue;
+    }
+    if (sectionStart >= 0) {
+      continue;
+    }
+
+    const closer = detectCloser(clean);
+    if (closer) {
+      const matchIndex = findMatchIndex(stack, closer);
+      if (matchIndex !== -1) {
+        const opener = stack[matchIndex];
+        if (i > opener.line) {
+          ranges.push({ startLine: opener.line, endLine: i - 1 });
+        }
+        stack.length = matchIndex;
+      }
+      continue;
+    }
+
+    const opener = detectOpener(clean);
+    if (opener) {
+      const leading = clean.length - clean.trimStart().length;
+      stack.push({ type: opener, line: i, startChar: leading, endChar: clean.trimEnd().length });
+    }
+  }
+
+  return ranges;
 }
 
 /** Returns the deepest stack index whose block type matches, or -1. */

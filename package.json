@@ -49,16 +49,26 @@
         "language": "powerbuilder",
         "path": "./snippets/powerbuilder.json"
       }
-    ]
-  },
-  "configuration": {
-    "title": "PowerBuilder",
-    "properties": {
-      "powerbuilder.version": {
-        "type": "string",
-        "default": "2025",
-        "enum": ["2022", "2025"],
-        "description": "Target PowerBuilder version for language features and function catalog"
+    ],
+    "commands": [
+      {
+        "command": "powerbuilder.switchVersion",
+        "title": "PowerBuilder: Switch Version (2022 ↔ 2025)"
+      },
+      {
+        "command": "powerbuilder.generateOrcaScript",
+        "title": "PowerBuilder: Generate OrcaScript to Rebuild PBLs from Source"
+      }
+    ],
+    "configuration": {
+      "title": "PowerBuilder",
+      "properties": {
+        "powerbuilder.version": {
+          "type": "string",
+          "default": "2025",
+          "enum": ["2022", "2025"],
+          "description": "Target PowerBuilder version for language features and function catalog"
+        }
       }
     }
   },
@@ -66,7 +76,8 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test": "npm run compile && node tools/lsp-smoke.js"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1",

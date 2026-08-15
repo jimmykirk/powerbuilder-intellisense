@@ -5,7 +5,11 @@ import {
   Definition,
   DidChangeConfigurationNotification,
   DidChangeWatchedFilesParams,
+  DocumentSymbol,
+  DocumentSymbolParams,
   FileChangeType,
+  FoldingRange,
+  FoldingRangeParams,
   Hover,
   InitializeParams,
   InitializeResult,
@@ -30,17 +34,21 @@ import { formatEventHover, formatHover, formatParam, formatSignature, ParamInfo 
 import {
   builtinEvents2022,
   builtinFunctions2022,
+  enumMap2022,
   findBuiltin2022,
-  findBuiltinEvent2022
+  findBuiltinEvent2022,
+  propertyMap2022
 } from './builtins-2022';
 import {
   builtinEvents2025,
   builtinFunctions2025,
+  enumMap2025,
   findBuiltin2025,
-  findBuiltinEvent2025
+  findBuiltinEvent2025,
+  propertyMap2025
 } from './builtins-2025';
 import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
-import { computeDiagnostics, SemanticContext } from './diagnostics';
+import { computeDiagnostics, computeFoldingRanges, SemanticContext } from './diagnostics';
 import { findActiveCall, getWordAtPosition } from './textutils';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -53,6 +61,11 @@ let activeFunctions = builtinFunctions2025;
 let findActiveBuiltin = findBuiltin2025;
 let activeEvents = builtinEvents2025;
 let findActiveEvent = findBuiltinEvent2025;
+let activeProperties = propertyMap2025;
+let activeEnums = enumMap2025;
+let otherFindBuiltin = findBuiltin2022;
+let otherFindEvent = findBuiltinEvent2022;
+let otherVersion: '2022' | '2025' = '2022';
 
 const KEYWORDS = [
   'if', 'then', 'else', 'elseif', 'end if', 'for', 'to', 'step', 'next',
@@ -79,7 +92,7 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       completionProvider: {
         resolveProvider: true,
-        triggerCharacters: ['.']
+        triggerCharacters: ['.', ':']
       },
       hoverProvider: true,
       definitionProvider: true,
@@ -87,7 +100,9 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
         triggerCharacters: ['(', ','],
         retriggerCharacters: [',']
       },
-      workspaceSymbolProvider: true
+      workspaceSymbolProvider: true,
+      documentSymbolProvider: true,
+      foldingRangeProvider: true
     }
   };
 });
@@ -138,6 +153,17 @@ function buildSemanticContext(text: string): SemanticContext {
       index.find(name).length > 0 ||
       index.findVariables(name).length > 0 ||
       localNames.has(name.toLowerCase()),
+    versionNote: (name) => {
+      const other = otherFindBuiltin(name) ?? otherFindEvent(name);
+      if (!other) {
+        return undefined;
+      }
+      const detail =
+        otherVersion > pbVersion
+          ? `it was added in PB ${otherVersion}`
+          : `it was removed after PB ${otherVersion}`;
+      return `'${other.name}' is not available in PowerBuilder ${pbVersion} — ${detail}.`;
+    },
     maxArgs: (name) => {
       const fn = findActiveBuiltin(name);
       if (!fn || fn.variadic || index.find(name).length > 0) {
@@ -168,22 +194,37 @@ connection.onDidChangeWatchedFiles((params: DidChangeWatchedFilesParams): void =
 });
 
 connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] => {
-  // Member completion when the cursor sits after `receiver.`
   const doc = documents.get(params.textDocument.uri);
   if (doc) {
     const linePrefix = doc.getText({
       start: { line: params.position.line, character: 0 },
       end: params.position
     });
+
+    // Embedded SQL host variables: `SELECT col INTO :ls_name FROM ...`
+    if (/:[A-Za-z_]?\w*$/.test(linePrefix) && isSqlContext(doc, params.position.line)) {
+      return hostVariableCompletion(doc, params.position);
+    }
+
+    // Event stub: `event ` offers the built-in events of the current object type
+    if (/^\s*event\s+\w*$/i.test(linePrefix)) {
+      return eventStubCompletion(doc);
+    }
+
     // DataWindow object-expression chain: `dw_ctrl.object.<column>`
     const objectChain = /([A-Za-z_]\w*)\s*\.\s*object\s*\.\s*\w*$/i.exec(linePrefix);
     if (objectChain) {
       return dataWindowColumnCompletion(doc, params.position, objectChain[1]);
     }
 
-    const dot = /([A-Za-z_]\w*)\s*\.\s*(\w*)$/.exec(linePrefix);
-    if (dot) {
-      return memberCompletion(doc, params.position, dot[1]);
+    // Member access, including chains like `this.idw_main.` / `GetApplication().`
+    const chainMatch =
+      /([A-Za-z_]\w*(?:\s*\([^()]*\))?(?:\s*\.\s*[A-Za-z_]\w*(?:\s*\([^()]*\))?)*)\s*\.\s*\w*$/.exec(linePrefix);
+    if (chainMatch) {
+      const segments = parseChainSegments(chainMatch[1]);
+      if (segments.length > 0) {
+        return memberCompletion(doc, params.position, segments);
+      }
     }
   }
 
@@ -191,6 +232,27 @@ connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] =
     label: keyword,
     kind: CompletionItemKind.Keyword
   }));
+
+  // When the active call argument is an enumerated type, float its values first.
+  const enumItems: CompletionItem[] = [];
+  if (doc) {
+    const call = findActiveCall(doc, params.position);
+    const fn = call ? findActiveBuiltin(call.name) : undefined;
+    if (call && fn && fn.params.length > 0) {
+      const param = fn.params[Math.min(call.activeParam, fn.params.length - 1)];
+      const en = activeEnums.get(param.type.toLowerCase());
+      if (en) {
+        for (const value of en.values) {
+          enumItems.push({
+            label: value,
+            kind: CompletionItemKind.EnumMember,
+            detail: `${en.name} enumerated value`,
+            sortText: `0_${value}`
+          });
+        }
+      }
+    }
+  }
 
   // Instance/shared variables from the current object, plus workspace globals.
   const seenVars = new Set<string>();
@@ -247,7 +309,7 @@ connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] =
     });
   }
 
-  return [...keywordItems, ...variableItems, ...builtinItems, ...eventItems, ...customItems];
+  return [...enumItems, ...keywordItems, ...variableItems, ...builtinItems, ...eventItems, ...customItems];
 });
 
 connection.onCompletionResolve((item: CompletionItem): CompletionItem => item);
@@ -378,6 +440,36 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
   return null;
 });
 
+connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => {
+  const symbols = index.symbolsIn(params.textDocument.uri);
+  return symbols
+    .filter((def) => def.kind !== 'variable')
+    .map((def) => {
+      const range = {
+        start: { line: def.line, character: def.character },
+        end: { line: def.line, character: def.character + def.name.length }
+      };
+      return {
+        name: def.name,
+        detail: def.signature,
+        kind: symbolKindFor(def),
+        range,
+        selectionRange: range
+      };
+    });
+});
+
+connection.onFoldingRanges((params: FoldingRangeParams): FoldingRange[] => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) {
+    return [];
+  }
+  return computeFoldingRanges(doc.getText()).map((r) => ({
+    startLine: r.startLine,
+    endLine: r.endLine
+  }));
+});
+
 connection.onWorkspaceSymbol((params: WorkspaceSymbolParams): SymbolInformation[] => {
   return index.search(params.query).map((def) => ({
     name: def.name,
@@ -499,13 +591,93 @@ function builtinMemberItems(typeName: string): CompletionItem[] {
   return [...fnItems, ...evItems];
 }
 
+/** Splits `a.b(x).c` into [{name:'a'},{name:'b',call:true},{name:'c'}]. */
+function parseChainSegments(chain: string): { name: string; call: boolean }[] {
+  const segments: { name: string; call: boolean }[] = [];
+  const re = /([A-Za-z_]\w*)(\s*\([^()]*\))?/g;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(chain)) !== null) {
+    segments.push({ name: match[1], call: match[2] !== undefined });
+  }
+  return segments;
+}
+
+/** The declared type of `member` accessed on an instance of `typeName`. */
+function memberTypeOf(typeName: string, member: string, isCall: boolean): string | undefined {
+  const chain = index.getInheritanceChain(typeName);
+  const walk = chain.length > 0 ? chain : [typeName.toLowerCase()];
+  const lower = member.toLowerCase();
+
+  for (const t of walk) {
+    if (!isCall) {
+      const prop = activeProperties.get(t)?.find((p) => p.name.toLowerCase() === lower);
+      if (prop) {
+        return prop.type;
+      }
+      const uri = index.uriForType(t);
+      if (uri) {
+        const iv = index.variablesIn(uri).find((v) => v.name.toLowerCase() === lower);
+        if (iv) {
+          return iv.type;
+        }
+      }
+    } else {
+      const uri = index.uriForType(t);
+      const fn = uri
+        ? index.symbolsIn(uri).find((d) => d.kind !== 'type' && d.name.toLowerCase() === lower)
+        : undefined;
+      if (fn?.returnType) {
+        return fn.returnType;
+      }
+    }
+  }
+  if (isCall) {
+    const builtin = findActiveBuiltin(member);
+    if (builtin && /^[A-Za-z_]\w*$/.test(builtin.returnType)) {
+      return builtin.returnType;
+    }
+    const custom = index.findCallable(member);
+    if (custom?.returnType) {
+      return custom.returnType;
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Resolves the type at the end of a member chain (`this.idw_main` → the type
+ * of idw_main; `GetApplication()` → application). Undefined when any link
+ * fails to resolve.
+ */
+function resolveChainType(
+  doc: TextDocument,
+  position: { line: number },
+  segments: { name: string; call: boolean }[]
+): string | undefined {
+  const [base, ...rest] = segments;
+  let current = base.call
+    ? memberTypeOf('', base.name, true)
+    : resolveReceiverType(doc, position, base.name);
+  for (const seg of rest) {
+    if (!current) {
+      return undefined;
+    }
+    current = memberTypeOf(current, seg.name, seg.call);
+  }
+  return current;
+}
+
 /**
  * Members offered after `receiver.` — walks the resolved type's inheritance
  * chain, mixing workspace-defined functions/events with the built-in catalog
  * members of any ancestor that is a built-in object type.
  */
-function memberCompletion(doc: TextDocument, position: { line: number }, receiver: string): CompletionItem[] {
-  const typeName = resolveReceiverType(doc, position, receiver);
+function memberCompletion(
+  doc: TextDocument,
+  position: { line: number },
+  segments: { name: string; call: boolean }[]
+): CompletionItem[] {
+  const typeName = resolveChainType(doc, position, segments);
   const items: CompletionItem[] = [];
   const seen = new Set<string>();
   const push = (item: CompletionItem): void => {
@@ -558,6 +730,16 @@ function memberCompletion(doc: TextDocument, position: { line: number }, receive
       for (const item of builtinMemberItems(t)) {
         push(item);
       }
+      for (const prop of activeProperties.get(t) ?? []) {
+        push({
+          label: prop.name,
+          kind: CompletionItemKind.Property,
+          detail: `${prop.type} ${prop.name}`,
+          documentation: prop.description
+            ? { kind: MarkupKind.Markdown, value: prop.description }
+            : undefined
+        });
+      }
     }
   } else {
     // Unresolved receiver: fall back to every documented member function/event
@@ -600,6 +782,104 @@ function memberCompletion(doc: TextDocument, position: { line: number }, receive
   }
 
   return items;
+}
+
+/** SQL verbs that begin an embedded SQL statement in PowerScript. */
+const SQL_VERBS =
+  /^(select|selectblob|insert|update|updateblob|delete|fetch|declare|connect|disconnect|commit|rollback|execute)\b/i;
+
+/**
+ * True when the cursor line sits inside an embedded SQL statement: an
+ * unterminated statement above it starts with a SQL verb.
+ */
+function isSqlContext(doc: TextDocument, line: number): boolean {
+  const lines = doc.getText().split(/\r?\n/);
+  for (let i = line; i >= 0 && i > line - 25; i--) {
+    const trimmed = lines[i].trim();
+    if (i < line && /;\s*$/.test(trimmed)) {
+      return false; // previous statement already terminated
+    }
+    if (SQL_VERBS.test(trimmed)) {
+      return true;
+    }
+    if (i < line && /^(end\s|event\s|function\s|subroutine\s)/i.test(trimmed)) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/** `:hostvar` completion inside embedded SQL — every variable in scope. */
+function hostVariableCompletion(doc: TextDocument, position: { line: number }): CompletionItem[] {
+  const items: CompletionItem[] = [];
+  const seen = new Set<string>();
+  const push = (name: string, type: string, scope: string): void => {
+    const key = name.toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      items.push({
+        label: name,
+        kind: CompletionItemKind.Variable,
+        detail: `${type} ${name} (${scope})`
+      });
+    }
+  };
+
+  const lines = doc.getText().split(/\r?\n/);
+  const stop = Math.max(0, position.line - 400);
+  for (let i = position.line - 1; i >= stop; i--) {
+    if (/^\s*end\s+(function|subroutine|event)\b/i.test(lines[i])) {
+      break;
+    }
+    for (const decl of parseVariableDeclaration(lines[i], i, doc.uri, 'local')) {
+      if (!NON_TYPE_KEYWORDS.has(decl.type.toLowerCase())) {
+        push(decl.name, decl.type, 'local');
+      }
+    }
+  }
+  for (const v of index.variablesIn(doc.uri)) {
+    push(v.name, v.type, v.scope);
+  }
+  for (const v of index.allVariables()) {
+    if (v.scope === 'global') {
+      push(v.name, v.type, 'global');
+    }
+  }
+  return items;
+}
+
+/**
+ * `event ` completion: stubs for the built-in events of the current object's
+ * type chain (or every event when the type cannot be resolved), inserted as a
+ * ready `name; ... end event` skeleton.
+ */
+function eventStubCompletion(doc: TextDocument): CompletionItem[] {
+  const mainType = index.symbolsIn(doc.uri).find((def) => def.kind === 'type' && !!def.container);
+  let events = activeEvents;
+  if (mainType) {
+    const chain = index.getInheritanceChain(mainType.name);
+    const categories = new Set<string>();
+    for (const t of chain) {
+      for (const c of TYPE_CATEGORY_ALIASES[t] ?? [t]) {
+        categories.add(c.toLowerCase());
+      }
+    }
+    const applicable = activeEvents.filter((ev) =>
+      (ev.appliesTo ?? [ev.category]).some((t) => categories.has(t.toLowerCase()))
+    );
+    if (applicable.length > 0) {
+      events = applicable;
+    }
+  }
+
+  return events.map((ev) => ({
+    label: ev.name,
+    kind: CompletionItemKind.Event,
+    detail: `event ${ev.name}(${ev.params.map(formatParam).join(', ')}) — ${ev.category}`,
+    documentation: { kind: MarkupKind.Markdown, value: formatEventHover(ev) },
+    insertText: `${ev.name};\n\t$0\nend event`,
+    insertTextFormat: 2
+  }));
 }
 
 /** Built-in types that carry a DataWindow object expression (`.object.`). */
@@ -761,12 +1041,22 @@ async function loadConfiguration(): Promise<void> {
       findActiveBuiltin = findBuiltin2022;
       activeEvents = builtinEvents2022;
       findActiveEvent = findBuiltinEvent2022;
+      activeProperties = propertyMap2022;
+      activeEnums = enumMap2022;
+      otherFindBuiltin = findBuiltin2025;
+      otherFindEvent = findBuiltinEvent2025;
+      otherVersion = '2025';
     } else {
       pbVersion = '2025';
       activeFunctions = builtinFunctions2025;
       findActiveBuiltin = findBuiltin2025;
       activeEvents = builtinEvents2025;
       findActiveEvent = findBuiltinEvent2025;
+      activeProperties = propertyMap2025;
+      activeEnums = enumMap2025;
+      otherFindBuiltin = findBuiltin2022;
+      otherFindEvent = findBuiltinEvent2022;
+      otherVersion = '2022';
     }
 
     connection.console.log(`PowerBuilder version set to: ${pbVersion}`);

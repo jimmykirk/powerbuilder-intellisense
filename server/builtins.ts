@@ -152,6 +152,39 @@ export function buildEventIndex(events: EventInfo[]): Map<string, EventInfo> {
   return index;
 }
 
+/** A property of a built-in object class (scraped from Objects and Controls). */
+export interface PropertyInfo {
+  name: string;
+  type: string;
+  description?: string;
+}
+
+/** An enumerated datatype and its `Value!` list. */
+export interface EnumInfo {
+  name: string;
+  values: string[];
+}
+
+/** Loads a property catalog into a lowercase-class-name lookup map. */
+export function loadPropertyCatalog(catalog: {
+  classes: { name: string; properties: PropertyInfo[] }[];
+}): Map<string, PropertyInfo[]> {
+  const map = new Map<string, PropertyInfo[]>();
+  for (const cls of catalog.classes) {
+    map.set(cls.name.toLowerCase(), cls.properties);
+  }
+  return map;
+}
+
+/** Loads an enum catalog into a lowercase-name lookup map. */
+export function loadEnumCatalog(catalogEnums: { enums: EnumInfo[] }): Map<string, EnumInfo> {
+  const map = new Map<string, EnumInfo>();
+  for (const en of catalogEnums.enums) {
+    map.set(en.name.toLowerCase(), en);
+  }
+  return map;
+}
+
 /** Builds a markdown hover body for a built-in event. */
 export function formatEventHover(ev: EventInfo): string {
   const lines: string[] = [];

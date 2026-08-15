@@ -6,16 +6,25 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 ## Features
 
 - Syntax highlighting for PowerBuilder source files
-- Full built-in catalogs scraped from the official Appeon PowerScript Reference:
-  914 (PB 2022) / 1,118 (PB 2025) system functions and 139 / 150 object events,
-  with typed parameters, documentation, and `pbm_*` event IDs
+- Full built-in catalogs scraped from the official Appeon docs: 914 (PB 2022) /
+  1,118 (PB 2025) system functions, 139 / 150 object events (with `pbm_*` IDs),
+  2,235 / 2,446 object properties across 155 / 185 classes, and ~70 enumerated
+  datatypes with their `Value!` lists
 - Auto-completion for keywords, built-in functions and events, instance/shared
   variables of the current object, workspace-wide globals, and custom
   functions/events indexed across the workspace
 - Member completion after `.` — resolves the receiver's type from local
-  declarations, indexed variables, or `this`/`super`, walks the inheritance
-  chain, and offers workspace-defined members plus the built-in members of any
-  built-in ancestor (matched via the docs' Applies-to lists)
+  declarations, indexed variables, or `this`/`super`, follows chains like
+  `this.idw_main.` and `GetApplication().` through property types and function
+  return types, walks the inheritance chain, and offers workspace-defined
+  members plus the built-in functions, events, and properties of any built-in
+  ancestor (matched via the docs' Applies-to lists)
+- Enumerated values floated to the top when the active call argument is an
+  enum (`MessageBox("t", "m", ` → `Information!`, `StopSign!`, ...)
+- Event stub completion: `event ` offers the built-in events of the current
+  object's type and inserts a ready `name; ... end event` skeleton
+- Embedded SQL host-variable completion: `:` inside a SQL statement offers
+  every variable in scope
 - DataWindow-aware completions: `.srd` exports are indexed for column names,
   `dw.Object.` completes the bound DataWindow object's columns, and
   DataWindow-typed receivers get `Object`/`DataObject` property items
@@ -26,9 +35,16 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 - Workspace-wide **Go to Definition** for custom functions, subroutines, events, and object types
 - Workspace symbol search (`Ctrl+T`) across all PowerBuilder files
 - Parser-based structural diagnostics that flag unmatched block terminators (`if`/`end if`, `for`/`next`, `do`/`loop`, `choose case`/`end choose`, `try`/`end try`, function/subroutine/event/type blocks), ignoring keywords inside comments and strings
-- Semantic call diagnostics: unknown functions (Information) and too many
-  arguments to a built-in (Warning), conservative around non-exported
-  libraries, variadic built-ins, and member calls
+- Semantic call diagnostics: unknown functions (Information), too many
+  arguments to a built-in (Warning), and version-availability warnings when a
+  call exists only in the other PB version ("added in PB 2025" / "removed
+  after PB 2022") — conservative around non-exported libraries, variadic
+  built-ins, and member calls
+- Document outline/breadcrumbs and folding for all block constructs plus
+  variables/prototypes sections
+- **PowerBuilder: Generate OrcaScript** command — writes a `.orca` script that
+  rebuilds the workspace's PBLs from the exported sources on disk (the
+  documented `scc refresh target` offline pattern)
 - Basic snippets for common code blocks
 
 ## Supported File Extensions
@@ -72,6 +88,7 @@ The extension is a thin client (`src/extension.ts`) that launches a Language Ser
 
 - Per-variant signatures for multi-syntax functions and events (Open, Close, Clicked, ...)
 - Resolve `dataobject` bindings assigned outside the current document
-- Object property catalogs (beyond functions/events) for hover and dot completion
 - Type-aware argument checking and undeclared-variable diagnostics
 - Go to Definition into DataWindow column definitions
+- Hover for object properties and enumerated values
+- Rename and Find All References for workspace symbols
