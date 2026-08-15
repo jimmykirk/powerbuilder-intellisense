@@ -11,8 +11,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { URI } from 'vscode-uri';
 import { ParamInfo } from './builtins';
-import { stripCommentsAndStrings } from './diagnostics';
 import { decodePBExport } from './encoding';
+import { stripCommentsAndStrings, toLogicalLines } from './preprocess';
 
 export type SymbolKind = 'function' | 'subroutine' | 'event' | 'type' | 'variable';
 
@@ -55,10 +55,23 @@ export const POWERBUILDER_EXTENSIONS = [
   '.sra', '.srw', '.sru', '.srm', '.srd', '.srf', '.srs', '.srp', '.srq', '.srj'
 ];
 
-const FUNCTION_RE =
-  /^\s*(?:(public|private|protected)\s+)?(?:global\s+)?(function|subroutine)\b\s+(?:(\w+)\s+)?(\w+)\s*\(([^)]*)\)/i;
-const EVENT_RE = /^\s*event\s+(?:type\s+(\w+)\s+)?(\w+)\s*(?:\(([^)]*)\))?\s*;/i;
-const TYPE_RE = /^\s*(?:global\s+)?type\s+(\w+)\s+from\s+([\w`.]+)/i;
+// PowerBuilder identifiers may contain non-ASCII letters — the OpenPay corpus
+// declares Greek-named menu items — and JavaScript's \w is ASCII-only.
+const ID = '[\\p{L}_][\\p{L}\\p{N}_]*';
+const FUNCTION_RE = new RegExp(
+  `^\\s*(?:(public|private|protected)\\s+)?(?:global\\s+)?(function|subroutine)\\b\\s+(?:(${ID})\\s+)?(${ID})\\s*\\(([^)]*)\\)`,
+  'iu'
+);
+const EVENT_RE = new RegExp(
+  `^\\s*event\\s+(?:type\\s+(${ID})\\s+)?(${ID})\\s*(?:\\(([^)]*)\\))?\\s*;`,
+  'iu'
+);
+// Menu separators are declared with punctuation in the name (`type m_- from menu`).
+const TYPE_RE = new RegExp(
+  `^\\s*(?:global\\s+)?type\\s+([\\p{L}_][\\p{L}\\p{N}_-]*)\\s+from\\s+([\\p{L}\\p{N}_\`.]+)`,
+  'iu'
+);
+const ID_RE = new RegExp(`^${ID}$`, 'u');
 const PROTOTYPES_START_RE = /^\s*(?:forward\s+|type\s+|global\s+)?prototypes\b/i;
 const PROTOTYPES_END_RE = /^\s*end\s+prototypes\b/i;
 
@@ -137,7 +150,7 @@ export function parseVariableDeclaration(
     }
     idx++;
   }
-  if (!/^[a-zA-Z_]\w*$/.test(type)) {
+  if (!ID_RE.test(type)) {
     return [];
   }
 
@@ -151,7 +164,7 @@ export function parseVariableDeclaration(
   // rare in exports and a wrong split only drops that name, never invents one.
   for (const segment of rest.split(',')) {
     const name = segment.trim().split('=')[0].trim().replace(/\[.*$/, '').trim();
-    if (name && /^[a-zA-Z_]\w*$/.test(name) && !DECLARATION_MODIFIERS.has(name.toLowerCase())) {
+    if (name && ID_RE.test(name) && !DECLARATION_MODIFIERS.has(name.toLowerCase())) {
       declarations.push({
         name,
         type,
@@ -242,7 +255,11 @@ export function parseSymbols(uri: string, text: string): {
   variables: VariableDefinition[];
   structures: StructureDefinition[];
 } {
-  const lines = text.split(/\r?\n/);
+  // Structural parsing runs over logical lines so `&`-continued declarations
+  // and signatures are seen whole; `line` still points at the physical line
+  // the statement starts on.
+  const physical = text.split(/\r?\n/);
+  const logical = toLogicalLines(physical);
   const symbols: SymbolDefinition[] = [];
   const variables: VariableDefinition[] = [];
   const structures: StructureDefinition[] = [];
@@ -251,8 +268,9 @@ export function parseSymbols(uri: string, text: string): {
   let currentScope: 'global' | 'instance' | 'local' | 'shared' = 'global';
   let currentStructure: StructureDefinition | null = null;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (const logicalLine of logical) {
+    const line = logicalLine.text;
+    const i = logicalLine.line;
 
     if (PROTOTYPES_START_RE.test(line)) {
       inPrototypes = true;

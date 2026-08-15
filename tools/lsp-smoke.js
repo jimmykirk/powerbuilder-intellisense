@@ -202,6 +202,38 @@ const SCOPE_DOC = [
   /*13*/ 'end function'
 ].join('\n');
 
+// Shapes taken from real exports (OpenPay corpus): `&`-continued declarations,
+// several statements on one line, and non-ASCII identifiers.
+const REAL_DOC = [
+  /*0*/ 'type variables',
+  /*1*/ 'datawindow\t\tidw_eteria, &',
+  /*2*/ '\t\t\t\t\tidw_masks, &',
+  /*3*/ '\t\t\t\t\tidw_prn',
+  /*4*/ 'end variables',
+  /*5*/ '',
+  /*6*/ 'global type w_real from window',
+  /*7*/ 'end type',
+  /*8*/ 'type m_- from menu within w_real',
+  /*9*/ 'end type',
+  /*10*/ 'type m_ανανέωση from menu within w_real',
+  /*11*/ 'end type',
+  /*12*/ '',
+  /*13*/ 'on w_real.create',
+  /*14*/ 'this.st_1=create statictext',
+  /*15*/ 'end on',
+  /*16*/ '',
+  /*17*/ 'event clicked;If PrintSetup( ) = 1 Then',
+  /*18*/ '\tst_2.Text = "x"',
+  /*19*/ 'end if',
+  /*20*/ 'end event',
+  /*21*/ '',
+  /*22*/ 'event dw::itemchanged;call super::itemchanged;choose case dwo.name',
+  /*23*/ '\tcase "a"',
+  /*24*/ 'end choose',
+  /*25*/ 'end event'
+].join('\n');
+const REAL_URI = 'file:///virtual/w_real.srw';
+
 const URI = 'file:///virtual/w_main.srw';
 const SRD_URI = 'file:///virtual/d_emp.srd';
 const DIAG_URI = 'file:///virtual/w_diag.srw';
@@ -503,6 +535,25 @@ async function main() {
   });
   const clickedStub2 = (stubs2.items ?? stubs2).find((i) => i.label === 'Clicked');
   check('event stub detail uses the window variant', /window/i.test(clickedStub2?.detail ?? ''), clickedStub2?.detail);
+
+  // --- real-world shapes from the corpus ---
+  notify('textDocument/didOpen', {
+    textDocument: { uri: REAL_URI, languageId: 'powerbuilder', version: 1, text: REAL_DOC }
+  });
+  await new Promise((r) => setTimeout(r, 500));
+  const realDiags = diagnosticsByUri.get(REAL_URI) ?? [];
+  const structural = realDiags.filter((d) => /block|Unexpected/.test(d.message));
+  check('real-world shapes produce no structural errors', structural.length === 0, JSON.stringify(structural.slice(0, 3)));
+
+  const realSyms = await request('textDocument/documentSymbol', { textDocument: { uri: REAL_URI } });
+  const realNames = new Set(realSyms.map((s) => s.name));
+  check('punctuation type name indexed (m_-)', realNames.has('m_-'), [...realNames].join(','));
+  check('non-ASCII type name indexed (Greek)', realNames.has('m_ανανέωση'), [...realNames].join(','));
+
+  const contComp = labels(await request('textDocument/completion', {
+    textDocument: { uri: REAL_URI }, position: { line: 14, character: 0 }
+  }));
+  check('continued declaration indexes every variable', contComp.has('idw_eteria') && contComp.has('idw_masks') && contComp.has('idw_prn'), [...contComp].filter((l) => l.startsWith('idw')).join(','));
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   fs.rmSync(fixtureDir, { recursive: true, force: true });

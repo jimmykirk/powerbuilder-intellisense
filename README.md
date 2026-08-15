@@ -71,8 +71,11 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
   variables/prototypes sections
 - Server-driven semantic highlighting (known calls, variables, enum values,
   types, properties) layered over the TextMate grammar
-- Encoding detection for exports read from disk: UTF-16LE/BE (with or without
-  BOM), UTF-8, and ANSI fallback — real PB exports index correctly
+- Built for real exports, not just tidy samples: `&` line continuations are
+  joined before parsing, multiple statements per line (`event clicked;if ...`)
+  are split, non-ASCII and punctuation identifiers (Greek menu names, `m_-`)
+  are handled, and encoding detection covers UTF-16LE/BE, UTF-8, and a
+  configurable ANSI codepage (`powerbuilder.ansiEncoding`)
 - **PowerBuilder: Generate OrcaScript** command — writes a `.orca` script that
   rebuilds the workspace's PBLs from the exported sources on disk (the
   documented `scc refresh target` offline pattern)
@@ -95,9 +98,14 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 
 ```bash
 npm install
-npm run compile
-node tools/lsp-smoke.js   # end-to-end check of the compiled language server
+npm test                                   # compile, bundle, 83 end-to-end LSP checks
+node tools/corpus-check.js /path/to/src    # index real exports and report anomalies
 ```
+
+`corpus-check.js` runs the parsers over a directory of real PowerBuilder
+exports and reports what was indexed plus any structural diagnostics — which
+should be zero on code that compiles. It is how the continuation, statement
+splitting, and identifier rules below were found and verified.
 
 Press `F5` in VS Code to launch an Extension Development Host.
 

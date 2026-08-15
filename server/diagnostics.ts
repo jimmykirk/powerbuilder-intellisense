@@ -8,6 +8,9 @@
  */
 
 import { Diagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver/node';
+import { LogicalLine, stripCommentsAndStrings, toStatements } from './preprocess';
+
+export { stripCommentsAndStrings };
 
 type BlockType =
   | 'if'
@@ -42,80 +45,15 @@ const CLOSER_LABEL: Record<BlockType, string> = {
   on: 'end on'
 };
 
-/**
- * Removes comments and string literals from each line, replacing them with
- * spaces so that character positions still line up with the original text.
- */
-export function stripCommentsAndStrings(lines: string[]): string[] {
-  const cleaned: string[] = [];
-  let inBlockComment = false;
-
-  for (const original of lines) {
-    const chars = original.split('');
-    let i = 0;
-
-    while (i < chars.length) {
-      if (inBlockComment) {
-        if (chars[i] === '*' && chars[i + 1] === '/') {
-          chars[i] = ' ';
-          chars[i + 1] = ' ';
-          i += 2;
-          inBlockComment = false;
-        } else {
-          chars[i] = ' ';
-          i++;
-        }
-        continue;
-      }
-
-      const two = chars[i] + (chars[i + 1] ?? '');
-      if (two === '//') {
-        // Line comment: blank the remainder.
-        for (let j = i; j < chars.length; j++) {
-          chars[j] = ' ';
-        }
-        break;
-      }
-      if (two === '/*') {
-        chars[i] = ' ';
-        chars[i + 1] = ' ';
-        i += 2;
-        inBlockComment = true;
-        continue;
-      }
-      if (chars[i] === '"' || chars[i] === "'") {
-        const quote = chars[i];
-        chars[i] = ' ';
-        i++;
-        while (i < chars.length && chars[i] !== quote) {
-          chars[i] = ' ';
-          i++;
-        }
-        if (i < chars.length) {
-          chars[i] = ' '; // closing quote
-          i++;
-        }
-        continue;
-      }
-
-      i++;
-    }
-
-    cleaned.push(chars.join(''));
-  }
-
-  return cleaned;
-}
-
 const FUNCTION_DEF_RE =
-  /^(?:(?:public|private|protected|global)\s+)*(function|subroutine)\s+\w+.*\(/i;
-const TYPE_DEF_RE = /^(?:global\s+)?type\s+\w+\s+from\b/i;
+  /^(?:(?:public|private|protected|global)\s+)*(function|subroutine)\s+[\p{L}_][\p{L}\p{N}_]*.*\(/iu;
+const TYPE_DEF_RE = /^(?:global\s+)?type\s+[\p{L}_][\p{L}\p{N}_-]*\s+from\b/iu;
 
 const PROTOTYPES_START_RE = /^\s*(?:forward\s+|type\s+|global\s+)?prototypes\b/i;
 const PROTOTYPES_END_RE = /^\s*end\s+prototypes\b/i;
 
 /** Identifies a block opener on a cleaned line, if any. */
-function detectOpener(clean: string): BlockType | null {
+function detectOpener(clean: string, insideType = false): BlockType | null {
   const trimmed = clean.trim();
   const lower = trimmed.toLowerCase();
   if (!lower) {
@@ -145,9 +83,9 @@ function detectOpener(clean: string): BlockType | null {
     return lower.includes('subroutine') && !lower.includes('function') ? 'subroutine' : 'function';
   }
   if (/^event\b/.test(lower)) {
-    return 'event';
+    return insideType ? null : 'event';
   }
-  if (/^on\s+\w/.test(lower) && lower.endsWith(';')) {
+  if (/^on\s+[\p{L}_]/u.test(lower)) {
     return 'on';
   }
 
@@ -196,9 +134,9 @@ function detectCloser(clean: string): BlockType | null {
   return null;
 }
 
-function rangeFor(lineNumber: number, clean: string): Range {
-  const leading = clean.length - clean.trimStart().length;
-  const end = clean.trimEnd().length;
+function rangeFor(lineNumber: number, clean: string, column = 0): Range {
+  const leading = column + clean.length - clean.trimStart().length;
+  const end = column + clean.trimEnd().length;
   return {
     start: { line: lineNumber, character: leading },
     end: { line: lineNumber, character: Math.max(end, leading + 1) }
@@ -332,7 +270,8 @@ const SQL_START_RE =
 function semanticDiagnostics(
   cleaned: string[],
   original: string[],
-  semantic: SemanticContext
+  semantic: SemanticContext,
+  logical: LogicalLine[]
 ): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   let inPrototypes = false;
@@ -384,8 +323,8 @@ function semanticDiagnostics(
       diagnostics.push({
         severity: DiagnosticSeverity.Warning,
         range: {
-          start: { line: i, character: assign[1].length },
-          end: { line: i, character: assign[1].length + assign[2].length }
+          start: { line: logical[i]?.line ?? i, character: assign[1].length },
+          end: { line: logical[i]?.line ?? i, character: assign[1].length + assign[2].length }
         },
         message: `Variable '${assign[2]}' is assigned but never declared.`,
         source: 'powerbuilder'
@@ -405,7 +344,7 @@ function semanticDiagnostics(
         const note = semantic.versionNote(name);
         diagnostics.push({
           severity: note ? DiagnosticSeverity.Warning : DiagnosticSeverity.Information,
-          range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+          range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
           message: note ??
             `Unknown function '${name}' — not a PowerBuilder ${semantic.version} built-in or an indexed workspace symbol.`,
           source: 'powerbuilder'
@@ -422,7 +361,7 @@ function semanticDiagnostics(
       if (max !== undefined && args.length > max) {
         diagnostics.push({
           severity: DiagnosticSeverity.Warning,
-          range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+          range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
           message: `'${name}' accepts at most ${max} argument${max === 1 ? '' : 's'}, but ${args.length} were passed.`,
           source: 'powerbuilder'
         });
@@ -437,7 +376,7 @@ function semanticDiagnostics(
           if (refParams?.[a] && literal.kind !== 'other') {
             diagnostics.push({
               severity: DiagnosticSeverity.Warning,
-              range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+              range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
               message: `Argument ${a + 1} of '${name}' is passed by reference and must be a variable, not a ${literal.kind} literal.`,
               source: 'powerbuilder'
             });
@@ -447,7 +386,7 @@ function semanticDiagnostics(
           if (mismatch) {
             diagnostics.push({
               severity: DiagnosticSeverity.Warning,
-              range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+              range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
               message: `Argument ${a + 1} of '${name}' ${mismatch}.`,
               source: 'powerbuilder'
             });
@@ -492,7 +431,10 @@ function extractArguments(clean: string, orig: string, openParen: number): strin
 }
 
 export function computeDiagnostics(text: string, semantic?: SemanticContext): Diagnostic[] {
-  const lines = text.split(/\r?\n/);
+  const logical = toStatements(text.split(/\r?\n/));
+  const lines = logical.map((l) => l.text);
+  const lineNo = (i: number): number => logical[i]?.line ?? i;
+  const colOf = (i: number): number => logical[i]?.column ?? 0;
   const cleaned = stripCommentsAndStrings(lines);
   const diagnostics: Diagnostic[] = [];
   const stack: OpenBlock[] = [];
@@ -524,7 +466,7 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
       if (matchIndex === -1) {
         diagnostics.push({
           severity: DiagnosticSeverity.Error,
-          range: rangeFor(i, clean),
+          range: rangeFor(lineNo(i), clean, colOf(i)),
           message: `Unexpected '${CLOSER_LABEL[closer]}' — no matching '${closer}' block is open.`,
           source: 'powerbuilder'
         });
@@ -535,7 +477,7 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
           diagnostics.push({
             severity: DiagnosticSeverity.Error,
             range: { start: { line: orphan.line, character: orphan.startChar }, end: { line: orphan.line, character: orphan.endChar } },
-            message: `'${orphan.type}' block is missing its '${CLOSER_LABEL[orphan.type]}' (closed by '${CLOSER_LABEL[closer]}' on line ${i + 1}).`,
+            message: `'${orphan.type}' block is missing its '${CLOSER_LABEL[orphan.type]}' (closed by '${CLOSER_LABEL[closer]}' on line ${lineNo(i) + 1}).`,
             source: 'powerbuilder'
           });
         }
@@ -544,14 +486,14 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
       continue;
     }
 
-    const opener = detectOpener(clean);
+    const opener = detectOpener(clean, stack[stack.length - 1]?.type === 'type');
     if (opener) {
-      const leading = clean.length - clean.trimStart().length;
+      const leading = colOf(i) + clean.length - clean.trimStart().length;
       stack.push({
         type: opener,
-        line: i,
+        line: lineNo(i),
         startChar: leading,
-        endChar: clean.trimEnd().length
+        endChar: colOf(i) + clean.trimEnd().length
       });
     }
   }
@@ -567,7 +509,7 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
   }
 
   if (semantic) {
-    diagnostics.push(...semanticDiagnostics(cleaned, lines, semantic));
+    diagnostics.push(...semanticDiagnostics(cleaned, lines, semantic, logical));
   }
 
   return diagnostics;
@@ -578,7 +520,9 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
  * plus variables/prototypes sections (which the block stack ignores).
  */
 export function computeFoldingRanges(text: string): { startLine: number; endLine: number }[] {
-  const lines = text.split(/\r?\n/);
+  const logical = toStatements(text.split(/\r?\n/));
+  const lines = logical.map((l) => l.text);
+  const lineNo = (i: number): number => logical[i]?.line ?? i;
   const cleaned = stripCommentsAndStrings(lines);
   const ranges: { startLine: number; endLine: number }[] = [];
   const stack: OpenBlock[] = [];
@@ -592,12 +536,12 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
     }
 
     if (/^(?:global|shared|type)\s+variables\b/i.test(trimmed) || PROTOTYPES_START_RE.test(clean)) {
-      sectionStart = i;
+      sectionStart = lineNo(i);
       continue;
     }
     if (/^end\s+(?:variables|prototypes)\b/i.test(trimmed)) {
-      if (sectionStart >= 0 && i > sectionStart) {
-        ranges.push({ startLine: sectionStart, endLine: i - 1 });
+      if (sectionStart >= 0 && lineNo(i) > sectionStart) {
+        ranges.push({ startLine: sectionStart, endLine: lineNo(i) - 1 });
       }
       sectionStart = -1;
       continue;
@@ -611,18 +555,18 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
       const matchIndex = findMatchIndex(stack, closer);
       if (matchIndex !== -1) {
         const opener = stack[matchIndex];
-        if (i > opener.line) {
-          ranges.push({ startLine: opener.line, endLine: i - 1 });
+        if (lineNo(i) > opener.line) {
+          ranges.push({ startLine: opener.line, endLine: lineNo(i) - 1 });
         }
         stack.length = matchIndex;
       }
       continue;
     }
 
-    const opener = detectOpener(clean);
+    const opener = detectOpener(clean, stack[stack.length - 1]?.type === 'type');
     if (opener) {
       const leading = clean.length - clean.trimStart().length;
-      stack.push({ type: opener, line: i, startChar: leading, endChar: clean.trimEnd().length });
+      stack.push({ type: opener, line: lineNo(i), startChar: leading, endChar: clean.trimEnd().length });
     }
   }
 

@@ -1,5 +1,28 @@
 # Change Log
 
+## 0.3.0
+
+Validated against a real PowerBuilder application for the first time (OpenPay,
+422 exported objects). Structural diagnostics went from **1,673 false
+positives across 158 of 422 files to zero**.
+
+- Logical-line preprocessing: `&` continuations are joined before any parsing,
+  so continued declarations (`datawindow idw_a, &` / `idw_b`) no longer lose
+  every variable after the first.
+- Statement splitting on `;`: PowerBuilder packs several statements onto one
+  line (`event dw::itemchanged;call super::itemchanged;choose case dwo.name`),
+  which previously hid block openers and produced spurious unmatched-block
+  errors.
+- `on ... end on` blocks are recognised without a trailing semicolon, and
+  `event` declarations inside a `type` block are no longer mistaken for event
+  bodies.
+- Identifiers may contain non-ASCII letters (Greek menu names) and type names
+  may contain punctuation (`type m_- from menu`).
+- ANSI decoding is configurable via `powerbuilder.ansiEncoding` (default
+  windows-1252); the previous latin1 fallback mangled other codepages.
+- New `tools/corpus-check.js` harness for running the parsers over real
+  exports.
+
 ## 0.2.1
 
 - By-reference arguments: the scrapers now read `REF` markers (and the declared

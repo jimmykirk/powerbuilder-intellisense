@@ -80,7 +80,7 @@ import {
   SemanticContext,
   stripCommentsAndStrings
 } from './diagnostics';
-import { decodePBExport } from './encoding';
+import { decodePBExport, setAnsiEncoding } from './encoding';
 import { findActiveCall, getWordAtPosition } from './textutils';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -1715,6 +1715,9 @@ async function loadConfiguration(): Promise<void> {
   try {
     const config = await connection.workspace.getConfiguration('powerbuilder');
     const version = typeof config?.version === 'string' ? config.version : '2025';
+    if (typeof config?.ansiEncoding === 'string') {
+      setAnsiEncoding(config.ansiEncoding);
+    }
 
     if (version === '2022') {
       pbVersion = '2022';

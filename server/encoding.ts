@@ -8,8 +8,26 @@
  * (workspace scan and watched-file reloads).
  */
 
+/**
+ * Codepage used for files that are neither UTF-16 nor valid UTF-8. There is no
+ * reliable way to detect this from the bytes — a PB export written on a Greek
+ * workstation is windows-1253, a Western European one windows-1252 — so the
+ * caller supplies it (the `powerbuilder.ansiEncoding` setting) and we default
+ * to the most common case.
+ */
+let ansiEncoding = 'windows-1252';
+
+export function setAnsiEncoding(label: string): void {
+  try {
+    new TextDecoder(label); // throws on an unsupported label
+    ansiEncoding = label;
+  } catch {
+    ansiEncoding = 'windows-1252';
+  }
+}
+
 /** Decodes a PowerBuilder source file buffer using BOM + content heuristics. */
-export function decodePBExport(buffer: Buffer): string {
+export function decodePBExport(buffer: Buffer, encoding = ansiEncoding): string {
   if (buffer.length >= 2) {
     if (buffer[0] === 0xff && buffer[1] === 0xfe) {
       return buffer.toString('utf16le', 2);
