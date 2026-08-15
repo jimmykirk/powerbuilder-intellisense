@@ -16,8 +16,8 @@ jobs:
       - run: npm install
       - run: npm test
       - name: Verify extension packages
-        run: npx --yes @vscode/vsce package --out powerbuilder-support.vsix
+        run: npx --yes @vscode/vsce package --out powerbuilder-intellisense.vsix
       - uses: actions/upload-artifact@v4
         with:
           name: vsix
-          path: powerbuilder-support.vsix
+          path: powerbuilder-intellisense.vsix

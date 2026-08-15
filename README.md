@@ -1,4 +1,4 @@
-# PowerBuilder Support (VS Code)
+# PowerBuilder IntelliSense (VS Code)
 
 PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 (switchable via the `powerbuilder.version` setting).

@@ -1,5 +1,13 @@
 # Change Log
 
+## 0.2.0
+
+- Renamed the extension to **PowerBuilder IntelliSense** (identifier
+  `powerbuilder-intellisense`). The previous name understated the scope: the
+  extension covers the DataWindow API, object properties, `.srd` objects, and
+  workspace files, not only the PowerScript language. The repository moved to
+  `github.com/jimmykirk/powerbuilder-intellisense`.
+
 ## 0.1.1
 
 - Added the DataWindow Reference catalogs (253/254 methods, 57 events):
