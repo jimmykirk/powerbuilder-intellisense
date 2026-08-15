@@ -1,0 +1,2140 @@
+{
+  "version": "2022",
+  "events": [
+    {
+      "name": "Activate",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs just before the window becomes active.",
+      "params": [],
+      "eventId": "pbm_activate"
+    },
+    {
+      "name": "AddressChange",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the frame's address changes.",
+      "params": [
+        {
+          "name": "newUrl",
+          "type": "any",
+          "description": "The frame’s new address."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "BeginDownload",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs at the beginning of a download procedure",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "BeginDrag",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The BeginDrag event has different arguments for different objects: Occurs when the user presses the left mouse button in the ListView control and begins dragging. Occurs when the user presses the left mouse button on a label in the TreeView control and begins dragging.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the ListView item being dragged)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (handle of the TreeView item being dragged)"
+        }
+      ],
+      "eventId": "pbm_lvnbegindrag, pbm_tvnbegindrag"
+    },
+    {
+      "name": "BeginLabelEdit",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The BeginLabelEdit event has different arguments for different objects: Occurs when the user clicks on the label of an item after selecting the item.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the selected ListView item)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (the handle of the selected TreeView item)"
+        }
+      ],
+      "eventId": "pbm_lvnbeginlabeledit, pbm_tvnbeginlabeledit"
+    },
+    {
+      "name": "BeginLogScan",
+      "returnType": "none",
+      "category": "MLSync",
+      "documentation": "Occurs before dbmlsync scans the transaction log to assemble the upload data stream.",
+      "params": [
+        {
+          "name": "rescanlog",
+          "type": "boolean",
+          "description": "Boolean indicating whether the log has already been scanned for the current synchronization."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "BeginRightDrag",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The BeginRightDrag event has different arguments for different objects: Occurs when the user presses the right mouse button in the ListView control and begins dragging. Occurs when the user presses the right mouse button in the TreeView control and begins dragging.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the ListView item being dragged)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (the handle of the TreeView item being dragged)"
+        }
+      ],
+      "eventId": "pbm_lvnbeginrightdrag, pbm_tvnbeginrightdrag"
+    },
+    {
+      "name": "BeginSync",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs at the beginning of the synchronization.",
+      "params": [
+        {
+          "name": "mlusername",
+          "type": "string",
+          "description": "Read-only string identifying the MobiLink user name."
+        },
+        {
+          "name": "pubnames",
+          "type": "string",
+          "description": "Read-only string identifying the publication to be synchronized. If there is more than one publication, this is a comma-separated list."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "BeginUpload",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs at the beginning of the synchronization upload procedure.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "CategoryCollapsed",
+      "returnType": "long",
+      "category": "RibbonBar",
+      "documentation": "Occurs when the category is collapsed. When the RibbonBar is minimized, the category will be expanded when the user clicks the category title, and will be collapsed when the user clicks the title again or clicks outside of the category.",
+      "params": [
+        {
+          "name": "Index",
+          "type": "long",
+          "description": "Long by value (the index of the currently collapsed category)"
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "CategoryExpanded",
+      "returnType": "long",
+      "category": "RibbonBar",
+      "documentation": "Occurs when the category is expanded. When the RibbonBar is minimized, the category will be expanded when the user clicks the category title.",
+      "params": [
+        {
+          "name": "Index",
+          "type": "long",
+          "description": "Long by value (the index of the currently popup category)"
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "CategorySelectionChanged",
+      "returnType": "long",
+      "category": "RibbonBar",
+      "documentation": "Just after the selection changes to another category. CategorySelectionChanged is triggered when the category is created and the initial selection is established.",
+      "params": [
+        {
+          "name": "OldIndex",
+          "type": "long",
+          "description": "Long by value (the index of the category that was previously selected)"
+        },
+        {
+          "name": "NewIndex",
+          "type": "long",
+          "description": "Long by value (the index of the category that has become selected)"
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "CategorySelectionChanging",
+      "returnType": "long",
+      "category": "RibbonBar",
+      "documentation": "Occurs when another category is about to be selected.",
+      "params": [
+        {
+          "name": "OldIndex",
+          "type": "long",
+          "description": "Long by value (the index of the currently selected category)"
+        },
+        {
+          "name": "NewIndex",
+          "type": "long",
+          "description": "Long by value (the index of the category that is about to be selected)"
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "CertificateError",
+      "returnType": "0 -- to continue browsing the current page",
+      "category": "WebBrowser",
+      "documentation": "Occurs when failed to validate the server certificate.",
+      "params": [
+        {
+          "name": "errorText",
+          "type": "any",
+          "description": "The error description."
+        },
+        {
+          "name": "requestUrl",
+          "type": "any",
+          "description": "The URL of the server currently being requested."
+        },
+        {
+          "name": "certificateInfo",
+          "type": "time",
+          "description": "The certificate information which includes certificate issuer, certificate subject, certificate expiration time, and certificate PEM encoding."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "Clicked",
+      "returnType": "none",
+      "category": "Menu",
+      "documentation": "The Clicked event has different arguments for different objects: For information about the DataWindow control's Clicked event, see the section called “Clicked” in DataWindow Reference . Occurs when the user chooses an item on a menu. Occurs when the user clicks within the ListView control, either on an item or in the blank space around items. Occurs when the user clicks on the tab portion of a Tab control. Occurs when the user clicks an item in a TreeView control. Occurs when the user clicks in an unoccupied area of the window or progress bar (any area with no visible, enabled object). This is a user event which occurs when the user clicks on an item within a RibbonBar control. Make sure the parameter (quantities and types) of the user event is correctly defined according to the requirement of the ribbon control. Occurs when the user clicks on the control.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the ListView item the user clicked). The value of index is -1 if the user clicks within the control but not on a specific item."
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (the handle of the TreeView item the user clicked)"
+        },
+        {
+          "name": "flags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button (windows only) 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button (windows only) In the Clicked event for windows, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+        },
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the left edge of the window workspace or control in pixels)."
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the top of the window's workspace or control in pixels)."
+        },
+        {
+          "name": "ItemHandle",
+          "type": "long",
+          "description": "Long. The handle of the button the menu is associated with."
+        },
+        {
+          "name": "SubIndex",
+          "type": "long",
+          "description": "Long. The index of the submenu item clicked. 0 indicates the event is triggered by the main menu."
+        }
+      ],
+      "eventId": "pbm_lvnclicked, pbm_tcnclicked, pbm_tvnclicked, pbm_lbuttonclk, pbm_lbuttondwn, pbm_bnclicked, pbm_lbuttondown"
+    },
+    {
+      "name": "Close",
+      "returnType": "none",
+      "category": "Application",
+      "documentation": "The Close event has different arguments for different objects: Occurs when the user closes the application. Occurs when the object in an OLE control has been activated offsite (the OLE server displays the object in the server's window) and that server is closed. Occurs just before a window is removed from display.",
+      "params": [],
+      "eventId": "pbm_omnclose, pbm_close"
+    },
+    {
+      "name": "CloseQuery",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a window is closed, before the Close event.",
+      "params": [],
+      "eventId": "pbm_closequery"
+    },
+    {
+      "name": "CloseUp",
+      "returnType": "long",
+      "category": "DatePicker",
+      "documentation": "Occurs when the user has selected a date from the drop-down calendar and the calendar closes.",
+      "params": [],
+      "eventId": "pbm_dtpcloseup"
+    },
+    {
+      "name": "ColumnClick",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "Occurs when the user clicks a column header.",
+      "params": [
+        {
+          "name": "column",
+          "type": "any",
+          "description": "The index of the clicked column"
+        }
+      ],
+      "eventId": "pbm_lvncolumnclick"
+    },
+    {
+      "name": "ConnectMobiLink",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs when the MobiLink synchronization server connects to the consolidated database server.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "Constructor",
+      "returnType": "long",
+      "category": "System",
+      "documentation": "Occurs when the control or object is created, just before the Open event for the window that contains the control.",
+      "params": [],
+      "eventId": "pbm_constructor"
+    },
+    {
+      "name": "DataChange",
+      "returnType": "long",
+      "category": "OLE",
+      "documentation": "Occurs when the server application notifies the control that data has changed.",
+      "params": [],
+      "eventId": "pbm_omndatachange"
+    },
+    {
+      "name": "DateChanged",
+      "returnType": "long",
+      "category": "MonthCalendar",
+      "documentation": "Occurs immediately after a date is selected.",
+      "params": [],
+      "eventId": "pbm_mcdatechanged"
+    },
+    {
+      "name": "DateSelected",
+      "returnType": "long",
+      "category": "MonthCalendar",
+      "documentation": "Occurs when the user selects a date using the mouse.",
+      "params": [],
+      "eventId": "pbm_mcdatesel"
+    },
+    {
+      "name": "DBError",
+      "returnType": "Long, but this return code has no meaning to PowerBuilder",
+      "category": "Transaction",
+      "documentation": "Triggered when an error occurs during a transaction or an attempted transaction.",
+      "params": [
+        {
+          "name": "code",
+          "type": "long",
+          "description": "Long by value. A database-specific error code. See your DBMS documentation for information on the meaning of the code. When there is no error code from the DBMS, code contains one of these values: -1 -- Cannot connect to the database -2 -- Writing a blob to the database failed -4 -- All other errors (see Usage note for more detail)"
+        },
+        {
+          "name": "sqlerrortext",
+          "type": "string",
+          "description": "String by value. A database-specific error message."
+        },
+        {
+          "name": "sqlsyntax",
+          "type": "string",
+          "description": "String by value. The full text of the SQL statement being sent to the DBMS when the error occurred."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "DBNotification",
+      "returnType": "long",
+      "category": "Transaction",
+      "documentation": "Triggered by a PowerBuilder script or DataWindow database operation command if a PowerBuilder database driver receives a notification from the database server. This event is supported only with the Oracle 10g (O10) native database interface.",
+      "params": [
+        {
+          "name": "notification",
+          "type": "DBNotification",
+          "description": "A value of the DBNotification enumerated datatype. The database interface determines the type of the notification received from the server, triggers the DBNotification event, and passes the notification type in this argument. Values are: DBServerDown! = 1. The server has been shut down. This notification type is used only by the O10 (Oracle 10g) database interface. DBFailover! = 2. The database client is failing over. DBDataTruncate! = 3. Data has been truncated. DBServerDown! is used for Oracle RAC database HA events. DBFailover! and DBDataTruncate! can be used with other databases for failover and data truncation warnings."
+        },
+        {
+          "name": "command",
+          "type": "string",
+          "description": "A string that informs users which command was being executed when the notification occurred."
+        },
+        {
+          "name": "dbmessage",
+          "type": "string",
+          "description": "A string that describes the reason why the event occurred."
+        }
+      ],
+      "eventId": "pbm_dbnotification"
+    },
+    {
+      "name": "Deactivate",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when the window becomes inactive.",
+      "params": [],
+      "eventId": "pbm_deactivate"
+    },
+    {
+      "name": "DeleteAllItems",
+      "returnType": "long",
+      "category": "System",
+      "documentation": "Occurs when all the items in the ListView are deleted.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "DeleteItem",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The DeleteItem event has different arguments for different objects: Occurs when an item is deleted.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the deleted item)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (the handle of the deleted item)"
+        }
+      ],
+      "eventId": "pbm_lvndeleteitem, pbm_tvndeleteitem"
+    },
+    {
+      "name": "Destructor",
+      "returnType": "long",
+      "category": "System",
+      "documentation": "Occurs when the user object or control is destroyed, immediately after the Close event of a window.",
+      "params": [],
+      "eventId": "pbm_destructor"
+    },
+    {
+      "name": "DisconnectMobiLink",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs when the MobiLink synchronization server disconnects from the consolidated database server.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "DisplayMessage",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs on display of an informational message from a MobiLink synchronization.",
+      "params": [
+        {
+          "name": "infomsg",
+          "type": "string",
+          "description": "Read-only string containing the text of an informational message returned from the synchronization server."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "DoubleClicked",
+      "returnType": "long",
+      "category": "ListBox",
+      "documentation": "The DoubleClicked event has different arguments for different objects: For information about the DataWindow control's DoubleClicked event, see the the section called “DoubleClicked” in DataWindow Reference . Occurs when the user double-clicks on the control. Occurs when the user double-clicks in an unoccupied area of the window (any area with no visible, enabled object).",
+      "params": [
+        {
+          "name": "index",
+          "type": "any",
+          "description": "Integer by value. The index of the item the user double-clicked (for tabs, the index of the tab page)."
+        },
+        {
+          "name": "handle",
+          "type": "any",
+          "description": "Long by value (the handle of the item the user double-clicked)"
+        },
+        {
+          "name": "flags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the Clicked event, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+        },
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+        }
+      ],
+      "eventId": "pbm_lbndblclk, pbm_lvndoubleclicked, pbm_tcndoubleclicked, pbm_tvndoubleclicked, pbm_lbuttondblclk, pbm_bndoubleclicked, pbm_cbndblclk, pbm_prndoubleclicked, pbm_rendoubleclicked"
+    },
+    {
+      "name": "DownloadingStart",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs before a download begins.",
+      "params": [
+        {
+          "name": "itemId",
+          "type": "any",
+          "description": "The ID used to specify the file."
+        },
+        {
+          "name": "fileName",
+          "type": "any",
+          "description": "The full path name of the file to be downloaded and saved locally."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "DownloadingStateChanged",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the download status or progress information has been updated.",
+      "params": [
+        {
+          "name": "itemId",
+          "type": "any",
+          "description": "The ID used to specify the file."
+        },
+        {
+          "name": "speed",
+          "type": "any",
+          "description": "The download speed estimated in bytes every second."
+        },
+        {
+          "name": "received",
+          "type": "any",
+          "description": "The number of bytes received."
+        },
+        {
+          "name": "total",
+          "type": "any",
+          "description": "The total number of bytes to be downloaded."
+        },
+        {
+          "name": "percent",
+          "type": "any",
+          "description": "A rough percentage of completion or -1 if the received total size is unknown."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "DragDrop",
+      "returnType": "long",
+      "category": "ListBox",
+      "documentation": "The DragDrop event has different arguments for different objects: For information about the DataWindow control's DragDrop event, see the the section called “DragDrop” in DataWindow Reference . Occurs when the user drags an object onto the control and releases the mouse button to drop the object.",
+      "params": [
+        {
+          "name": "source",
+          "type": "dragobject",
+          "description": "DragObject by value (a reference to the control being dragged)"
+        },
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the target ListView item)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (the handle of the target TreeView item)"
+        }
+      ],
+      "eventId": "pbm_lbndragdrop, pbm_lvndragdrop, pbm_tcndragdrop, pbm_tvndragdrop, pbm_bndragdrop, pbm_cbndragdrop, pbm_dragdrop, pbm_endragdrop, pbm_omndragdrop, pbm_prndragdrop, pbm_rendragdrop, pbm_sbndragdrop, pbm_uondragdrop"
+    },
+    {
+      "name": "DragEnter",
+      "returnType": "long",
+      "category": "CheckBox",
+      "documentation": "Occurs when the user is dragging an object and enters the control.",
+      "params": [
+        {
+          "name": "source",
+          "type": "dragobject",
+          "description": "DragObject by value (a reference to the control being dragged)"
+        }
+      ],
+      "eventId": "pbm_bndragenter, pbm_cbndragenter, pbm_dragenter, pbm_dwndragenter, pbm_endragenter, pbm_lbndragenter, pbm_lvndragenter, pbm_omndragenter, pbm_prndragenter, pbm_rendragenter, pbm_sbndragenter, pbm_tcndragenter, pbm_tvndragenter, pbm_uondragenter"
+    },
+    {
+      "name": "DragLeave",
+      "returnType": "long",
+      "category": "CheckBox",
+      "documentation": "Occurs when the user is dragging an object and leaves the control.",
+      "params": [
+        {
+          "name": "source",
+          "type": "dragobject",
+          "description": "DragObject by value (a reference to the control being dragged)"
+        }
+      ],
+      "eventId": "pbm_bndragleave, pbm_cbndragleave, pbm_dragleave, pbm_dwndragleave, pbm_endragleave, pbm_lbndragleave, pbm_lvndragleave, pbm_omndragleave, pbm_prndragleave, pbm_rendragleave, pbm_sbndragleave, pbm_tcndragleave, pbm_tvndragleave, pbm_uondragleave"
+    },
+    {
+      "name": "DragWithin",
+      "returnType": "long",
+      "category": "ListBox",
+      "documentation": "The DragWithin event has different arguments for different objects: For information about the DataWindow control's DragWithin event, see the section called “DragWithin” in DataWindow Reference . Occurs when the user is dragging an object within the control.",
+      "params": [
+        {
+          "name": "source",
+          "type": "dragobject",
+          "description": "DragObject by value (a reference to the control being dragged)"
+        },
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (a reference to the ListView item under the pointer in the ListView control)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long (a reference to the ListView item under the pointer in the TreeView control)"
+        }
+      ],
+      "eventId": "pbm_lbndragwithin, pbm_lvndragwithin, pbm_tcndragwithin, pbm_tvndragwithin, pbm_bndragwithin, pbm_cbndragwithin, pbm_dragwithin, pbm_endragwithin, pbm_omndragwithin, pbm_prndragwithin, pbm_rendragwithin, pbm_sbndragwithin, pbm_uondragwithin"
+    },
+    {
+      "name": "DropDown",
+      "returnType": "long",
+      "category": "DatePicker",
+      "documentation": "Occurs when the user has clicked the drop-down arrow in a DatePicker control just before the drop-down calendar displays.",
+      "params": [],
+      "eventId": "pbm_dtpdropdown"
+    },
+    {
+      "name": "EndDownload",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs at the end of a download procedure",
+      "params": [
+        {
+          "name": "upsertrows",
+          "type": "long",
+          "description": "Long identifying the inserted and updated rows."
+        },
+        {
+          "name": "deleterows",
+          "type": "long",
+          "description": "Long identifying the deleted rows."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "EndLabelEdit",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The EndLabelEdit event has different arguments for different objects: Occurs when the user finishes editing an item's label.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer. The index of the ListView item for which you have edited the label."
+        },
+        {
+          "name": "newlabel",
+          "type": "string",
+          "description": "The string that represents the new label for the ListView item."
+        },
+        {
+          "name": "handle",
+          "type": "integer",
+          "description": "Integer. The index of the TreeView item for which you have edited the label."
+        },
+        {
+          "name": "newtext",
+          "type": "string",
+          "description": "The string that represents the new label for the TreeView item."
+        }
+      ],
+      "eventId": "pbm_lvnendlabeledit, pbm_tvnendlabeledit"
+    },
+    {
+      "name": "EndLogScan",
+      "returnType": "none",
+      "category": "MLSync",
+      "documentation": "Occurs after the scan of the transaction log completes for upload.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "EndSync",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs at the end of synchronization.",
+      "params": [
+        {
+          "name": "rc",
+          "type": "long",
+          "description": "Long datatype value that indicates whether a synchronization error occurred."
+        },
+        {
+          "name": "restart",
+          "type": "boolean",
+          "description": "Boolean value passed by reference that, if true, causes dbmlsync to restart the synchronization."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "EndUpload",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs after transmission of the upload to the synchronization server.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "Error",
+      "returnType": "none",
+      "category": "Connection",
+      "documentation": "Occurs when an error is found in a data or property expression for an external object or a DataWindow object. Occurs when an error is found in the file compression operation. Occurs when an error is found in the archive extraction operation.",
+      "params": [
+        {
+          "name": "errornumber",
+          "type": "integer",
+          "description": "Unsigned integer by value (PowerBuilder's error number)"
+        },
+        {
+          "name": "errortext",
+          "type": "string",
+          "description": "String, read-only (PowerBuilder's error message)"
+        },
+        {
+          "name": "errorwindowmenu",
+          "type": "string",
+          "description": "String, read-only (the name of the window or menu that is the parent of the object whose script caused the error)"
+        },
+        {
+          "name": "errorobject",
+          "type": "string",
+          "description": "String, read-only (the name of the object whose script caused the error)"
+        },
+        {
+          "name": "errorscript",
+          "type": "string",
+          "description": "String, read-only (the full text of the script in which the error occurred)"
+        },
+        {
+          "name": "errorline",
+          "type": "integer",
+          "description": "Unsigned integer by value (the line in the script where the error occurred)"
+        },
+        {
+          "name": "action",
+          "type": "any",
+          "description": "ExceptionAction by reference. A value you specify to control the application's course of action as a result of the error. Values are: ExceptionFail! -- fail as if this script were not implemented. The error condition triggers any active event handlers, or if none, the SystemError event. ExceptionIgnore! -- ignore this error and return as if no error occurred (use this option with caution because the conditions that caused the error can cause another error). ExceptionRetry! -- execute the function or evaluate the expression again in case the OLE server was not ready. This option is not valid for DataWindows. ExceptionSubstituteReturnValue! -- use the value specified in the returnvalue argument instead of the value returned by the OLE server or DataWindow, and cancel the error condition."
+        },
+        {
+          "name": "returnvalue",
+          "type": "any",
+          "description": "Any by reference (a value whose datatype matches the expected value that the OLE server or DataWindow would have returned). This value is used when the value of action is ExceptionSubstituteReturnValue!."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "ErrorMessage",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs on display of an error message from a MobiLink synchronization.",
+      "params": [
+        {
+          "name": "errmsg",
+          "type": "string",
+          "description": "Read-only string containing the text of the error message returned from the synchronization server."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "EvaluateJavascriptFinished",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs after the EvaluateJavascriptAsync function is executed.",
+      "params": [
+        {
+          "name": "result",
+          "type": "any",
+          "description": "The result of script execution. The execution result is represented in JSON format. The supported JavaScript data types are bool, int, double, string, date, array. When the above types are mapped to the PowerBuilder data types, they are boolean, integer, double, string, datetime, array."
+        },
+        {
+          "name": "error",
+          "type": "string",
+          "description": "The error information if an error occurs during execution or an empty string if there is no error."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "ExternalException",
+      "returnType": "none",
+      "category": "OLE",
+      "documentation": "Occurs when an OLE automation command caused an exception on the OLE server.",
+      "params": [
+        {
+          "name": "resultcode",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (a PowerBuilder number identifying the exception that occurred on the server)."
+        },
+        {
+          "name": "exceptioncode",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (a number identifying the error that occurred on the server. For the meaning of the code, see the server documentation)."
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "description": "String by value (the name of the server, which the server provides)."
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "description": "String by value (a description of the exception, which the server provides)."
+        },
+        {
+          "name": "helpfile",
+          "type": "string",
+          "description": "String by value (the name of a Help file containing information about the exception, which the server provides)."
+        },
+        {
+          "name": "helpcontext",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the context ID of a Help topic in helpfile containing information about the exception, which the server provides)."
+        },
+        {
+          "name": "action",
+          "type": "any",
+          "description": "ExceptionAction by reference. A value you specify to control the application's course of action as a result of the error. Values are: ExceptionFail! -- fail as if this script were not implemented. The error condition triggers the SystemError event. ExceptionIgnore! -- ignore this error and return as if no error occurred (use this option with caution because the conditions that caused the error can cause another error). ExceptionRetry! -- execute the function or evaluate the expression again in case the OLE server was not ready. ExceptionSubstituteReturnValue! -- use the value specified in the returnvalue argument instead of the value returned by the OLE server or DataWindow and cancel the error condition."
+        },
+        {
+          "name": "returnvalue",
+          "type": "any",
+          "description": "Any by reference. A value whose datatype matches the expected value that the OLE server would have returned. This value is used when the value of action is ExceptionSubstituteReturnValue!."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "FileExists",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "Occurs when a file is saved in the RichTextEdit control and the file already exists.",
+      "params": [
+        {
+          "name": "filename",
+          "type": "any",
+          "description": "The name of the file"
+        }
+      ],
+      "eventId": "pbm_renfileexists"
+    },
+    {
+      "name": "FileMessage",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs on display of a detailed information message from a MobiLink synchronization.",
+      "params": [
+        {
+          "name": "filemsg",
+          "type": "string",
+          "description": "Read-only string containing the text of the message returned from the synchronization server."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "Finished",
+      "returnType": "none",
+      "category": "Compression",
+      "documentation": "Occurs when the file compression or extraction is completed.",
+      "params": [
+        {
+          "name": "Result",
+          "type": "boolean",
+          "description": "A boolean value specifying the file compression or decompression result: True -- Success False -- Failed"
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "Gesture",
+      "returnType": "boolean",
+      "category": "InkEdit",
+      "documentation": "Occurs when an application gesture recognized by the control is completed. A gesture is a stroke or series of strokes that is recognized by the application as indicating an action. This event can only be triggered on a Tablet PC.",
+      "params": [
+        {
+          "name": "gest",
+          "type": "integer",
+          "description": "Integer identifying the gesture recognized. See the tables in the Usage section for argument values."
+        }
+      ],
+      "eventId": "pbm_inkegesture, pbm_inkpgesture"
+    },
+    {
+      "name": "GetFocus",
+      "returnType": "long",
+      "category": "CheckBox",
+      "documentation": "Occurs just before the control receives focus (before it is selected and becomes active). GetFocus applies to all controls",
+      "params": [],
+      "eventId": "pbm_bnsetfocus, pbm_cbnsetfocus, pbm_dwnsetfocus, pbm_ensetfocus, pbm_lbnsetfocus, pbm_lvnsetfocus, pbm_rensetfocus, pbm_sbnsetfocus, pbm_setfocus, pbm_tcnsetfocus, pbm_tvnsetfocus"
+    },
+    {
+      "name": "Help",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when the user drags the question-mark button from the title bar to a menu item or a control and then clicks, or when the user clicks in a control (giving it focus) and then presses the F1 key.",
+      "params": [
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the Help message from the left edge of the screen, in PowerBuilder units)"
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the Help message from the top of the screen, in PowerBuilder units)"
+        }
+      ],
+      "eventId": "pbm_help"
+    },
+    {
+      "name": "Hide",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs just before the window is hidden.",
+      "params": [],
+      "eventId": "pbm_hidewindow"
+    },
+    {
+      "name": "HotLinkAlarm",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs after a Dynamic Data Exchange (DDE) server application has sent new (changed) data and the client DDE application has received it.",
+      "params": [],
+      "eventId": "pbm_ddedata"
+    },
+    {
+      "name": "Idle",
+      "returnType": "none",
+      "category": "Application",
+      "documentation": "Occurs when the Idle function has been called in an application object script and the specified number of seconds have elapsed with no mouse or keyboard activity.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "InputFieldSelected",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "In a RichTextEdit control, occurs when the user double-clicks an input field, allowing the user to edit the data in the field.",
+      "params": [
+        {
+          "name": "fieldname",
+          "type": "string",
+          "description": "String by value (the name of the input field that was selected)"
+        }
+      ],
+      "eventId": "pbm_reninputfieldselected"
+    },
+    {
+      "name": "InsertItem",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "Occurs when an item is inserted in the ListView.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "An integer that represents the index of the item being inserted into the ListView"
+        }
+      ],
+      "eventId": "pbm_lvninsertitem"
+    },
+    {
+      "name": "ItemActivate",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "Occurs when a ListView item is clicked or double-clicked. The actual firing mechanism depends on the OneClickActivate and TwoClickActivate property settings.",
+      "params": [
+        {
+          "name": "Index",
+          "type": "integer",
+          "description": "An integer that represents the index of the item being inserted into the ListView"
+        }
+      ],
+      "eventId": "pbm_lvnitemactivate"
+    },
+    {
+      "name": "ItemChanged",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "Occurs when an ListView item has changed.",
+      "params": [
+        {
+          "name": "index",
+          "type": "any",
+          "description": "The index of the item that is changing"
+        },
+        {
+          "name": "focuschanged",
+          "type": "boolean",
+          "description": "Boolean (specifies if focus has changed for the item)"
+        },
+        {
+          "name": "hasfocus",
+          "type": "boolean",
+          "description": "Boolean (specifies whether the item has focus)"
+        },
+        {
+          "name": "selectionchange",
+          "type": "boolean",
+          "description": "Boolean (specifies whether the selection has changed for the item)"
+        },
+        {
+          "name": "selected",
+          "type": "boolean",
+          "description": "Boolean (specifies whether the item is selected)"
+        },
+        {
+          "name": "otherchange",
+          "type": "boolean",
+          "description": "Boolean (specifies if anything other than focus or selection has changed for the item)"
+        }
+      ],
+      "eventId": "pbm_lvnitemchanged"
+    },
+    {
+      "name": "ItemChanging",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "Occurs just before a ListView changes.",
+      "params": [
+        {
+          "name": "index",
+          "type": "any",
+          "description": "The index of the item that has changed"
+        },
+        {
+          "name": "focuschange",
+          "type": "boolean",
+          "description": "Boolean (specifies if focus is changing for the item)"
+        },
+        {
+          "name": "hasfocus",
+          "type": "boolean",
+          "description": "Boolean (specifies whether the item has focus)"
+        },
+        {
+          "name": "selectionchange",
+          "type": "boolean",
+          "description": "Boolean (specifies whether the selection is changing for the item)"
+        },
+        {
+          "name": "selected",
+          "type": "boolean",
+          "description": "Boolean (specifies whether the item is selected)"
+        },
+        {
+          "name": "otherchange",
+          "type": "boolean",
+          "description": "Boolean (specifies if anything other than focus or selection has changed for the item)"
+        }
+      ],
+      "eventId": "pbm_lvnitemchanging"
+    },
+    {
+      "name": "ItemCollapsed",
+      "returnType": "long",
+      "category": "TreeView",
+      "documentation": "Occurs when a TreeView item has collapsed.",
+      "params": [
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by reference (the handle of the collapsed TreeViewItem)"
+        }
+      ],
+      "eventId": "pbm_tvnitemcollapsed"
+    },
+    {
+      "name": "ItemCollapsing",
+      "returnType": "long",
+      "category": "TreeView",
+      "documentation": "Occurs when a TreeView item is collapsing.",
+      "params": [
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by reference (the handle of the collapsing item)"
+        }
+      ],
+      "eventId": "pbm_tvnitemcollapsing"
+    },
+    {
+      "name": "ItemExpanded",
+      "returnType": "long",
+      "category": "TreeView",
+      "documentation": "Occurs when a TreeView item has expanded.",
+      "params": [
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by reference (the handle of the expanded item)"
+        }
+      ],
+      "eventId": "pbm_tvnitemexpanded"
+    },
+    {
+      "name": "ItemExpanding",
+      "returnType": "long",
+      "category": "TreeView",
+      "documentation": "Occurs while a TreeView item is expanding.",
+      "params": [
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by reference (the handle of the expanding TreeView item)"
+        }
+      ],
+      "eventId": "pbm_tvnitemexpanding"
+    },
+    {
+      "name": "ItemPopulate",
+      "returnType": "long",
+      "category": "TreeView",
+      "documentation": "Occurs when a TreeView item is being populated with children.",
+      "params": [
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by reference (the handle of the TreeView item being populated)"
+        }
+      ],
+      "eventId": "pbm_tvnitempopulate"
+    },
+    {
+      "name": "ItemUnselected",
+      "returnType": "long",
+      "category": "RibbonBar",
+      "documentation": "Occurs when an item changes from highlight to another state.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "Key",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "Occurs when the user presses a key.",
+      "params": [
+        {
+          "name": "key",
+          "type": "KeyCode",
+          "description": "KeyCode by value. A value of the KeyCode enumerated datatype indicating the key that was pressed (for example, KeyA! or KeyF1!)."
+        },
+        {
+          "name": "keyflags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys that were pressed with the key). Values are: 1 Shift key 2 Ctrl key 3 Shift and Ctrl keys"
+        }
+      ],
+      "eventId": "pbm_lvnkeydown, pbm_renkey, pbm_tcnkeydown, pbm_tvnkeydown, pbm_keydown"
+    },
+    {
+      "name": "LineDown",
+      "returnType": "long",
+      "category": "VScrollBar",
+      "documentation": "Occurs when the user clicks the down arrow of the vertical scroll bar or presses the down arrow on the keyboard when the focus is on a track bar.",
+      "params": [],
+      "eventId": "pbm_sbnlinedown"
+    },
+    {
+      "name": "LineLeft",
+      "returnType": "long",
+      "category": "HScrollBar",
+      "documentation": "Occurs when the user clicks in the left arrow of the horizontal scroll bar or presses the left arrow key on the keyboard when focus is on a horizontal track bar.",
+      "params": [],
+      "eventId": "pbm_sbnlineup"
+    },
+    {
+      "name": "LineRight",
+      "returnType": "long",
+      "category": "HScrollBar",
+      "documentation": "Occurs when the user clicks in the right arrow of the horizontal scroll bar or presses the right arrow key on the keyboard when focus is on a horizontal track bar.",
+      "params": [],
+      "eventId": "pbm_sbnlinedown"
+    },
+    {
+      "name": "LineUp",
+      "returnType": "long",
+      "category": "VScrollBar",
+      "documentation": "Occurs when the user clicks the up arrow of the vertical scroll bar or presses the up arrow on the keyboard when the focus is on a track bar",
+      "params": [],
+      "eventId": "pbm_sbnlineup"
+    },
+    {
+      "name": "LoseFocus",
+      "returnType": "long",
+      "category": "UserObject (standard visual user )",
+      "documentation": "Occurs just before a control loses focus (before it becomes inactive).",
+      "params": [],
+      "eventId": "pbm_controltypekillfocus, pbm_bnkillfocus, pbm_cbnkillfocus, pbm_dwnkillfocus, pbm_enkillfocus, pbm_killfocus, pbm_lbnkillfocus, pbm_lvnkillfocus, pbm_renkillfocus, pbm_sbnkillfocus, pbm_tcnkillfocus, pbm_tvnkillfocus"
+    },
+    {
+      "name": "Modified",
+      "returnType": "long",
+      "category": "DropDownListBox",
+      "documentation": "This is a user event which occurs when the ribbon combo box control loses focus, the text has been changed, or Enter or Tab is pressed. Make sure the parameter (quantities and types) of the user event is correctly defined according to the requirement of the ribbon combo box control. Occurs when the contents in the control have changed.",
+      "params": [
+        {
+          "name": "ItemHandle",
+          "type": "long",
+          "description": "Long. The handle of the item."
+        }
+      ],
+      "eventId": "pbm_cbnmodified, pbm_enmodified, pbm_inkemodified, pbm_renmodified"
+    },
+    {
+      "name": "MouseDown",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "The MouseDown event has different arguments for different objects: Occurs when the user presses the left mouse button on the RichTextEdit control. Occurs when the user presses the left mouse button in an unoccupied area of the window (any area with no visible, enabled object).",
+      "params": [
+        {
+          "name": "flags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the MouseDown event, the left mouse button is always down, so 1 is always summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+        },
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+        }
+      ],
+      "eventId": "pbm_renlbuttondown, pbm_lbuttondown"
+    },
+    {
+      "name": "MouseMove",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "The MouseMove event has different arguments for different objects: Occurs when the mouse has moved within the RichTextEdit control. Occurs when the pointer is moved within the window.",
+      "params": [
+        {
+          "name": "flags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button Flags is the sum of all the buttons and keys that are pressed."
+        },
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+        }
+      ],
+      "eventId": "pbm_renmousemove, pbm_mousemove"
+    },
+    {
+      "name": "MouseUp",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "The MouseUp event has different arguments for different objects: Occurs when the user releases the left mouse button in a RichTextEdit control. Occurs when the user releases the left mouse button in an unoccupied area of the window (any area with no visible enabled object).",
+      "params": [
+        {
+          "name": "flags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the MouseUp event, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+        },
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+        }
+      ],
+      "eventId": "pbm_renlbuttonup, pbm_lbuttonup"
+    },
+    {
+      "name": "Moved",
+      "returnType": "long",
+      "category": "HScrollBar",
+      "documentation": "Occurs when the user moves the scroll box, either by clicking on the arrows or by dragging the box itself.",
+      "params": [
+        {
+          "name": "scrollpos",
+          "type": "integer",
+          "description": "Integer by value (a number indicating position of the scroll box within the range of values specified by the MinPosition and MaxPosition properties)"
+        }
+      ],
+      "eventId": "pbm_sbnthumbtrack"
+    },
+    {
+      "name": "NavigationError",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the navigation fails or is cancelled.",
+      "params": [
+        {
+          "name": "errorCode",
+          "type": "any",
+          "description": "The error code number."
+        },
+        {
+          "name": "errorText",
+          "type": "any",
+          "description": "The error text."
+        },
+        {
+          "name": "failedUrl",
+          "type": "any",
+          "description": "The URL that the browser failed to load."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "NavigationProgressIndex",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the overall page loading progress changes.",
+      "params": [
+        {
+          "name": "progressIndex",
+          "type": "any",
+          "description": "The page loading progress."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "NavigationStart",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs after a navigation has been committed and before the browser begins loading contents in the frame.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "NavigationStateChanged",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the navigation state changes.",
+      "params": [
+        {
+          "name": "canGoBack",
+          "type": "boolean",
+          "description": "A boolean value specifying whether to be able to go back to the last page: True -- To be able to go back False -- Not to able to go back"
+        },
+        {
+          "name": "canGoForward",
+          "type": "boolean",
+          "description": "A boolean value specifying whether to be able to move forward to the next page: True -- To be able to move forward False -- Not to be able to move forward"
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "Notify",
+      "returnType": "long",
+      "category": "TreeView",
+      "documentation": "Occurs when a TreeView control sends a WM_NOTIFY message to its parent.",
+      "params": [
+        {
+          "name": "wparam",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value containing the ID of the control sending the message. This value is not guaranteed to be unique."
+        },
+        {
+          "name": "lparam",
+          "type": "long",
+          "description": "Long by value containing a pointer to a structure that contains the window handle and identifier of the control sending a message and a notification code."
+        }
+      ],
+      "eventId": "pbm_notify"
+    },
+    {
+      "name": "Open",
+      "returnType": "none",
+      "category": "Application",
+      "documentation": "The Open event has different arguments for different objects: Occurs when the user starts the application. Occurs when a window is opened by one of the Open functions. The event occurs after the window has been opened but before it is displayed.",
+      "params": [
+        {
+          "name": "commandline",
+          "type": "string",
+          "description": "String by value. Additional arguments are included on the command line after the name of the executable program."
+        }
+      ],
+      "eventId": "pbm_open"
+    },
+    {
+      "name": "Other",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a system message occurs that is not a PowerBuilder message.",
+      "params": [
+        {
+          "name": "wparam",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value"
+        },
+        {
+          "name": "lparam",
+          "type": "long",
+          "description": "Long by value"
+        }
+      ],
+      "eventId": "pbm_other"
+    },
+    {
+      "name": "PageDown",
+      "returnType": "long",
+      "category": "VScrollBar",
+      "documentation": "Occurs when the user clicks in the open space below the scroll box.",
+      "params": [],
+      "eventId": "pbm_sbnpagedown"
+    },
+    {
+      "name": "PageLeft",
+      "returnType": "long",
+      "category": "HScrollBar",
+      "documentation": "Occurs when the open space to the left of the scroll box is clicked.",
+      "params": [],
+      "eventId": "pbm_sbnpageup"
+    },
+    {
+      "name": "PageRight",
+      "returnType": "long",
+      "category": "HScrollBar",
+      "documentation": "Occurs when the open space to the right of the scroll box is clicked.",
+      "params": [],
+      "eventId": "pbm_sbnpagedown"
+    },
+    {
+      "name": "PageUp",
+      "returnType": "long",
+      "category": "VScrollBar",
+      "documentation": "Occurs when the user clicks in the open space above the scroll box (also called the thumb).",
+      "params": [],
+      "eventId": "pbm_sbnpageup"
+    },
+    {
+      "name": "PdfPrintFinished",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the process of printing PDF is completed.",
+      "params": [
+        {
+          "name": "pdfFile",
+          "type": "any",
+          "description": "The path and file name of the PDF file to be saved."
+        },
+        {
+          "name": "result",
+          "type": "any",
+          "description": "The result of operation. TRUE indicates success; FALSE indicates failure."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "PictureSelected",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "Occurs when the user selects a picture in the RichTextEdit control by clicking it.",
+      "params": [],
+      "eventId": "pbm_renpictureselected"
+    },
+    {
+      "name": "PipeEnd",
+      "returnType": "long",
+      "category": "Pipeline",
+      "documentation": "Occurs when pipeline processing is completed.",
+      "params": [],
+      "eventId": "pbm_pipeend"
+    },
+    {
+      "name": "PipeMeter",
+      "returnType": "long",
+      "category": "Pipeline",
+      "documentation": "Occurs during pipeline processing after each block of rows is read or written. The Commit factor specified for the Pipeline in the Pipeline painter determines the size of each block.",
+      "params": [],
+      "eventId": "pbm_pipemeter"
+    },
+    {
+      "name": "PipeStart",
+      "returnType": "long",
+      "category": "Pipeline",
+      "documentation": "Occurs when pipeline processing begins.",
+      "params": [],
+      "eventId": "pbm_pipestart"
+    },
+    {
+      "name": "PrintFooter",
+      "returnType": "none",
+      "category": "RichTextEdit",
+      "documentation": "Occurs when the footer of a page of the document in the RichTextEdit control is about to be printed.",
+      "params": [],
+      "eventId": "pbm_renprintfooter"
+    },
+    {
+      "name": "PrintHeader",
+      "returnType": "none",
+      "category": "RichTextEdit",
+      "documentation": "Occurs when the header of a page of the document in the RichTextEdit control is about to be printed.",
+      "params": [],
+      "eventId": "pbm_renprintheader"
+    },
+    {
+      "name": "ProcessingFile",
+      "returnType": "none",
+      "category": "Compression",
+      "documentation": "Occurs during the file compression or extraction process. This event can be used to display the full path name of the file that is being compressed or decompressed. If one of the files in the compressed archive failed to be extracted, the Error event instead of the ProcessingFile event will be triggered.",
+      "params": [
+        {
+          "name": "FileFullPath",
+          "type": "string",
+          "description": "A readonly string whose value is the full path name of the file that is being compressed or decompressed."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "ProgressIndex",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs periodically during synchronization after updates to a synchronization progress bar.",
+      "params": [
+        {
+          "name": "progress_idx",
+          "type": "long",
+          "description": "Long value representing the progress of the synchronization."
+        },
+        {
+          "name": "progress_max",
+          "type": "long",
+          "description": "Long value indicating the progress limit of the synchronization."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "PropertyChanged",
+      "returnType": "none",
+      "category": "OLE",
+      "documentation": "Occurs after the OLE server changes the value of a property of the OLE object.",
+      "params": [
+        {
+          "name": "propertyname",
+          "type": "string",
+          "description": "The name of the property whose value changed. If propertyname is an empty string, a more general change occurred, such as changes to more than one property."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "PropertyRequestEdit",
+      "returnType": "none",
+      "category": "OLE",
+      "documentation": "Occurs when the OLE server is about to change the value of a property of the object in the OLE control.",
+      "params": [
+        {
+          "name": "propertyname",
+          "type": "string",
+          "description": "String by value (the name of the property whose value changed). If propertyname is an empty string, a more general change occurred, such as changes to more than one property."
+        },
+        {
+          "name": "cancelchange",
+          "type": "boolean",
+          "description": "Boolean by reference; determines whether the change will be canceled. Values are: FALSE -- (Default) the change is allowed. TRUE -- the change is canceled."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "RButtonDown",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "The RButtonDown event has different arguments for different objects: For a window, occurs when the right mouse button is pressed in an unoccupied area of the window (any area with no visible, enabled object). The window event will occur if the cursor is over an invisible or disabled control. For a control, occurs when the right mouse button is pressed on the control. Occurs when the user presses the right mouse button on the RichTextEdit control and the control's PopMenu property is set to false.",
+      "params": [
+        {
+          "name": "flags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the RButtonDown event, the right mouse button is always pressed, so 2 is always summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+        },
+        {
+          "name": "xpos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+        },
+        {
+          "name": "ypos",
+          "type": "integer",
+          "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+        }
+      ],
+      "eventId": "pbm_rbuttondown, pbm_renrbuttondown"
+    },
+    {
+      "name": "RButtonUp",
+      "returnType": "long",
+      "category": "RichTextEdit",
+      "documentation": "Occurs when the right mouse button is released.",
+      "params": [],
+      "eventId": "pbm_renrbuttonup"
+    },
+    {
+      "name": "RecognitionResult",
+      "returnType": "none",
+      "category": "InkEdit",
+      "documentation": "Occurs when an InkEdit control gets results from a call to the RecognizeText function.",
+      "params": [],
+      "eventId": "pbm_inkerecognition"
+    },
+    {
+      "name": "RemoteExec",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a DDE client application has sent a command.",
+      "params": [],
+      "eventId": "pbm_ddeexecute"
+    },
+    {
+      "name": "RemoteHotLinkStart",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a DDE client application wants to start a hot link.",
+      "params": [],
+      "eventId": "pbm_ddeadvise"
+    },
+    {
+      "name": "RemoteHotLinkStop",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a DDE client application wants to end a hot link.",
+      "params": [],
+      "eventId": "pbm_ddeunadvise"
+    },
+    {
+      "name": "RemoteRequest",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a DDE client application requests data.",
+      "params": [],
+      "eventId": "pbm_dderequest"
+    },
+    {
+      "name": "RemoteSend",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when a DDE client application has sent data.",
+      "params": [],
+      "eventId": "pbm_ddepoke"
+    },
+    {
+      "name": "Rename",
+      "returnType": "long",
+      "category": "OLE",
+      "documentation": "Occurs when the server application notifies the control that the object has been renamed.",
+      "params": [],
+      "eventId": "pbm_omnrename"
+    },
+    {
+      "name": "Resize",
+      "returnType": "long",
+      "category": "DataWindow",
+      "documentation": "Occurs when the user or a script opens or resizes the client area of a window or DataWindow control.",
+      "params": [
+        {
+          "name": "sizetype",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value. The values are: 0 -- (SIZE_RESTORED) The window or DataWindow has been resized, but it was not minimized or maximized. The user might have dragged the borders or a script might have called the Resize function. 1 -- (SIZE_MINIMIZED) The window or DataWindow has been minimized. 2 -- (SIZE_MAXIMIZED) The window or DataWindow has been maximized. 3 -- (SIZE_MAXSHOW) This window is a pop-up window and some other window in the application has been restored to its former size (does not apply to DataWindow controls). 4 -- (SIZE_MAXHIDE) This window is a pop-up window and some other window in the application has been maximized (does not apply to DataWindow controls)."
+        },
+        {
+          "name": "newwidth",
+          "type": "integer",
+          "description": "Integer by value (the width of the client area of a window or DataWindow control in PowerBuilder units)."
+        },
+        {
+          "name": "newheight",
+          "type": "integer",
+          "description": "Integer by value (the height of the client area of a window or DataWindow control in PowerBuilder units)."
+        }
+      ],
+      "eventId": "pbm_dwnresize, pbm_size"
+    },
+    {
+      "name": "ResourceRedirect",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when a resource load is redirected.",
+      "params": [
+        {
+          "name": "redirectUrl",
+          "type": "any",
+          "description": "The new URL to be redirected to."
+        },
+        {
+          "name": "headers",
+          "type": "any",
+          "description": "The response headers."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "RightClicked",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The RightClicked event has different arguments for different objects: Occurs when the user clicks the right mouse button on the ListView control or the tab portion of the Tab control. Occurs when the user clicks the right mouse button on the TreeView control.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the item or tab the user clicked)"
+        },
+        {
+          "name": "handle",
+          "type": "long",
+          "description": "Long by value (the handle of the item the user clicked)"
+        }
+      ],
+      "eventId": "pbm_lvnrclicked, pbm_tcnrclicked, pbm_tvnrclicked"
+    },
+    {
+      "name": "RightDoubleClicked",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The RightDoubleClicked event has different arguments for different objects: Occurs when the user double-clicks the right mouse button on the ListView control or the tab portion of the Tab control. Occurs when the user double-clicks the right mouse button on the TreeView control.",
+      "params": [
+        {
+          "name": "index",
+          "type": "any",
+          "description": "Integer by value (the index of the item or tab the user double-clicked)"
+        },
+        {
+          "name": "handle",
+          "type": "any",
+          "description": "Long by value (the handle of the item the user double-clicked)"
+        }
+      ],
+      "eventId": "pbm_lvnrdoubleclicked, pbm_tcnrdoubleclicked, pbm_tvnrdoubleclicked"
+    },
+    {
+      "name": "Save",
+      "returnType": "long",
+      "category": "OLE",
+      "documentation": "Occurs when the server application notifies the control that the data has been saved.",
+      "params": [],
+      "eventId": "pbm_omnsave"
+    },
+    {
+      "name": "SaveObject",
+      "returnType": "long",
+      "category": "OLE",
+      "documentation": "Occurs when the server application saves the object in the control.",
+      "params": [],
+      "eventId": "pbm_omnsaveobject"
+    },
+    {
+      "name": "Selected",
+      "returnType": "long",
+      "category": "Menu",
+      "documentation": "This is a user event which occurs when the user highlights an item within the RibbonBar control. Make sure the parameter (quantities and types) of the user event is correctly defined according to the requirement of the ribbon control. Occurs when the user highlights an item on the menu using the arrow keys or the mouse, without choosing it to be executed.",
+      "params": [
+        {
+          "name": "ItemHandle",
+          "type": "long",
+          "description": "Long. The handle of the button the menu is associated with."
+        },
+        {
+          "name": "Index",
+          "type": "long",
+          "description": "Long. The index of the menu item the mouse is on."
+        },
+        {
+          "name": "SubIndex",
+          "type": "long",
+          "description": "Long. The index of the submenu item the mouse is on. 0 indicates the event is triggered by the main menu."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "SelectionChanged",
+      "returnType": "long",
+      "category": "DropDownListBox",
+      "documentation": "The SelectionChanged event has different arguments for different objects: Occurs when an item is selected in the control. Occurs when a tab is selected. Occurs when the item is selected in a TreeView control. This is a user event which occurs when the item is selected in the ribbon combo box control. Make sure the parameter (quantities and types) of the user event is correctly defined according to the requirement of the ribbon combo box control.",
+      "params": [
+        {
+          "name": "index",
+          "type": "integer",
+          "description": "Integer by value (the index of the item that has become selected)"
+        },
+        {
+          "name": "oldindex",
+          "type": "integer",
+          "description": "Integer by value (the index of the tab that was previously selected)"
+        },
+        {
+          "name": "newindex",
+          "type": "integer",
+          "description": "Integer by value (the index of the tab that has become selected)"
+        },
+        {
+          "name": "oldhandle",
+          "type": "long",
+          "description": "Long by value (the handle of the previously selected item)"
+        },
+        {
+          "name": "newhandle",
+          "type": "long",
+          "description": "Long by value (the handle of the currently selected item)"
+        },
+        {
+          "name": "ItemHandle",
+          "type": "long",
+          "description": "Long. The handle of the item."
+        }
+      ],
+      "eventId": "pbm_cbnselchange, pbm_lbnselchange, pbm_tcnselchanged, pbm_tvnselchanged"
+    },
+    {
+      "name": "SelectionChanging",
+      "returnType": "long",
+      "category": "Tab",
+      "documentation": "The SelectionChanging event has different arguments for different objects: Occurs when another tab is about to be selected. Occurs when the selection is about to change in the TreeView control.",
+      "params": [
+        {
+          "name": "oldindex",
+          "type": "integer",
+          "description": "Integer by value (the index of the currently selected tab)"
+        },
+        {
+          "name": "newindex",
+          "type": "integer",
+          "description": "Integer by value (the index of the tab that is about to be selected)"
+        },
+        {
+          "name": "oldhandle",
+          "type": "long",
+          "description": "Long by value (the handle of the currently selected item)"
+        },
+        {
+          "name": "newhandle",
+          "type": "long",
+          "description": "Long by value (the handle of the item that is about to be selected)"
+        }
+      ],
+      "eventId": "pbm_tcnselchanging, pbm_tvnselchanging"
+    },
+    {
+      "name": "Show",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs just before the window is displayed.",
+      "params": [
+        {
+          "name": "show",
+          "type": "boolean",
+          "description": "Boolean by value (whether the window is being shown). The value is always true."
+        },
+        {
+          "name": "status",
+          "type": "long",
+          "description": "Long by value (the status of the window). Values are: 0 -- The current window is the only one affected. 1 -- The window's parent is also being minimized or a pop-up window is being hidden. 3 -- The window's parent is also being displayed or maximized or a pop-up window is being shown."
+        }
+      ],
+      "eventId": "pbm_showwindow"
+    },
+    {
+      "name": "SizeCompleted",
+      "returnType": "none",
+      "category": "Compression",
+      "documentation": "Occurs during the file compression or extraction process. This event can be used to display the total number of bytes in the file that has been compressed or decompressed.",
+      "params": [
+        {
+          "name": "CompletedSize",
+          "type": "longlong",
+          "description": "A longlong whose value is the total number of bytes in the file that has been compressed or decompressed."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "Sort",
+      "returnType": "long",
+      "category": "ListView",
+      "documentation": "The Sort event has different arguments for different objects: Occurs for each comparison when the ListView is being sorted. Occurs for each comparison when the TreeView is being sorted.",
+      "params": [
+        {
+          "name": "index1",
+          "type": "integer",
+          "description": "Integer by value (the index of one item being compared during a sorting operation)"
+        },
+        {
+          "name": "index2",
+          "type": "integer",
+          "description": "Integer by value (the index of the second item being compared)"
+        },
+        {
+          "name": "column",
+          "type": "integer",
+          "description": "Integer by value (the number of the column containing the items being sorted)"
+        },
+        {
+          "name": "handle1",
+          "type": "long",
+          "description": "Long by value (the handle of one item being compared during a sorting operation)"
+        },
+        {
+          "name": "handle2",
+          "type": "long",
+          "description": "Long by value (the handle of the second item being compared)"
+        }
+      ],
+      "eventId": "pbm_lvnsort, pbm_tvnsort"
+    },
+    {
+      "name": "SQLPreview",
+      "returnType": "long",
+      "category": "Transaction",
+      "documentation": "Occurs immediately before a SQL statement is submitted to the DBMS.",
+      "params": [
+        {
+          "name": "sqlfunc",
+          "type": "any",
+          "description": "The SQLFunction system enumeration passed by value. This enumeration indicates the function that initiated database activity. Values for this enumeration are: SQLDBInsert! SQLDBUpdate!, SQLDBDelete!, SQLDBSelect!, SQLDBProcedure!, SQLDBRPC!, and SQLDBOthers!."
+        },
+        {
+          "name": "sqlsyntax",
+          "type": "string",
+          "description": "String by value. The full text of the SQL statement."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "Start",
+      "returnType": "long",
+      "category": "Animation",
+      "documentation": "Occurs when an animation has started playing. Occurs before the file compression or extraction starts. This event can be used to display the total number of bytes in the file that will be compressed or decompressed.",
+      "params": [
+        {
+          "name": "TotalSize",
+          "type": "longlong",
+          "description": "For CompressorObject, it is a longlong whose value is the total number of bytes in the file that will be compressed, plus the size of some additional meta data. For ExtractorObject, it is a longlong whose value is the original size of all files in the compressed archive."
+        }
+      ],
+      "eventId": "pbm_animatestart"
+    },
+    {
+      "name": "Stop",
+      "returnType": "long",
+      "category": "Animation",
+      "documentation": "Occurs when an animation has stopped playing.",
+      "params": [],
+      "eventId": "pbm_animatestop"
+    },
+    {
+      "name": "Stroke",
+      "returnType": "boolean",
+      "category": "InkEdit",
+      "documentation": "Occurs when the user draws a new stroke.",
+      "params": [],
+      "eventId": "pbm_inkestroke, pbm_inkpstroke"
+    },
+    {
+      "name": "SyncPreview",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Returns generated dbmlsync command arguments immediately prior to launching the synchronization process.",
+      "params": [
+        {
+          "name": "command_args",
+          "type": "string",
+          "description": "String passed by reference that includes dbmlsync command arguments for launching the synchronization process."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "SystemError",
+      "returnType": "none",
+      "category": "Application",
+      "documentation": "Occurs when a serious runtime error occurs (such as trying to open a nonexistent window) if the error is not handled in a try-catch block.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "SystemKey",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs when the insertion point is not in a line edit, and the user presses the Alt key (alone or with another key).",
+      "params": [
+        {
+          "name": "key",
+          "type": "KeyCode",
+          "description": "KeyCode by value. A value of the KeyCode enumerated datatype indicating the key that was pressed, for example, KeyA! or KeyF1!."
+        },
+        {
+          "name": "keyflags",
+          "type": "unsignedlong",
+          "description": "UnsignedLong by value (the modifier keys that were pressed with the key). The only modifier key is the Shift key."
+        }
+      ],
+      "eventId": "pbm_syskeydown"
+    },
+    {
+      "name": "Timer",
+      "returnType": "long",
+      "category": "Timing",
+      "documentation": "Occurs when a specified number of seconds elapses after the Start or Timer function has been called.",
+      "params": [],
+      "eventId": "pbm_timer"
+    },
+    {
+      "name": "TitleTextChanged",
+      "returnType": "none",
+      "category": "WebBrowser",
+      "documentation": "Occurs when the page title changes.",
+      "params": [
+        {
+          "name": "titletext",
+          "type": "any",
+          "description": "The title of the page you browse."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "ToolbarMoved",
+      "returnType": "long",
+      "category": "Window",
+      "documentation": "Occurs in an MDI frame window when the user moves any FrameBar or SheetBar.",
+      "params": [],
+      "eventId": "pbm_tbnmoved"
+    },
+    {
+      "name": "UploadAck",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs on completion of upload processing.",
+      "params": [
+        {
+          "name": "uploadack_status",
+          "type": "long",
+          "description": "Long indicating the status returned by MobiLink to the remote after the upload stream is processed. Values are: 0 for StatCommitted 1 for StatFailed 248 for StatRetry See the Usage note for the meaning of these values."
+        }
+      ],
+      "eventId": null
+    },
+    {
+      "name": "UserString",
+      "returnType": "long",
+      "category": "DatePicker",
+      "documentation": "Occurs when the user has edited the contents of the control and the control has lost focus. The AllowEdit property must be set to true.",
+      "params": [
+        {
+          "name": "flag",
+          "type": "long",
+          "description": "Unsigned long by reference. The value of flag is 0 by default and should not be changed."
+        },
+        {
+          "name": "userstr",
+          "type": "string",
+          "description": "String entered in the control by the user."
+        },
+        {
+          "name": "dtm",
+          "type": "any",
+          "description": "A DateTime value by reference to which the validated date should be assigned."
+        }
+      ],
+      "eventId": "pbm_dtpuserstring"
+    },
+    {
+      "name": "ValueChanged",
+      "returnType": "long",
+      "category": "DatePicker",
+      "documentation": "Occurs when the Value property in a DatePicker control changes.",
+      "params": [
+        {
+          "name": "flag",
+          "type": "long",
+          "description": "Unsigned long that defaults to 0 and can be ignored"
+        },
+        {
+          "name": "dtm",
+          "type": "datetime",
+          "description": "The new DateTime value"
+        }
+      ],
+      "eventId": "pbm_dtpvaluechanged"
+    },
+    {
+      "name": "ViewChange",
+      "returnType": "long",
+      "category": "OLE",
+      "documentation": "Occurs when the server application notifies the control that the view shown to the user has changed.",
+      "params": [],
+      "eventId": "pbm_omnviewchange"
+    },
+    {
+      "name": "WaitForUploadAck",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs when the synchronization process starts a new waiting period for upload acknowledgement.",
+      "params": [],
+      "eventId": null
+    },
+    {
+      "name": "WarningMessage",
+      "returnType": "none",
+      "category": "MLSynchronization",
+      "documentation": "Occurs on display of a warning message.",
+      "params": [
+        {
+          "name": "warnmsg",
+          "type": "string",
+          "description": "Read-only string containing the text of the warning message returned from the synchronization server."
+        }
+      ],
+      "eventId": null
+    }
+  ]
+}

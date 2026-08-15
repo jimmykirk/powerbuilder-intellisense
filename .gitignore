@@ -60,3 +60,7 @@ coverage/
 
 # Linux
 .directory
+
+# Docs scraper: raw HTML page cache and venv (regenerable, see tools/docs-scraper/README.md)
+tools/docs-scraper/cache/
+tools/docs-scraper/venv/
