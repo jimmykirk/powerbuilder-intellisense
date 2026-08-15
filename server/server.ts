@@ -40,7 +40,7 @@ import {
   findBuiltinEvent2025
 } from './builtins-2025';
 import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
-import { computeDiagnostics } from './diagnostics';
+import { computeDiagnostics, SemanticContext } from './diagnostics';
 import { findActiveCall, getWordAtPosition } from './textutils';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -108,9 +108,45 @@ documents.onDidChangeContent((change): void => {
   index.updateDocument(change.document.uri, change.document.getText());
   connection.sendDiagnostics({
     uri: change.document.uri,
-    diagnostics: computeDiagnostics(change.document.getText())
+    diagnostics: computeDiagnostics(
+      change.document.getText(),
+      buildSemanticContext(change.document.getText())
+    )
   });
 });
+
+/**
+ * Name resolution for semantic diagnostics: built-in functions and events of
+ * the active PB version, every indexed workspace callable/variable/type, and
+ * identifiers declared anywhere in the current document (loose local scan, so
+ * script-local declarations are never flagged).
+ */
+function buildSemanticContext(text: string): SemanticContext {
+  const localNames = new Set<string>();
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    for (const decl of parseVariableDeclaration(lines[i], i, '', 'local')) {
+      localNames.add(decl.name.toLowerCase());
+    }
+  }
+
+  return {
+    version: pbVersion,
+    isKnown: (name) =>
+      !!findActiveBuiltin(name) ||
+      !!findActiveEvent(name) ||
+      index.find(name).length > 0 ||
+      index.findVariables(name).length > 0 ||
+      localNames.has(name.toLowerCase()),
+    maxArgs: (name) => {
+      const fn = findActiveBuiltin(name);
+      if (!fn || fn.variadic || index.find(name).length > 0) {
+        return undefined; // unknown arity, or shadowed by a workspace symbol
+      }
+      return fn.params.length;
+    }
+  };
+}
 
 connection.onDidChangeWatchedFiles((params: DidChangeWatchedFilesParams): void => {
   for (const change of params.changes) {

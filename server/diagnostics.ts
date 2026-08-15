@@ -205,7 +205,133 @@ function rangeFor(lineNumber: number, clean: string): Range {
   };
 }
 
-export function computeDiagnostics(text: string): Diagnostic[] {
+/**
+ * Name-resolution facade the server supplies so semantic checks can consult
+ * the active built-in catalogs and the workspace index without this module
+ * depending on either.
+ */
+export interface SemanticContext {
+  /** True when the name resolves to any callable or declared identifier. */
+  isKnown(name: string): boolean;
+  /**
+   * Maximum accepted argument count when the name is a built-in whose arity is
+   * trustworthy (single-syntax, non-variadic); undefined disables the check.
+   */
+  maxArgs(name: string): number | undefined;
+  /** Active PowerBuilder version, for messages. */
+  version: string;
+}
+
+/** Control-flow words that read like calls when followed by `(`. */
+const STATEMENT_WORDS = new Set([
+  'if', 'elseif', 'then', 'else', 'while', 'until', 'for', 'do', 'loop',
+  'choose', 'case', 'try', 'catch', 'finally', 'throw', 'return', 'when',
+  'not', 'and', 'or', 'exit', 'continue', 'halt', 'goto', 'create', 'destroy',
+  'on', 'call', 'is'
+]);
+
+const CALL_RE = /(^|[^.\w:])([A-Za-z_]\w*)\s*\(/g;
+
+/**
+ * Flags unknown bare calls (Information — the target may live in a library
+ * that isn't exported to the workspace) and calls that pass more arguments
+ * than a built-in accepts (Warning). Member calls after a dot are skipped:
+ * without full type inference an unknown member is too often a false alarm.
+ */
+function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  let inPrototypes = false;
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const clean = cleaned[i];
+    const trimmed = clean.trim();
+    if (!trimmed) {
+      continue;
+    }
+    if (PROTOTYPES_START_RE.test(clean)) {
+      inPrototypes = true;
+      continue;
+    }
+    if (PROTOTYPES_END_RE.test(clean)) {
+      inPrototypes = false;
+      continue;
+    }
+    // Declaration lines legitimately contain `name (params)` shapes.
+    if (
+      inPrototypes ||
+      FUNCTION_DEF_RE.test(trimmed) ||
+      TYPE_DEF_RE.test(trimmed) ||
+      /^(end|event|on)\b/i.test(trimmed)
+    ) {
+      continue;
+    }
+
+    CALL_RE.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = CALL_RE.exec(clean)) !== null) {
+      const name = match[2];
+      const nameStart = match.index + match[1].length;
+      if (STATEMENT_WORDS.has(name.toLowerCase())) {
+        continue;
+      }
+
+      if (!semantic.isKnown(name)) {
+        diagnostics.push({
+          severity: DiagnosticSeverity.Information,
+          range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+          message: `Unknown function '${name}' — not a PowerBuilder ${semantic.version} built-in or an indexed workspace symbol.`,
+          source: 'powerbuilder'
+        });
+        continue;
+      }
+
+      const max = semantic.maxArgs(name);
+      if (max === undefined) {
+        continue;
+      }
+      const openParen = clean.indexOf('(', nameStart + name.length);
+      const args = countArguments(clean, openParen);
+      if (args !== undefined && args > max) {
+        diagnostics.push({
+          severity: DiagnosticSeverity.Warning,
+          range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+          message: `'${name}' accepts at most ${max} argument${max === 1 ? '' : 's'}, but ${args} were passed.`,
+          source: 'powerbuilder'
+        });
+      }
+    }
+  }
+
+  return diagnostics;
+}
+
+/**
+ * Counts the arguments of a call whose `(` sits at openParen, or undefined if
+ * the call does not close on the same (already comment/string-stripped) line.
+ */
+function countArguments(clean: string, openParen: number): number | undefined {
+  let depth = 0;
+  let commas = 0;
+  let sawContent = false;
+  for (let i = openParen; i < clean.length; i++) {
+    const ch = clean[i];
+    if (ch === '(') {
+      depth++;
+    } else if (ch === ')') {
+      depth--;
+      if (depth === 0) {
+        return sawContent ? commas + 1 : 0;
+      }
+    } else if (ch === ',' && depth === 1) {
+      commas++;
+    } else if (depth >= 1 && /\S/.test(ch)) {
+      sawContent = true;
+    }
+  }
+  return undefined;
+}
+
+export function computeDiagnostics(text: string, semantic?: SemanticContext): Diagnostic[] {
   const lines = text.split(/\r?\n/);
   const cleaned = stripCommentsAndStrings(lines);
   const diagnostics: Diagnostic[] = [];
@@ -278,6 +404,10 @@ export function computeDiagnostics(text: string): Diagnostic[] {
       message: `'${orphan.type}' block is never closed (missing '${CLOSER_LABEL[orphan.type]}').`,
       source: 'powerbuilder'
     });
+  }
+
+  if (semantic) {
+    diagnostics.push(...semanticDiagnostics(cleaned, semantic));
   }
 
   return diagnostics;

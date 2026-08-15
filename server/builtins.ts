@@ -25,6 +25,8 @@ export interface FunctionInfo {
   member?: boolean;
   /** Every object type the docs list this function/event as applying to. */
   appliesTo?: string[];
+  /** True when the documented syntax takes a repeating argument list. */
+  variadic?: boolean;
 }
 
 /**
@@ -105,7 +107,8 @@ export function loadFunctionCatalog(catalog: { functions: RawFunctionEntry[] }):
       documentation: fn.documentation,
       params,
       member: receiver !== undefined,
-      appliesTo: fn.appliesTo
+      appliesTo: fn.appliesTo,
+      variadic: /\.\s*\.\s*\./.test(fn.syntax)
     };
   });
 }

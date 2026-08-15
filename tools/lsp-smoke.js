@@ -12,6 +12,7 @@ const child = spawn('node', [serverPath, '--stdio'], { stdio: ['pipe', 'pipe', '
 
 let nextId = 1;
 const pending = new Map();
+const diagnosticsByUri = new Map();
 let buffer = Buffer.alloc(0);
 
 child.stdout.on('data', (chunk) => {
@@ -27,6 +28,8 @@ child.stdout.on('data', (chunk) => {
     if (body.id !== undefined && pending.has(body.id)) {
       pending.get(body.id)(body);
       pending.delete(body.id);
+    } else if (body.method === 'textDocument/publishDiagnostics') {
+      diagnosticsByUri.set(body.params.uri, body.params.diagnostics);
     }
   }
 });
@@ -87,8 +90,19 @@ const SRD = [
   'column(band=detail id=2 alignment="0" name=emp_name )'
 ].join('\n');
 
+const DIAG_DOC = [
+  'event ue_test;',
+  'string ls_name',
+  'ls_name = Upper("abc")',
+  'wf_missing(1)',
+  'MessageBox("t", "m", Information!, OKCancel!, 2, 99)',
+  'MessageBox("t", "m")',
+  'end event'
+].join('\n');
+
 const URI = 'file:///virtual/w_main.srw';
 const SRD_URI = 'file:///virtual/d_emp.srd';
+const DIAG_URI = 'file:///virtual/w_diag.srw';
 let failures = 0;
 
 function check(label, condition, detail) {
@@ -155,6 +169,17 @@ async function main() {
   // Signature help inside MessageBox(
   const sig = await request('textDocument/signatureHelp', at(17, 'MessageBox('.length));
   check('signature help for MessageBox', !!sig && sig.signatures[0].label.includes('MessageBox'), JSON.stringify(sig)?.slice(0, 80));
+
+  // Semantic diagnostics
+  notify('textDocument/didOpen', {
+    textDocument: { uri: DIAG_URI, languageId: 'powerbuilder', version: 1, text: DIAG_DOC }
+  });
+  await new Promise((r) => setTimeout(r, 500));
+  const diags = diagnosticsByUri.get(DIAG_URI) ?? [];
+  const onLine = (line) => diags.filter((d) => d.range.start.line === line);
+  check('unknown call flagged as Information', onLine(3).some((d) => d.severity === 3 && d.message.includes('wf_missing')), JSON.stringify(diags).slice(0, 200));
+  check('MessageBox with 6 args flagged as Warning', onLine(4).some((d) => d.severity === 2 && d.message.includes('at most 5')), JSON.stringify(onLine(4)));
+  check('valid calls produce no diagnostics', onLine(2).length === 0 && onLine(5).length === 0, JSON.stringify([...onLine(2), ...onLine(5)]));
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   child.kill();
