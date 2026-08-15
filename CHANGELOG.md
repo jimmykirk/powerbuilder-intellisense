@@ -1,5 +1,38 @@
 # Change Log
 
+## 0.1.0
+
+- Replaced the hand-written catalogs with full data scraped from the official
+  Appeon docs: 914 (PB 2022) / 1,118 (PB 2025) system functions, 139/150
+  object events with `pbm_*` IDs, 2,235/2,446 object properties across
+  155/185 classes, and ~70 enumerated datatypes — switchable between 2022 and
+  2025 via the `powerbuilder.version` setting and the status-bar toggle.
+- Member completion after `.` with receiver-type resolution, inheritance
+  walking, chained access (`this.idw_main.`, `GetApplication().`), object
+  properties, and deeper inference (`x = CREATE datastore`, `GetChild` ref
+  arguments).
+- DataWindow awareness: `.srd` column indexing, `dw.Object.` column
+  completion with cross-file `dataobject` binding resolution, and Go to
+  Definition into column definitions.
+- Instance/shared/global variable indexing and completion; embedded SQL
+  host-variable completion after `:`; enum values floated for enum-typed call
+  arguments; event stub completion with `end event` skeletons.
+- Signature help shows every documented variant of multi-syntax built-ins
+  (Open, Close, Clicked, ...) with the best match preselected.
+- Hover for built-in functions/events, properties through receiver chains,
+  and enumerated values.
+- Semantic diagnostics (debounced): unknown calls, arity and literal-type
+  checks, undeclared assignment targets, and version-availability warnings.
+- Document outline, folding ranges, Find All References, Rename, and
+  server-driven semantic highlighting.
+- Encoding detection for exports read from disk (UTF-16LE/BE BOMs, BOM-less
+  UTF-16, UTF-8, ANSI fallback).
+- TextMate grammar rewrite with proper embedded-SQL regions, enum `Value!`
+  constants, export headers, and line continuations.
+- "PowerBuilder: Generate OrcaScript" command rebuilds workspace PBLs from
+  exported sources; `npm test` runs an end-to-end LSP smoke harness; CI
+  workflow packages the extension on every push.
+
 ## 0.0.2
 
 - Expanded the built-in function catalog to ~55 system functions with structured

@@ -5,7 +5,26 @@
  * and signature help. Run after `npm run compile`:  node tools/lsp-smoke.js
  */
 const { spawn } = require('child_process');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
+
+// Fixture workspace on disk: a UTF-16LE (BOM) export, to prove encoding
+// detection in the folder scan.
+const fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pb-smoke-'));
+const UTF16_SRC = [
+  '$PBExportHeader$w_utf16.srw',
+  'global type w_utf16 from window',
+  'end type',
+  '',
+  'public function integer wf_utf16_calc (integer ai_n)',
+  'return ai_n * 2',
+  'end function'
+].join('\r\n');
+fs.writeFileSync(
+  path.join(fixtureDir, 'w_utf16.srw'),
+  Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(UTF16_SRC, 'utf16le')])
+);
 
 const serverPath = path.join(__dirname, '..', 'out', 'server', 'server.js');
 const child = spawn('node', [serverPath, '--stdio'], { stdio: ['pipe', 'pipe', 'inherit'] });
@@ -117,7 +136,13 @@ const W2_DOC = [
   /*1*/ 'datawindow dw_shared',
   /*2*/ 'dw_shared.object.',
   /*3*/ 'Close(',
-  /*4*/ 'end event'
+  /*4*/ 'powerobject lpo_x',
+  /*5*/ 'lpo_x = CREATE datastore',
+  /*6*/ 'lpo_x.',
+  /*7*/ 'powerobject lpo_c',
+  /*8*/ 'dw_shared.GetChild("emp_id", lpo_c)',
+  /*9*/ 'lpo_c.',
+  /*10*/ 'end event'
 ].join('\n');
 const W2_URI = 'file:///virtual/w_second.srw';
 
@@ -155,6 +180,7 @@ async function main() {
   await request('initialize', {
     processId: null,
     rootUri: null,
+    workspaceFolders: [{ uri: `file://${fixtureDir}`, name: 'fixtures' }],
     capabilities: { workspace: { configuration: false } }
   });
   notify('initialized', {});
@@ -319,7 +345,29 @@ async function main() {
   });
   check('hover on Information! shows enum info', !!enumHover && /Icon/.test(enumHover.contents.value), JSON.stringify(enumHover)?.slice(0, 120));
 
+  // UTF-16LE export picked up by the workspace scan
+  await new Promise((r) => setTimeout(r, 400));
+  const wsSymbols = await request('workspace/symbol', { query: 'wf_utf16' });
+  check('UTF-16LE export indexed by folder scan', wsSymbols.some((s) => s.name === 'wf_utf16_calc'), JSON.stringify(wsSymbols).slice(0, 150));
+
+  // Deeper inference: CREATE assignment and GetChild ref-argument
+  const created = labels(await request('textDocument/completion', w2at(6, 'lpo_x.'.length)));
+  check('CREATE datastore refines powerobject receiver', created.has('object'), [...created].slice(0, 8).join(','));
+  const childRef = labels(await request('textDocument/completion', w2at(9, 'lpo_c.'.length)));
+  check('GetChild ref-arg infers datawindowchild', childRef.has('object'), [...childRef].slice(0, 8).join(','));
+
+  // Semantic tokens
+  const tokens = await request('textDocument/semanticTokens/full', { textDocument: { uri: DIAG_URI } });
+  const types = [];
+  for (let i = 3; i < (tokens?.data ?? []).length; i += 5) {
+    types.push(tokens.data[i]);
+  }
+  check('semantic tokens produced', types.length > 0, JSON.stringify(tokens).slice(0, 100));
+  check('semantic tokens include enum values', types.includes(2), `types seen: ${[...new Set(types)].join(',')}`);
+  check('semantic tokens include function calls', types.includes(0), `types seen: ${[...new Set(types)].join(',')}`);
+
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
+  fs.rmSync(fixtureDir, { recursive: true, force: true });
   child.kill();
   process.exit(failures === 0 ? 0 : 1);
 }

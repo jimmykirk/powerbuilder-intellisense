@@ -1,14 +1,27 @@
 {
   "name": "powerbuilder-support",
   "displayName": "PowerBuilder Support",
-  "description": "Language support for Appeon PowerBuilder 2025 in VS Code.",
-  "version": "0.0.2",
-  "publisher": "your-publisher",
+  "description": "Language support for Appeon PowerBuilder 2022/2025: completion, hover, signature help, diagnostics, and navigation from the official PowerScript reference.",
+  "version": "0.1.0",
+  "publisher": "jimmykirk",
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jimmykirk/powerbuilder_vscode.git"
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
   "categories": [
     "Programming Languages"
+  ],
+  "keywords": [
+    "powerbuilder",
+    "powerscript",
+    "appeon",
+    "datawindow",
+    "pbl"
   ],
   "activationEvents": [
     "onLanguage:powerbuilder"

@@ -2,5 +2,6 @@
 **/*.map
 tools/**
 server/data/**
+.github/**
 .vscode/**
 node_modules/**/.bin/**

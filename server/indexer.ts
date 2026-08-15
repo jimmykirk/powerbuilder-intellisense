@@ -12,6 +12,7 @@ import * as path from 'path';
 import { URI } from 'vscode-uri';
 import { ParamInfo } from './builtins';
 import { stripCommentsAndStrings } from './diagnostics';
+import { decodePBExport } from './encoding';
 
 export type SymbolKind = 'function' | 'subroutine' | 'event' | 'type' | 'variable';
 
@@ -631,8 +632,8 @@ export class WorkspaceIndex {
           continue;
         }
         try {
-          const text = await fs.promises.readFile(fullPath, 'utf8');
-          this.updateDocument(URI.file(fullPath).toString(), text);
+          const raw = await fs.promises.readFile(fullPath);
+          this.updateDocument(URI.file(fullPath).toString(), decodePBExport(raw));
         } catch {
           // Ignore unreadable files.
         }

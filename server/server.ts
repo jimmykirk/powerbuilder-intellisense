@@ -19,6 +19,9 @@ import {
   ProposedFeatures,
   ReferenceParams,
   RenameParams,
+  SemanticTokens,
+  SemanticTokensBuilder,
+  SemanticTokensParams,
   SignatureHelp,
   SignatureHelpParams,
   SignatureInformation,
@@ -59,7 +62,13 @@ import {
   propertyMap2025
 } from './builtins-2025';
 import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
-import { computeDiagnostics, computeFoldingRanges, SemanticContext } from './diagnostics';
+import {
+  computeDiagnostics,
+  computeFoldingRanges,
+  SemanticContext,
+  stripCommentsAndStrings
+} from './diagnostics';
+import { decodePBExport } from './encoding';
 import { findActiveCall, getWordAtPosition } from './textutils';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -115,7 +124,11 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
       documentSymbolProvider: true,
       foldingRangeProvider: true,
       referencesProvider: true,
-      renameProvider: true
+      renameProvider: true,
+      semanticTokensProvider: {
+        legend: { tokenTypes: SEMANTIC_TOKEN_TYPES, tokenModifiers: [] },
+        full: true
+      }
     }
   };
 });
@@ -288,8 +301,8 @@ connection.onDidChangeWatchedFiles((params: DidChangeWatchedFilesParams): void =
       continue;
     }
     try {
-      const text = fs.readFileSync(URI.parse(change.uri).fsPath, 'utf8');
-      index.updateDocument(change.uri, text);
+      const raw = fs.readFileSync(URI.parse(change.uri).fsPath);
+      index.updateDocument(change.uri, decodePBExport(raw));
     } catch {
       // Ignore files that disappeared or are unreadable.
     }
@@ -609,6 +622,97 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
   return null;
 });
 
+const SEMANTIC_TOKEN_TYPES = ['function', 'variable', 'enumMember', 'type', 'property', 'event'];
+const TOKEN_IDX: Record<string, number> = Object.fromEntries(
+  SEMANTIC_TOKEN_TYPES.map((t, i) => [t, i])
+);
+
+connection.languages.semanticTokens.on((params: SemanticTokensParams): SemanticTokens => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) {
+    return { data: [] };
+  }
+  const lines = doc.getText().split(/\r?\n/);
+  const cleaned = stripCommentsAndStrings(lines);
+
+  const docVarNames = new Set<string>();
+  for (const v of index.variablesIn(doc.uri)) {
+    docVarNames.add(v.name.toLowerCase());
+  }
+  for (let i = 0; i < lines.length; i++) {
+    for (const decl of parseVariableDeclaration(lines[i], i, doc.uri, 'local')) {
+      if (!NON_TYPE_KEYWORDS.has(decl.type.toLowerCase())) {
+        docVarNames.add(decl.name.toLowerCase());
+      }
+    }
+  }
+  const enumValues = new Set<string>();
+  for (const en of activeEnums.values()) {
+    for (const v of en.values) {
+      enumValues.add(v.toLowerCase());
+    }
+  }
+
+  const tokens: { line: number; char: number; length: number; type: number }[] = [];
+  const WORD_RE = /[A-Za-z_]\w*!?/g;
+  for (let i = 0; i < cleaned.length; i++) {
+    const clean = cleaned[i];
+    WORD_RE.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = WORD_RE.exec(clean)) !== null) {
+      const word = match[0];
+      const lower = word.toLowerCase();
+      const start = match.index;
+      const prev = clean.slice(0, start).trimEnd();
+      const after = clean.slice(start + word.length);
+
+      if (word.endsWith('!')) {
+        if (enumValues.has(lower)) {
+          tokens.push({ line: i, char: start, length: word.length, type: TOKEN_IDX.enumMember });
+        }
+        continue;
+      }
+      const isCall = /^\s*\(/.test(after);
+      const afterDot = prev.endsWith('.');
+      if (isCall && !STATEMENT_LIKE.has(lower)) {
+        const custom = index.findCallable(word);
+        if (custom?.kind === 'event' || (!custom && !findActiveBuiltin(word) && findActiveEvent(word))) {
+          tokens.push({ line: i, char: start, length: word.length, type: TOKEN_IDX.event });
+        } else if (custom || findActiveBuiltin(word)) {
+          tokens.push({ line: i, char: start, length: word.length, type: TOKEN_IDX.function });
+        }
+        continue;
+      }
+      if (afterDot) {
+        if (anyPropertyNames().has(lower)) {
+          tokens.push({ line: i, char: start, length: word.length, type: TOKEN_IDX.property });
+        }
+        continue;
+      }
+      if (docVarNames.has(lower)) {
+        tokens.push({ line: i, char: start, length: word.length, type: TOKEN_IDX.variable });
+        continue;
+      }
+      if (index.find(word).some((d) => d.kind === 'type')) {
+        tokens.push({ line: i, char: start, length: word.length, type: TOKEN_IDX.type });
+      }
+    }
+  }
+
+  tokens.sort((a, b) => a.line - b.line || a.char - b.char);
+  const builder = new SemanticTokensBuilder();
+  for (const t of tokens) {
+    builder.push(t.line, t.char, t.length, t.type, 0);
+  }
+  return builder.build();
+});
+
+/** Control words that look like calls but are never callables. */
+const STATEMENT_LIKE = new Set([
+  'if', 'elseif', 'while', 'until', 'for', 'choose', 'case', 'catch', 'return',
+  'throw', 'when', 'not', 'and', 'or', 'create', 'destroy', 'call', 'on', 'is'
+]);
+
 connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => {
   const symbols = index.symbolsIn(params.textDocument.uri);
   return symbols
@@ -749,10 +853,21 @@ function resolveReceiverType(doc: TextDocument, position: { line: number }, rece
 
   const lines = doc.getText().split(/\r?\n/);
   const stop = Math.max(0, position.line - 400);
+  const createRe = new RegExp(`^\\s*${lower}\\s*=\\s*create\\s+([A-Za-z_]\\w*)`, 'i');
+  const getChildRe = new RegExp(`\\.\\s*GetChild\\s*\\([^,]+,\\s*${lower}\\s*\\)`, 'i');
   for (let i = position.line - 1; i >= stop; i--) {
     const line = lines[i];
     if (/^\s*end\s+(function|subroutine|event)\b/i.test(line)) {
       break; // left the enclosing script
+    }
+    // Nearest information wins: a CREATE assignment or a GetChild ref-argument
+    // is more specific than the declared type (powerobject, datawindowchild).
+    const created = createRe.exec(line);
+    if (created && !/^using$/i.test(created[1])) {
+      return created[1];
+    }
+    if (getChildRe.test(line)) {
+      return 'datawindowchild';
     }
     for (const decl of parseVariableDeclaration(line, i, doc.uri, 'local')) {
       if (decl.name.toLowerCase() === lower && !NON_TYPE_KEYWORDS.has(decl.type.toLowerCase())) {

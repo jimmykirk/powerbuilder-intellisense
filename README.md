@@ -55,6 +55,10 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
   constants, export headers, and line continuations
 - Document outline/breadcrumbs and folding for all block constructs plus
   variables/prototypes sections
+- Server-driven semantic highlighting (known calls, variables, enum values,
+  types, properties) layered over the TextMate grammar
+- Encoding detection for exports read from disk: UTF-16LE/BE (with or without
+  BOM), UTF-8, and ANSI fallback — real PB exports index correctly
 - **PowerBuilder: Generate OrcaScript** command — writes a `.orca` script that
   rebuilds the workspace's PBLs from the exported sources on disk (the
   documented `scc refresh target` offline pattern)
@@ -99,8 +103,8 @@ The extension is a thin client (`src/extension.ts`) that launches a Language Ser
 
 ## Roadmap
 
-- Encoding detection for real PB exports (UTF-16LE / ANSI with `$PBExportHeader$`)
-- CI running the LSP smoke harness on push
-- Marketplace packaging: publisher, license, icon, `vsce` verification
-- Semantic highlighting driven by the language server
-- Deeper type inference (`ref` output arguments, `GetChild` handles)
+- Validate against a real exported PowerBuilder workspace
+- Publish to the VS Code Marketplace (requires the `jimmykirk` publisher
+  account; `npx @vscode/vsce publish`)
+- `ref`-argument awareness in signature help and diagnostics
+- Event variant selection based on the enclosing object's type
