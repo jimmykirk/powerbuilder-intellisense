@@ -80,7 +80,11 @@ const DOC = [
   /*21*/ '',
   /*22*/ 'event ue_chain;',
   /*23*/ 'this.idw_main.',
-  /*24*/ 'end event'
+  /*24*/ 'end event',
+  /*25*/ '',
+  /*26*/ 'event ue_bind;',
+  /*27*/ 'dw_shared.dataobject = "d_emp"',
+  /*28*/ 'end event'
 ].join('\n');
 
 const SRD = [
@@ -102,8 +106,20 @@ const DIAG_DOC = [
   'MessageBox("t", "m", Information!, OKCancel!, 2, 99)',
   'MessageBox("t", "m")',
   'BeginTransaction(1)',
+  'ls_undeclared = 5',
+  'MessageBox(42, "m")',
+  'MessageBox("t", "m", OKCancel!)',
   'end event'
 ].join('\n');
+
+const W2_DOC = [
+  /*0*/ 'event ue_second;',
+  /*1*/ 'datawindow dw_shared',
+  /*2*/ 'dw_shared.object.',
+  /*3*/ 'Close(',
+  /*4*/ 'end event'
+].join('\n');
+const W2_URI = 'file:///virtual/w_second.srw';
 
 const FEATURE_DOC = [
   /* 0*/ 'type variables',
@@ -251,8 +267,57 @@ async function main() {
   const folds = await request('textDocument/foldingRange', { textDocument: { uri: FEATURE_URI } });
   check('folding ranges cover variables block and event', folds.some((f) => f.startLine === 0) && folds.some((f) => f.startLine === 7), JSON.stringify(folds));
 
-  // Version-availability: AccessToken exists in 2022 but not 2025
+  // Version-availability: BeginTransaction exists in 2022 but not 2025
   check('2022-only builtin flagged with version note', onLine(6).some((d) => d.severity === 2 && /PB 2022/i.test(d.message)), JSON.stringify(onLine(6)));
+
+  // Undeclared assignment target + literal type mismatches
+  check('undeclared assignment flagged', onLine(7).some((d) => d.message.includes('ls_undeclared')), JSON.stringify(onLine(7)));
+  check('numeric literal for string param flagged', onLine(8).some((d) => /Argument 1.*string/i.test(d.message)), JSON.stringify(onLine(8)));
+  check('wrong enum for Icon param flagged', onLine(9).some((d) => /Icon.*OKCancel!.*Button/i.test(d.message)), JSON.stringify(onLine(9)));
+
+  // Second window doc: cross-file dataobject binding + variant signatures
+  notify('textDocument/didOpen', {
+    textDocument: { uri: W2_URI, languageId: 'powerbuilder', version: 1, text: W2_DOC }
+  });
+  await new Promise((r) => setTimeout(r, 400));
+  const w2at = (line, character) => ({ textDocument: { uri: W2_URI }, position: { line, character } });
+  const crossCols = labels(await request('textDocument/completion', w2at(2, 'dw_shared.object.'.length)));
+  check('cross-file dataobject binding resolves columns', crossCols.has('emp_name') && crossCols.has('salary'), [...crossCols].slice(0, 8).join(','));
+
+  const closeSig = await request('textDocument/signatureHelp', w2at(3, 'Close('.length));
+  check('Close shows multiple variant signatures', !!closeSig && closeSig.signatures.length >= 4, `got ${closeSig?.signatures?.length}`);
+  check('variant signature labels carry docs syntax', !!closeSig && closeSig.signatures.some((s) => /Close\s*\(/i.test(s.label)), JSON.stringify(closeSig?.signatures?.[0]?.label));
+
+  // References + rename across files (is_title is declared in both windows)
+  const refs = await request('textDocument/references', {
+    textDocument: { uri: URI }, position: { line: 2, character: 8 },
+    context: { includeDeclaration: true }
+  });
+  const refUris = new Set(refs.map((r) => r.uri));
+  check('references finds is_title across files', refs.length >= 2 && refUris.size >= 2, JSON.stringify(refs));
+
+  const rename = await request('textDocument/rename', {
+    textDocument: { uri: URI }, position: { line: 2, character: 8 }, newName: 'is_caption'
+  });
+  const editCount = Object.values(rename?.changes ?? {}).flat().length;
+  check('rename edits every occurrence', editCount >= 2, JSON.stringify(rename).slice(0, 200));
+
+  // Go to Definition into the .srd column
+  const colDef = await request('textDocument/definition', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 9, character: 'SELECT emp'.length }
+  });
+  const colDefs = Array.isArray(colDef) ? colDef : colDef ? [colDef] : [];
+  check('column name jumps into .srd definition', colDefs.some((l) => l.uri === SRD_URI), JSON.stringify(colDef));
+
+  // Hover on a property through a chain, and on an enum value
+  const propHover = await request('textDocument/hover', {
+    textDocument: { uri: FEATURE_URI }, position: { line: 11, character: 'this.Ti'.length }
+  });
+  check('hover on this.Title shows property info', !!propHover && /property of window/i.test(propHover.contents.value), JSON.stringify(propHover)?.slice(0, 120));
+  const enumHover = await request('textDocument/hover', {
+    textDocument: { uri: DIAG_URI }, position: { line: 4, character: 'MessageBox("t", "m", Inf'.length }
+  });
+  check('hover on Information! shows enum info', !!enumHover && /Icon/.test(enumHover.contents.value), JSON.stringify(enumHover)?.slice(0, 120));
 
   console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) FAILED.`);
   child.kill();

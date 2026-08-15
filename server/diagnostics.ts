@@ -46,7 +46,7 @@ const CLOSER_LABEL: Record<BlockType, string> = {
  * Removes comments and string literals from each line, replacing them with
  * spaces so that character positions still line up with the original text.
  */
-function stripCommentsAndStrings(lines: string[]): string[] {
+export function stripCommentsAndStrings(lines: string[]): string[] {
   const cleaned: string[] = [];
   let inBlockComment = false;
 
@@ -223,8 +223,86 @@ export interface SemanticContext {
    * trustworthy (single-syntax, non-variadic); undefined disables the check.
    */
   maxArgs(name: string): number | undefined;
+  /**
+   * Declared parameter types when trustworthy (same conditions as maxArgs);
+   * undefined disables literal-vs-type checking.
+   */
+  paramTypesOf(name: string): string[] | undefined;
+  /** The enum an `Identifier!` value belongs to, or undefined. */
+  enumNameOf(valueToken: string): string | undefined;
+  /** True when typeName is a known enumerated datatype. */
+  isEnumType(typeName: string): boolean;
+  /** True when name is a declared variable/param/property — assignment targets. */
+  isDeclaredIdentifier(name: string): boolean;
   /** Active PowerBuilder version, for messages. */
   version: string;
+}
+
+const NUMERIC_TYPES = new Set([
+  'integer', 'int', 'long', 'longlong', 'double', 'decimal', 'dec', 'real',
+  'uint', 'ulong', 'byte', 'unsignedinteger', 'unsignedlong'
+]);
+
+type LiteralKind = 'string' | 'number' | 'enum' | 'other';
+
+function literalKindOf(argText: string): { kind: LiteralKind; token?: string } {
+  const trimmed = argText.trim();
+  if (/^["']/.test(trimmed)) {
+    return { kind: 'string' };
+  }
+  if (/^[+-]?\d/.test(trimmed) && /^[+-]?\d+(\.\d+)?$/.test(trimmed)) {
+    return { kind: 'number' };
+  }
+  const enumMatch = /^([A-Za-z_]\w*!)$/.exec(trimmed);
+  if (enumMatch) {
+    return { kind: 'enum', token: enumMatch[1] };
+  }
+  return { kind: 'other' };
+}
+
+/** A human message when a literal argument cannot satisfy the declared type. */
+function literalMismatch(
+  semantic: SemanticContext,
+  paramType: string,
+  arg: { kind: LiteralKind; token?: string }
+): string | undefined {
+  const lower = paramType.toLowerCase();
+  if (arg.kind === 'other' || lower === 'any') {
+    return undefined;
+  }
+  if (NUMERIC_TYPES.has(lower)) {
+    if (arg.kind === 'string') {
+      return `expects ${paramType}, but a string literal was passed`;
+    }
+    if (arg.kind === 'enum') {
+      return `expects ${paramType}, but the enumerated value ${arg.token} was passed`;
+    }
+    return undefined;
+  }
+  if (lower === 'string') {
+    if (arg.kind === 'number') {
+      return 'expects string, but a numeric literal was passed';
+    }
+    if (arg.kind === 'enum') {
+      return `expects string, but the enumerated value ${arg.token} was passed`;
+    }
+    return undefined;
+  }
+  if (lower === 'boolean' && (arg.kind === 'string' || arg.kind === 'number')) {
+    return `expects boolean, but a ${arg.kind} literal was passed`;
+  }
+  if (semantic.isEnumType(paramType)) {
+    if (arg.kind === 'string' || arg.kind === 'number') {
+      return `expects a ${paramType} enumerated value, but a ${arg.kind} literal was passed`;
+    }
+    if (arg.kind === 'enum' && arg.token) {
+      const actual = semantic.enumNameOf(arg.token);
+      if (actual && actual.toLowerCase() !== paramType.toLowerCase()) {
+        return `expects a ${paramType} enumerated value, but ${arg.token} belongs to ${actual}`;
+      }
+    }
+  }
+  return undefined;
 }
 
 /** Control-flow words that read like calls when followed by `(`. */
@@ -243,9 +321,17 @@ const CALL_RE = /(^|[^.\w:])([A-Za-z_]\w*)\s*\(/g;
  * than a built-in accepts (Warning). Member calls after a dot are skipped:
  * without full type inference an unknown member is too often a false alarm.
  */
-function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diagnostic[] {
+const SQL_START_RE =
+  /^(select|selectblob|insert|update(?!\s*\()|updateblob|delete|fetch|declare|open(?!\s*\()|close(?!\s*\()|connect|disconnect|commit|rollback|execute)\b/i;
+
+function semanticDiagnostics(
+  cleaned: string[],
+  original: string[],
+  semantic: SemanticContext
+): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   let inPrototypes = false;
+  let inSql = false;
 
   for (let i = 0; i < cleaned.length; i++) {
     const clean = cleaned[i];
@@ -261,6 +347,17 @@ function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diag
       inPrototypes = false;
       continue;
     }
+    // Embedded SQL statements run until their terminating semicolon and follow
+    // SQL semantics, not PowerScript's.
+    if (!inSql && SQL_START_RE.test(trimmed)) {
+      inSql = true;
+    }
+    if (inSql) {
+      if (/;\s*$/.test(trimmed)) {
+        inSql = false;
+      }
+      continue;
+    }
     // Declaration lines legitimately contain `name (params)` shapes.
     if (
       inPrototypes ||
@@ -269,6 +366,25 @@ function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diag
       /^(end|event|on)\b/i.test(trimmed)
     ) {
       continue;
+    }
+
+    // Assignment to an identifier that no declaration accounts for.
+    const assign = /^(\s*)([A-Za-z_]\w*)\s*(?:\[[^\]]*\])?\s*=(?!=)/.exec(clean);
+    if (
+      assign &&
+      !STATEMENT_WORDS.has(assign[2].toLowerCase()) &&
+      !semantic.isKnown(assign[2]) &&
+      !semantic.isDeclaredIdentifier(assign[2])
+    ) {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Warning,
+        range: {
+          start: { line: i, character: assign[1].length },
+          end: { line: i, character: assign[1].length + assign[2].length }
+        },
+        message: `Variable '${assign[2]}' is assigned but never declared.`,
+        source: 'powerbuilder'
+      });
     }
 
     CALL_RE.lastIndex = 0;
@@ -293,18 +409,34 @@ function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diag
       }
 
       const max = semantic.maxArgs(name);
-      if (max === undefined) {
-        continue;
-      }
       const openParen = clean.indexOf('(', nameStart + name.length);
-      const args = countArguments(clean, openParen);
-      if (args !== undefined && args > max) {
+      const args = extractArguments(clean, original[i], openParen);
+      if (args === undefined) {
+        continue; // multiline call — structure unknown on this line
+      }
+      if (max !== undefined && args.length > max) {
         diagnostics.push({
           severity: DiagnosticSeverity.Warning,
           range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
-          message: `'${name}' accepts at most ${max} argument${max === 1 ? '' : 's'}, but ${args} were passed.`,
+          message: `'${name}' accepts at most ${max} argument${max === 1 ? '' : 's'}, but ${args.length} were passed.`,
           source: 'powerbuilder'
         });
+        continue;
+      }
+
+      const paramTypes = semantic.paramTypesOf(name);
+      if (paramTypes) {
+        for (let a = 0; a < args.length && a < paramTypes.length; a++) {
+          const mismatch = literalMismatch(semantic, paramTypes[a], literalKindOf(args[a]));
+          if (mismatch) {
+            diagnostics.push({
+              severity: DiagnosticSeverity.Warning,
+              range: { start: { line: i, character: nameStart }, end: { line: i, character: nameStart + name.length } },
+              message: `Argument ${a + 1} of '${name}' ${mismatch}.`,
+              source: 'powerbuilder'
+            });
+          }
+        }
       }
     }
   }
@@ -313,13 +445,15 @@ function semanticDiagnostics(cleaned: string[], semantic: SemanticContext): Diag
 }
 
 /**
- * Counts the arguments of a call whose `(` sits at openParen, or undefined if
- * the call does not close on the same (already comment/string-stripped) line.
+ * Extracts the argument texts of a call whose `(` sits at openParen. Structure
+ * (parens, commas) comes from the comment/string-stripped line; the returned
+ * segments come from the original line so literals survive. Returns undefined
+ * when the call does not close on the same line.
  */
-function countArguments(clean: string, openParen: number): number | undefined {
+function extractArguments(clean: string, orig: string, openParen: number): string[] | undefined {
   let depth = 0;
-  let commas = 0;
-  let sawContent = false;
+  let segStart = openParen + 1;
+  const args: string[] = [];
   for (let i = openParen; i < clean.length; i++) {
     const ch = clean[i];
     if (ch === '(') {
@@ -327,12 +461,15 @@ function countArguments(clean: string, openParen: number): number | undefined {
     } else if (ch === ')') {
       depth--;
       if (depth === 0) {
-        return sawContent ? commas + 1 : 0;
+        const last = orig.slice(segStart, i);
+        if (args.length > 0 || last.trim().length > 0) {
+          args.push(last);
+        }
+        return args;
       }
     } else if (ch === ',' && depth === 1) {
-      commas++;
-    } else if (depth >= 1 && /\S/.test(ch)) {
-      sawContent = true;
+      args.push(orig.slice(segStart, i));
+      segStart = i + 1;
     }
   }
   return undefined;
@@ -414,7 +551,7 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
   }
 
   if (semantic) {
-    diagnostics.push(...semanticDiagnostics(cleaned, semantic));
+    diagnostics.push(...semanticDiagnostics(cleaned, lines, semantic));
   }
 
   return diagnostics;

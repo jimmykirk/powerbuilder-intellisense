@@ -256,6 +256,53 @@ def parse_event_id_tables(elems):
                     yield squash(tds[0].get_text(" ")), squash(tds[1].get_text(" "))
 
 
+def parse_variant(sub):
+    """One syntax variant of a multi-syntax page: label, syntax, params, return."""
+    smap = section_map(sub)
+    title = sub.find(["h3", "h4", "h5"], class_="title")
+    label = squash(title.get_text()) if title else None
+
+    syn_elems = collect(smap, lambda h: h.startswith("Syntax"))
+    syntaxes = [squash(e.get_text(" ")) for e in syn_elems if e.name == "pre"]
+    for e in syn_elems:
+        if e.name != "pre":
+            syntaxes.extend(squash(p.get_text(" ")) for p in e.find_all("pre"))
+    syntax = syntaxes[0] if syntaxes else None
+    depth_map = optional_depths(" ".join(syntaxes))
+
+    params, seen = [], set()
+    arg_elems = syn_elems + collect(smap, lambda h: h.startswith("Argument"))
+    for raw_name, raw_desc in parse_arg_tables(arg_elems):
+        opt = "(optional)" in raw_name.lower() or raw_desc.lower().startswith("(optional)")
+        pname = squash(re.sub(r"\(.*?\)", "", raw_name))
+        pname = pname.split()[0] if pname else raw_name
+        if not pname or pname.lower() in seen:
+            continue
+        seen.add(pname.lower())
+        pdesc = squash(re.sub(r"^\(optional\)\s*", "", raw_desc, flags=re.I))
+        if depth_map.get(pname.lower(), 0) > 0:
+            opt = True
+        param = {"name": pname, "type": infer_param_type(pname, pdesc),
+                 "description": pdesc}
+        if opt:
+            param["optional"] = True
+        params.append(param)
+
+    ret_elems = collect(smap, lambda h: h.lower().startswith("return"))
+    return_type = parse_return_type(ret_elems)
+
+    if not syntax and not params:
+        return None
+    variant = {"params": params}
+    if label:
+        variant["label"] = label
+    if syntax:
+        variant["syntax"] = syntax
+    if return_type:
+        variant["returnType"] = return_type
+    return variant
+
+
 def parse_page(path, kind="func"):
     soup = BeautifulSoup(path.read_text(encoding="utf-8", errors="replace"), "lxml")
     section_div = soup.find("div", class_="section")
@@ -268,12 +315,16 @@ def parse_page(path, kind="func"):
     name = re.sub(r"\s*\(obsolete\)\s*", "", name, flags=re.I)
     sections = section_map(section_div)
     # Multi-syntax pages (Open, Close, AddData, ...) nest one sub-section per
-    # syntax variant; merge their headers in document order.
+    # syntax variant; merge their headers in document order, and additionally
+    # capture each variant separately for per-variant signature help.
     merged = {k: list(v) for k, v in sections.items()}
-    for sub in section_div.find_all("div", class_=("section", "simplesect"),
-                                    recursive=False):
+    variant_subs = section_div.find_all("div", class_=("section", "simplesect"),
+                                        recursive=False)
+    for sub in variant_subs:
         for k, v in section_map(sub).items():
             merged.setdefault(k, []).extend(v)
+    variants = [parse_variant(sub) for sub in variant_subs]
+    variants = [v for v in variants if v is not None]
 
     desc_elems = collect(sections, lambda h: h == "Description")
     doc_parts = [squash(e.get_text(" ")) for e in desc_elems if e.name == "p"]
@@ -356,6 +407,8 @@ def parse_page(path, kind="func"):
     }
     if applies_to:
         record["appliesTo"] = applies_to
+    if len(variants) >= 2:
+        record["variants"] = variants
     if kind == "event":
         del record["syntax"]
         ids = list(dict.fromkeys(

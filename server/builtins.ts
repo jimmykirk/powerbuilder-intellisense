@@ -15,6 +15,15 @@ export interface ParamInfo {
   optional?: boolean;
 }
 
+/** One documented syntax variant of a multi-syntax function or event. */
+export interface VariantInfo {
+  /** Docs heading, e.g. "Syntax 1: For windows". */
+  label?: string;
+  syntax?: string;
+  params: ParamInfo[];
+  returnType?: string;
+}
+
 export interface FunctionInfo {
   name: string;
   returnType: string;
@@ -27,6 +36,8 @@ export interface FunctionInfo {
   appliesTo?: string[];
   /** True when the documented syntax takes a repeating argument list. */
   variadic?: boolean;
+  /** Per-syntax variants for multi-syntax functions (Open, Close, ...). */
+  variants?: VariantInfo[];
 }
 
 /**
@@ -83,6 +94,17 @@ export interface RawFunctionEntry {
   syntax: string;
   params: ParamInfo[];
   appliesTo?: string[];
+  variants?: VariantInfo[];
+}
+
+/** Drops the documented receiver row from a variant's parameter list. */
+function stripReceiver(params: ParamInfo[], syntax: string | undefined): ParamInfo[] {
+  const receiver = syntax
+    ? /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\./.exec(syntax)?.[1]?.toLowerCase()
+    : undefined;
+  return receiver && params.length > 0 && params[0].name.toLowerCase() === receiver
+    ? params.slice(1)
+    : params;
 }
 
 /**
@@ -96,19 +118,19 @@ export interface RawFunctionEntry {
 export function loadFunctionCatalog(catalog: { functions: RawFunctionEntry[] }): FunctionInfo[] {
   return catalog.functions.map((fn) => {
     const receiver = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\./.exec(fn.syntax)?.[1]?.toLowerCase();
-    const params =
-      receiver && fn.params.length > 0 && fn.params[0].name.toLowerCase() === receiver
-        ? fn.params.slice(1)
-        : fn.params;
     return {
       name: fn.name,
       returnType: fn.returnType,
       category: fn.category,
       documentation: fn.documentation,
-      params,
+      params: stripReceiver(fn.params, fn.syntax),
       member: receiver !== undefined,
       appliesTo: fn.appliesTo,
-      variadic: /\.\s*\.\s*\./.test(fn.syntax)
+      variadic: /\.\s*\.\s*\./.test(fn.syntax),
+      variants: fn.variants?.map((v) => ({
+        ...v,
+        params: stripReceiver(v.params, v.syntax ?? fn.syntax)
+      }))
     };
   });
 }
@@ -137,6 +159,8 @@ export interface EventInfo {
   params: ParamInfo[];
   /** Every object type the docs list this event as applying to. */
   appliesTo?: string[];
+  /** Per-object variants for events with differing arguments (Clicked, ...). */
+  variants?: VariantInfo[];
 }
 
 export function loadEventCatalog(catalog: { events: EventInfo[] }): EventInfo[] {

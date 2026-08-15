@@ -3,17 +3,31 @@
   "name": "PowerBuilder",
   "scopeName": "source.powerbuilder",
   "patterns": [
+    { "include": "#export-header" },
     { "include": "#comments" },
     { "include": "#strings" },
     { "include": "#sql" },
     { "include": "#numbers" },
+    { "include": "#enums" },
     { "include": "#keywords" },
     { "include": "#types" },
+    { "include": "#pronouns" },
     { "include": "#functions" },
-    { "include": "#operators" },
-    { "include": "#variables" }
+    { "include": "#operators" }
   ],
   "repository": {
+    "export-header": {
+      "patterns": [
+        {
+          "name": "comment.line.export-header.powerbuilder",
+          "match": "^\\$PBExport(Header|Comments)\\$.*$"
+        },
+        {
+          "name": "meta.preprocessor.powerbuilder",
+          "match": "^(HA?)?\\$PBExport.*$"
+        }
+      ]
+    },
     "comments": {
       "patterns": [
         {
@@ -36,14 +50,20 @@
           "patterns": [
             {
               "name": "constant.character.escape.powerbuilder",
-              "match": "~~.|~[nrt\"']"
+              "match": "~~.|~[nrtbfv\"']|~h[0-9A-Fa-f]{2}|~[0-9]{3}"
             }
           ]
         },
         {
           "name": "string.quoted.single.powerbuilder",
           "begin": "'",
-          "end": "'"
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.powerbuilder",
+              "match": "~~.|~[nrtbfv\"']"
+            }
+          ]
         }
       ]
     },
@@ -51,7 +71,51 @@
       "patterns": [
         {
           "name": "constant.numeric.powerbuilder",
-          "match": "\\b\\d+(?:\\.\\d+)?\\b"
+          "match": "\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b"
+        }
+      ]
+    },
+    "enums": {
+      "patterns": [
+        {
+          "name": "constant.language.enum.powerbuilder",
+          "match": "\\b[A-Za-z_]\\w*!"
+        },
+        {
+          "name": "constant.language.boolean.powerbuilder",
+          "match": "(?i)\\b(true|false)\\b"
+        }
+      ]
+    },
+    "sql": {
+      "patterns": [
+        {
+          "name": "meta.embedded.sql.powerbuilder",
+          "begin": "(?i)^\\s*(SELECT|SELECTBLOB|INSERT|UPDATE(?!\\s*\\()|UPDATEBLOB|DELETE(?=\\s+FROM\\b)|FETCH|DECLARE(?=\\s+\\w+\\s+(?:CURSOR|PROCEDURE)\\b)|OPEN(?!\\s*\\()|CLOSE(?!\\s*\\()|CONNECT|DISCONNECT|COMMIT|ROLLBACK|EXECUTE)\\b",
+          "beginCaptures": {
+            "1": { "name": "keyword.other.sql.powerbuilder" }
+          },
+          "end": ";",
+          "endCaptures": {
+            "0": { "name": "punctuation.terminator.statement.sql.powerbuilder" }
+          },
+          "patterns": [
+            { "include": "#comments" },
+            { "include": "#strings" },
+            {
+              "name": "variable.other.sql-host.powerbuilder",
+              "match": ":[A-Za-z_]\\w*"
+            },
+            {
+              "name": "keyword.other.sql.powerbuilder",
+              "match": "(?i)\\b(FROM|WHERE|GROUP\\s+BY|HAVING|ORDER\\s+BY|INTO|VALUES|SET|JOIN|INNER|LEFT|RIGHT|FULL|OUTER|ON|UNION|INTERSECT|EXCEPT|AND|OR|NOT|IN|EXISTS|LIKE|BETWEEN|IS|NULL|DISTINCT|AS|ASC|DESC|CURSOR|PROCEDURE|FOR|USING|IMMEDIATE|CURRENT|OF|FIRST|NEXT|PRIOR|LAST)\\b"
+            },
+            {
+              "name": "support.function.sql.powerbuilder",
+              "match": "(?i)\\b(COUNT|SUM|AVG|MIN|MAX|CAST|CONVERT|SUBSTRING|UPPER|LOWER|TRIM|ABS|ROUND|COALESCE|NULLIF|CASE|WHEN|THEN|ELSE|END)\\b"
+            },
+            { "include": "#numbers" }
+          ]
         }
       ]
     },
@@ -59,7 +123,15 @@
       "patterns": [
         {
           "name": "keyword.control.powerbuilder",
-          "match": "(?i)\\b(if|then|else|elseif|end if|choose case|case|end choose|for|to|step|next|do|while|loop|exit|continue|return|try|catch|finally|throw|create|destroy|open|close|on|trigger|event|function|subroutine|end function|end subroutine|forward|prototypes|end prototypes|global|shared|private|public|protected|readonly)\\b"
+          "match": "(?i)\\b(if|then|else|elseif|end\\s+if|choose\\s+case|case|end\\s+choose|for|to|step|next|do|while|until|loop|exit|continue|return|goto|halt|try|catch|finally|end\\s+try|throw|throws)\\b"
+        },
+        {
+          "name": "keyword.declaration.powerbuilder",
+          "match": "(?i)\\b(function|subroutine|end\\s+function|end\\s+subroutine|event|end\\s+event|type|end\\s+type|within|from|variables|end\\s+variables|forward|end\\s+forward|prototypes|end\\s+prototypes|on|end\\s+on|create|destroy|call|dynamic|post|trigger|alias\\s+for|library|rpcfunc|system|autoinstantiate|descriptor)\\b"
+        },
+        {
+          "name": "storage.modifier.powerbuilder",
+          "match": "(?i)\\b(global|shared|instance|private|public|protected|privatewrite|privateread|protectedwrite|protectedread|constant|readonly|ref|indirect)\\b"
         },
         {
           "name": "keyword.operator.logical.powerbuilder",
@@ -67,59 +139,51 @@
         }
       ]
     },
-    "sql": {
-      "patterns": [
-        {
-          "name": "keyword.sql.dml.powerbuilder",
-          "match": "(?i)\\b(SELECT|INSERT|UPDATE|DELETE|MERGE|WITH)\\b"
-        },
-        {
-          "name": "keyword.sql.clauses.powerbuilder",
-          "match": "(?i)\\b(FROM|WHERE|GROUP BY|HAVING|ORDER BY|INTO|VALUES|SET|JOIN|INNER|LEFT|RIGHT|FULL|OUTER|ON|UNION|INTERSECT|EXCEPT|LIMIT|OFFSET|FETCH)\\b"
-        },
-        {
-          "name": "keyword.sql.functions.powerbuilder",
-          "match": "(?i)\\b(COUNT|SUM|AVG|MIN|MAX|CAST|CONVERT|SUBSTRING|UPPER|LOWER|TRIM|ABS|ROUND|COALESCE|NULLIF|CASE|WHEN|THEN|ELSE|END)\\b"
-        }
-      ]
-    },
     "types": {
       "patterns": [
         {
           "name": "storage.type.powerbuilder",
-          "match": "(?i)\\b(any|blob|boolean|byte|char|date|datetime|decimal|double|integer|long|longlong|object|real|string|time|uint|ulong|ulonglong|window|menu|datawindow|transaction)\\b"
+          "match": "(?i)\\b(any|blob|boolean|byte|char|character|date|datetime|dec|decimal|double|int|integer|long|longlong|longptr|object|real|string|time|uint|ulong|ulonglong|unsignedinteger|unsignedlong|window|menu|datawindow|datastore|datawindowchild|transaction|structure|powerobject|graphicobject|dragobject|windowobject|userobject|exception|throwable|runtimeerror|nonvisualobject)\\b"
+        }
+      ]
+    },
+    "pronouns": {
+      "patterns": [
+        {
+          "name": "variable.language.powerbuilder",
+          "match": "(?i)\\b(this|parent|super|sqlca|sqlda|sqlsa|error|message|parentwindow)\\b"
+        },
+        {
+          "name": "variable.other.constant.powerbuilder",
+          "match": "(?i)\\b(sqlcode|sqlnrows|sqldbcode|sqlerrtext)\\b"
         }
       ]
     },
     "functions": {
       "patterns": [
         {
-          "name": "support.function.powerbuilder",
-          "match": "(?i)\\b(messagebox|setnull|isnull|upper|lower|len|left|right|mid|string|int|long|dec|abs|mod|trim|today|now|openwithparm|closewithreturn)\\b(?=\\s*\\()"
+          "name": "entity.name.function.powerbuilder",
+          "match": "\\b[A-Za-z_]\\w*(?=\\s*\\()"
         }
       ]
     },
     "operators": {
       "patterns": [
         {
+          "name": "punctuation.separator.continuation.powerbuilder",
+          "match": "&\\s*$"
+        },
+        {
           "name": "keyword.operator.assignment.powerbuilder",
-          "match": ":="
+          "match": "\\+=|-=|\\*=|/=|="
         },
         {
           "name": "keyword.operator.arithmetic.powerbuilder",
-          "match": "\\+|-|\\*|/"
+          "match": "\\+|-|\\*|/|\\^"
         },
         {
           "name": "keyword.operator.comparison.powerbuilder",
-          "match": "<=|>=|<>|=|<|>"
-        }
-      ]
-    },
-    "variables": {
-      "patterns": [
-        {
-          "name": "variable.other.powerbuilder",
-          "match": "\\b(this|parent|super|sqlca|sqlcode|sqlnrows)\\b"
+          "match": "<=|>=|<>|<|>"
         }
       ]
     }

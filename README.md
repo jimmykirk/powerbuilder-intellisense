@@ -5,7 +5,6 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 
 ## Features
 
-- Syntax highlighting for PowerBuilder source files
 - Full built-in catalogs scraped from the official Appeon docs: 914 (PB 2022) /
   1,118 (PB 2025) system functions, 139 / 150 object events (with `pbm_*` IDs),
   2,235 / 2,446 object properties across 155 / 185 classes, and ~70 enumerated
@@ -26,20 +25,34 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 - Embedded SQL host-variable completion: `:` inside a SQL statement offers
   every variable in scope
 - DataWindow-aware completions: `.srd` exports are indexed for column names,
-  `dw.Object.` completes the bound DataWindow object's columns, and
+  `dw.Object.` completes the bound DataWindow object's columns (bindings are
+  resolved across files, from assignments or exported control properties), and
   DataWindow-typed receivers get `Object`/`DataObject` property items
 - Rich hover documentation with per-parameter descriptions for built-in
   functions and events, signatures for custom functions, variable types/scopes,
   and type inheritance chains
-- Signature help (parameter hints) while typing a function call, with the active argument highlighted
-- Workspace-wide **Go to Definition** for custom functions, subroutines, events, and object types
+- Signature help (parameter hints) while typing a function call, with the
+  active argument highlighted — multi-syntax built-ins (Open, Close, Clicked,
+  ...) show every documented variant with the best match preselected
+- Hover on properties through receiver chains (`this.Title`) and on enumerated
+  values (`Information!` shows its enum and sibling values)
+- Workspace-wide **Go to Definition** for custom functions, subroutines,
+  events, and object types — and DataWindow column names jump into their
+  `.srd` definition
+- **Find All References** and **Rename** across the workspace (case-insensitive,
+  comment/string-aware, matching PowerScript semantics)
 - Workspace symbol search (`Ctrl+T`) across all PowerBuilder files
 - Parser-based structural diagnostics that flag unmatched block terminators (`if`/`end if`, `for`/`next`, `do`/`loop`, `choose case`/`end choose`, `try`/`end try`, function/subroutine/event/type blocks), ignoring keywords inside comments and strings
-- Semantic call diagnostics: unknown functions (Information), too many
-  arguments to a built-in (Warning), and version-availability warnings when a
-  call exists only in the other PB version ("added in PB 2025" / "removed
-  after PB 2022") — conservative around non-exported libraries, variadic
-  built-ins, and member calls
+- Semantic call diagnostics (debounced while typing): unknown functions
+  (Information), too many arguments to a built-in (Warning), literal arguments
+  that cannot satisfy the declared parameter type (wrong enum, string where a
+  number is expected, ...), assignments to undeclared variables, and
+  version-availability warnings when a call exists only in the other PB
+  version — conservative around non-exported libraries, variadic and
+  multi-variant built-ins, member calls, and embedded SQL
+- Syntax highlighting with proper embedded-SQL regions (SQL keywords and
+  `:host` variables highlight only inside SQL statements), enumerated `Value!`
+  constants, export headers, and line continuations
 - Document outline/breadcrumbs and folding for all block constructs plus
   variables/prototypes sections
 - **PowerBuilder: Generate OrcaScript** command — writes a `.orca` script that
@@ -86,9 +99,8 @@ The extension is a thin client (`src/extension.ts`) that launches a Language Ser
 
 ## Roadmap
 
-- Per-variant signatures for multi-syntax functions and events (Open, Close, Clicked, ...)
-- Resolve `dataobject` bindings assigned outside the current document
-- Type-aware argument checking and undeclared-variable diagnostics
-- Go to Definition into DataWindow column definitions
-- Hover for object properties and enumerated values
-- Rename and Find All References for workspace symbols
+- Encoding detection for real PB exports (UTF-16LE / ANSI with `$PBExportHeader$`)
+- CI running the LSP smoke harness on push
+- Marketplace packaging: publisher, license, icon, `vsce` verification
+- Semantic highlighting driven by the language server
+- Deeper type inference (`ref` output arguments, `GetChild` handles)

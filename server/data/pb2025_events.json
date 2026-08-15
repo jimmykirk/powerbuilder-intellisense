@@ -94,6 +94,30 @@
         "ListView",
         "TreeView"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the ListView item being dragged)"
+            }
+          ],
+          "label": "Syntax 1: For ListView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (handle of the TreeView item being dragged)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_lvnbegindrag, pbm_tvnbegindrag"
     },
     {
@@ -116,6 +140,30 @@
       "appliesTo": [
         "ListView",
         "TreeView"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the selected ListView item)"
+            }
+          ],
+          "label": "Syntax 1: For ListView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (the handle of the selected TreeView item)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lvnbeginlabeledit, pbm_tvnbeginlabeledit"
     },
@@ -156,6 +204,30 @@
       "appliesTo": [
         "ListView",
         "TreeView"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the ListView item being dragged)"
+            }
+          ],
+          "label": "Syntax 1: For ListView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (the handle of the TreeView item being dragged)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lvnbeginrightdrag, pbm_tvnbeginrightdrag"
     },
@@ -366,6 +438,83 @@
         "StaticHyperLink",
         "DatePicker",
         "MonthCalendar"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the ListView item the user clicked). The value of index is -1 if the user clicks within the control but not on a specific item."
+            }
+          ],
+          "label": "Syntax 2: For ListView and Toolbar controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the tab page the user clicked)"
+            }
+          ],
+          "label": "Syntax 3: For Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (the handle of the TreeView item the user clicked)"
+            }
+          ],
+          "label": "Syntax 4: For TreeView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button (windows only) 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button (windows only) In the Clicked event for windows, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window workspace or control in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace or control in pixels)."
+            }
+          ],
+          "label": "Syntax 5: For windows and progress bars",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "ItemHandle",
+              "type": "long",
+              "description": "Long. The handle of the button the menu is associated with."
+            },
+            {
+              "name": "Index",
+              "type": "long",
+              "description": "Long. The index of the menu item clicked."
+            },
+            {
+              "name": "SubIndex",
+              "type": "long",
+              "description": "Long. The index of the submenu item clicked. 0 indicates the event is triggered by the main menu."
+            }
+          ],
+          "label": "Syntax 6: For Ribbon item controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lvnclicked, pbm_tcnclicked, pbm_tvnclicked, pbm_lbuttonclk, pbm_lbuttondwn, pbm_bnclicked, pbm_lbuttondown"
     },
@@ -585,6 +734,30 @@
         "ListView",
         "TreeView"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the deleted item)"
+            }
+          ],
+          "label": "Syntax 1: For ListView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (the handle of the deleted item)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_lvndeleteitem, pbm_tvndeleteitem"
     },
     {
@@ -688,6 +861,51 @@
         "HProgressBar",
         "VProgressBar",
         "RichTextEdit"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "description": "Integer by value. The index of the item the user double-clicked (for tabs, the index of the tab page)."
+            }
+          ],
+          "label": "Syntax 1: For ListBox, PictureListBox, ListView, and Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "any",
+              "description": "Long by value (the handle of the item the user double-clicked)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "flags",
+              "type": "unsignedlong",
+              "description": "UnsignedLong by value (the modifier keys and mouse buttons that are pressed). Values are: 1 -- Left mouse button 2 -- Right mouse button 4 -- Shift key 8 -- Ctrl key 16 -- Middle mouse button In the Clicked event, the left mouse button is being released, so 1 is not summed in the value of flags. For an explanation of flags, see Syntax 2 of MouseMove ."
+            },
+            {
+              "name": "xpos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the left edge of the window's workspace in pixels)."
+            },
+            {
+              "name": "ypos",
+              "type": "integer",
+              "description": "Integer by value (the distance of the pointer from the top of the window's workspace in pixels)."
+            }
+          ],
+          "label": "Syntax 3: For windows",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lbndblclk, pbm_lvndoubleclicked, pbm_tcndoubleclicked, pbm_tvndoubleclicked, pbm_lbuttondblclk, pbm_bndoubleclicked, pbm_cbndblclk, pbm_prndoubleclicked, pbm_rendoubleclicked"
     },
@@ -859,6 +1077,51 @@
         "UserObject",
         "Window"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "source",
+              "type": "dragobject",
+              "description": "DragObject by value (a reference to the control being dragged)"
+            },
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the target ListView item)"
+            }
+          ],
+          "label": "Syntax 1: For ListBox, PictureListBox, ListView, and Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "source",
+              "type": "dragobject",
+              "description": "DragObject by value (a reference to the control being dragged)"
+            },
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (the handle of the target TreeView item)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "source",
+              "type": "dragobject",
+              "description": "DragObject by value (a reference to the control being dragged)"
+            }
+          ],
+          "label": "Syntax 3: For windows and other controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_lbndragdrop, pbm_lvndragdrop, pbm_tcndragdrop, pbm_tvndragdrop, pbm_bndragdrop, pbm_cbndragdrop, pbm_dragdrop, pbm_endragdrop, pbm_omndragdrop, pbm_prndragdrop, pbm_rendragdrop, pbm_sbndragdrop, pbm_uondragdrop"
     },
     {
@@ -1018,6 +1281,51 @@
         "UserObject",
         "Window"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "source",
+              "type": "dragobject",
+              "description": "DragObject by value (a reference to the control being dragged)"
+            },
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (a reference to the ListView item under the pointer in the ListView control)"
+            }
+          ],
+          "label": "Syntax 1: For ListBox, PictureListBox, ListView, and Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "source",
+              "type": "dragobject",
+              "description": "DragObject by value (a reference to the control being dragged)"
+            },
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long (a reference to the ListView item under the pointer in the TreeView control)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "source",
+              "type": "dragobject",
+              "description": "DragObject by value (a reference to the control being dragged)"
+            }
+          ],
+          "label": "Syntax 3: For windows and other controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_lbndragwithin, pbm_lvndragwithin, pbm_tcndragwithin, pbm_tvndragwithin, pbm_bndragwithin, pbm_cbndragwithin, pbm_dragwithin, pbm_endragwithin, pbm_omndragwithin, pbm_prndragwithin, pbm_rendragwithin, pbm_sbndragwithin, pbm_uondragwithin"
     },
     {
@@ -1084,6 +1392,40 @@
       "appliesTo": [
         "ListView",
         "TreeView"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer. The index of the ListView item for which you have edited the label."
+            },
+            {
+              "name": "newlabel",
+              "type": "string",
+              "description": "The string that represents the new label for the ListView item."
+            }
+          ],
+          "label": "Syntax 1: For ListView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "integer",
+              "description": "Integer. The index of the TreeView item for which you have edited the label."
+            },
+            {
+              "name": "newtext",
+              "type": "string",
+              "description": "The string that represents the new label for the TreeView item."
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lvnendlabeledit, pbm_tvnendlabeledit"
     },
@@ -1188,6 +1530,86 @@
         "OLEObject",
         "OLETxnObject",
         "Compression"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "errornumber",
+              "type": "integer",
+              "description": "Unsigned integer by value (PowerBuilder's error number)"
+            },
+            {
+              "name": "errortext",
+              "type": "string",
+              "description": "String, read-only (PowerBuilder's error message)"
+            },
+            {
+              "name": "errorwindowmenu",
+              "type": "string",
+              "description": "String, read-only (the name of the window or menu that is the parent of the object whose script caused the error)"
+            },
+            {
+              "name": "errorobject",
+              "type": "string",
+              "description": "String, read-only (the name of the object whose script caused the error)"
+            },
+            {
+              "name": "errorscript",
+              "type": "string",
+              "description": "String, read-only (the full text of the script in which the error occurred)"
+            },
+            {
+              "name": "errorline",
+              "type": "integer",
+              "description": "Unsigned integer by value (the line in the script where the error occurred)"
+            },
+            {
+              "name": "action",
+              "type": "any",
+              "description": "ExceptionAction by reference. A value you specify to control the application's course of action as a result of the error. Values are: ExceptionFail! -- fail as if this script were not implemented. The error condition triggers any active event handlers, or if none, the SystemError event. ExceptionIgnore! -- ignore this error and return as if no error occurred (use this option with caution because the conditions that caused the error can cause another error). ExceptionRetry! -- execute the function or evaluate the expression again in case the OLE server was not ready. This option is not valid for DataWindows. ExceptionSubstituteReturnValue! -- use the value specified in the returnvalue argument instead of the value returned by the OLE server or DataWindow, and cancel the error condition."
+            },
+            {
+              "name": "returnvalue",
+              "type": "any",
+              "description": "Any by reference (a value whose datatype matches the expected value that the OLE server or DataWindow would have returned). This value is used when the value of action is ExceptionSubstituteReturnValue!."
+            }
+          ],
+          "label": "Syntax 1: for Connection, DataWindow, DataStore, OLE, OLEObject, OLETxnObject",
+          "returnType": "none"
+        },
+        {
+          "params": [
+            {
+              "name": "ErrorNumber",
+              "type": "integer",
+              "description": "Unsigned integer by value (PowerBuilder's error number) 1 -- Success -1 -- A general error occurred. If the CompressorObject object is used in asynchronous mode, this function will return the general error. -2 -- The password entered is illegal. -3 -- The operation is not supported for the source file format. -4 -- The task thread is aborted. -5 -- A task thread is currently running. -6 -- The folder to be compressed does not exist. -7 -- The folder to be compressed is empty. -8 -- The compression format does not support multi-file compression. -9 -- Failed to read file from the folder for compression. -10 -- The target path does not exist. -11 -- More than one source file has the same file name. -12 -- Invalid compressed file name or no compressed file name is specified in the \"dest\" argument. -13 -- Failed to compress."
+            },
+            {
+              "name": "ErrorText",
+              "type": "string",
+              "description": "String, read-only (PowerBuilder's error message)"
+            }
+          ],
+          "label": "Syntax 2: for CompressorObject objects",
+          "returnType": "none"
+        },
+        {
+          "params": [
+            {
+              "name": "ErrorNumber",
+              "type": "integer",
+              "description": "Unsigned integer by value (PowerBuilder's error number) 1 -- Success -1 -- A general error occurred. If the ExtractorObject object is used in asynchronous mode, this function will return the general error. -2 -- The password entered is illegal. -3 -- The operation is not supported for the source file format. -4 -- The task thread is aborted. -5 -- A task thread is currently running. -6 -- No password is entered. You must enter the password. -7 -- The password is incorrect. -8 -- Failed to get new memory when saving the decompressed file. -9 -- Failed to read the compressed file. -10 -- Unrecognized format or the encrypted file name option is used when compressing the document. -11 -- Access denied when extracting the archive. -12 -- The compressed file does not exist. -13 -- The directory where the decompressed file will be saved does not exist. -14 -- Failed to extract the compressed file."
+            },
+            {
+              "name": "ErrorText",
+              "type": "string",
+              "description": "String, read-only (PowerBuilder's error message)"
+            }
+          ],
+          "label": "Syntax 3: for ExtractorObject objects",
+          "returnType": "none"
+        }
       ],
       "eventId": null
     },
@@ -2626,6 +3048,30 @@
         "Tab",
         "TreeView"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the item or tab the user clicked)"
+            }
+          ],
+          "label": "Syntax 1: For ListView and Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "long",
+              "description": "Long by value (the handle of the item the user clicked)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_lvnrclicked, pbm_tcnrclicked, pbm_tvnrclicked"
     },
     {
@@ -2649,6 +3095,30 @@
         "ListView",
         "Tab",
         "TreeView"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "any",
+              "description": "Integer by value (the index of the item or tab the user double-clicked)"
+            }
+          ],
+          "label": "Syntax 1: For ListView and Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle",
+              "type": "any",
+              "description": "Long by value (the handle of the item the user double-clicked)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lvnrdoubleclicked, pbm_tcnrdoubleclicked, pbm_tvnrdoubleclicked"
     },
@@ -2753,6 +3223,67 @@
         "Tab",
         "TreeView"
       ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index",
+              "type": "integer",
+              "description": "Integer by value (the index of the item that has become selected)"
+            }
+          ],
+          "label": "Syntax 1: For Listboxes",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "oldindex",
+              "type": "integer",
+              "description": "Integer by value (the index of the tab that was previously selected)"
+            },
+            {
+              "name": "newindex",
+              "type": "integer",
+              "description": "Integer by value (the index of the tab that has become selected)"
+            }
+          ],
+          "label": "Syntax 2: For Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "oldhandle",
+              "type": "long",
+              "description": "Long by value (the handle of the previously selected item)"
+            },
+            {
+              "name": "newhandle",
+              "type": "long",
+              "description": "Long by value (the handle of the currently selected item)"
+            }
+          ],
+          "label": "Syntax 3: For TreeView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "ItemHandle",
+              "type": "long",
+              "description": "Long. The handle of the item."
+            },
+            {
+              "name": "index",
+              "type": "long",
+              "description": "Long. The index of the item selected."
+            }
+          ],
+          "label": "Syntax 4: For Ribbon item controls",
+          "returnType": "long"
+        }
+      ],
       "eventId": "pbm_cbnselchange, pbm_lbnselchange, pbm_tcnselchanged, pbm_tvnselchanged"
     },
     {
@@ -2785,6 +3316,40 @@
       "appliesTo": [
         "Tab",
         "TreeView"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "oldindex",
+              "type": "integer",
+              "description": "Integer by value (the index of the currently selected tab)"
+            },
+            {
+              "name": "newindex",
+              "type": "integer",
+              "description": "Integer by value (the index of the tab that is about to be selected)"
+            }
+          ],
+          "label": "Syntax 1: For Tab controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "oldhandle",
+              "type": "long",
+              "description": "Long by value (the handle of the currently selected item)"
+            },
+            {
+              "name": "newhandle",
+              "type": "long",
+              "description": "Long by value (the handle of the item that is about to be selected)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_tcnselchanging, pbm_tvnselchanging"
     },
@@ -2862,6 +3427,45 @@
       "appliesTo": [
         "ListView",
         "TreeView"
+      ],
+      "variants": [
+        {
+          "params": [
+            {
+              "name": "index1",
+              "type": "integer",
+              "description": "Integer by value (the index of one item being compared during a sorting operation)"
+            },
+            {
+              "name": "index2",
+              "type": "integer",
+              "description": "Integer by value (the index of the second item being compared)"
+            },
+            {
+              "name": "column",
+              "type": "integer",
+              "description": "Integer by value (the number of the column containing the items being sorted)"
+            }
+          ],
+          "label": "Syntax 1: For ListView controls",
+          "returnType": "long"
+        },
+        {
+          "params": [
+            {
+              "name": "handle1",
+              "type": "long",
+              "description": "Long by value (the handle of one item being compared during a sorting operation)"
+            },
+            {
+              "name": "handle2",
+              "type": "long",
+              "description": "Long by value (the handle of the second item being compared)"
+            }
+          ],
+          "label": "Syntax 2: For TreeView controls",
+          "returnType": "long"
+        }
       ],
       "eventId": "pbm_lvnsort, pbm_tvnsort"
     },

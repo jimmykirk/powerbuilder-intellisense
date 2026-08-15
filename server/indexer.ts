@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { URI } from 'vscode-uri';
 import { ParamInfo } from './builtins';
+import { stripCommentsAndStrings } from './diagnostics';
 
 export type SymbolKind = 'function' | 'subroutine' | 'event' | 'type' | 'variable';
 
@@ -162,8 +163,15 @@ export function parseVariableDeclaration(
  * matched by scanning a bounded window after each `column` opener so nested
  * parens like `type=char(10)` don't end the search early.
  */
-export function parseDataWindowColumns(text: string): string[] {
-  const columns: string[] = [];
+export interface DataWindowColumn {
+  name: string;
+  /** 0-based position of the column's `name=` value in the .srd. */
+  line: number;
+  character: number;
+}
+
+export function parseDataWindowColumns(text: string): DataWindowColumn[] {
+  const columns: DataWindowColumn[] = [];
   const seen = new Set<string>();
   const opener = /\bcolumn\s*[=(]/g;
   let match: RegExpExecArray | null;
@@ -172,10 +180,46 @@ export function parseDataWindowColumns(text: string): string[] {
     const name = /\bname=([a-zA-Z_]\w*)/.exec(window);
     if (name && !seen.has(name[1].toLowerCase())) {
       seen.add(name[1].toLowerCase());
-      columns.push(name[1]);
+      const offset = match.index + name.index + 'name='.length;
+      const before = text.slice(0, offset);
+      const line = (before.match(/\n/g) ?? []).length;
+      const character = offset - (before.lastIndexOf('\n') + 1);
+      columns.push({ name: name[1], line, character });
     }
   }
   return columns;
+}
+
+/**
+ * DataWindow-object bindings declared in a document: both runtime assignments
+ * (`dw_1.dataobject = "d_emp"`) and the `dataobject = "d_emp"` property inside
+ * an exported control's type block.
+ */
+export function parseDataObjectBindings(text: string): { control: string; dataObject: string }[] {
+  const bindings: { control: string; dataObject: string }[] = [];
+  const assign = /\b([A-Za-z_]\w*)\s*\.\s*dataobject\s*=\s*['"]([\w$#%-]+)['"]/gi;
+  let match: RegExpExecArray | null;
+  while ((match = assign.exec(text)) !== null) {
+    bindings.push({ control: match[1], dataObject: match[2] });
+  }
+
+  let currentType: string | null = null;
+  for (const line of text.split(/\r?\n/)) {
+    const typeMatch = /^\s*(?:global\s+)?type\s+(\w+)\s+from\b/i.exec(line);
+    if (typeMatch) {
+      currentType = typeMatch[1];
+      continue;
+    }
+    if (/^\s*end\s+type\b/i.test(line)) {
+      currentType = null;
+      continue;
+    }
+    const prop = /^\s*dataobject\s*=\s*"([\w$#%-]+)"/i.exec(line);
+    if (prop && currentType) {
+      bindings.push({ control: currentType, dataObject: prop[1] });
+    }
+  }
+  return bindings;
 }
 
 /**
@@ -293,8 +337,12 @@ export class WorkspaceIndex {
   private byName = new Map<string, SymbolDefinition[]>();
   private varsByUri = new Map<string, VariableDefinition[]>();
   private varsByName = new Map<string, VariableDefinition[]>();
-  // DataWindow object name (from the .srd basename) -> column names
-  private dwColumns = new Map<string, string[]>();
+  // DataWindow object name (from the .srd basename) -> its source and columns
+  private dwColumns = new Map<string, { uri: string; columns: DataWindowColumn[] }>();
+  // Per-document control -> dataobject bindings
+  private dwBindingsByUri = new Map<string, { control: string; dataObject: string }[]>();
+  // Raw document text, kept for reference/rename scans
+  private textByUri = new Map<string, string>();
   // Type inheritance: maps type name -> immediate ancestor name
   private typeAncestors = new Map<string, string>();
   // Reverse mapping: ancestor -> all direct children
@@ -304,19 +352,29 @@ export class WorkspaceIndex {
   updateDocument(uri: string, text: string): void {
     const { symbols, variables } = parseSymbols(uri, text);
     this.setEntries(uri, symbols, variables);
+    this.textByUri.set(uri, text);
 
     if (uri.toLowerCase().endsWith('.srd')) {
       const dataObject = path.basename(URI.parse(uri).fsPath, path.extname(URI.parse(uri).fsPath));
       const columns = parseDataWindowColumns(text);
       if (columns.length > 0) {
-        this.dwColumns.set(dataObject.toLowerCase(), columns);
+        this.dwColumns.set(dataObject.toLowerCase(), { uri, columns });
       } else {
         this.dwColumns.delete(dataObject.toLowerCase());
+      }
+    } else {
+      const bindings = parseDataObjectBindings(text);
+      if (bindings.length > 0) {
+        this.dwBindingsByUri.set(uri, bindings);
+      } else {
+        this.dwBindingsByUri.delete(uri);
       }
     }
   }
 
   removeDocument(uri: string): void {
+    this.textByUri.delete(uri);
+    this.dwBindingsByUri.delete(uri);
     if (uri.toLowerCase().endsWith('.srd')) {
       const dataObject = path.basename(URI.parse(uri).fsPath, path.extname(URI.parse(uri).fsPath));
       this.dwColumns.delete(dataObject.toLowerCase());
@@ -432,13 +490,62 @@ export class WorkspaceIndex {
   }
 
   /** Returns the columns of an indexed DataWindow object (.srd basename). */
-  columnsForDataObject(name: string): string[] {
-    return this.dwColumns.get(name.toLowerCase()) ?? [];
+  columnsForDataObject(name: string): DataWindowColumn[] {
+    return this.dwColumns.get(name.toLowerCase())?.columns ?? [];
   }
 
-  /** Returns every indexed DataWindow object name with its columns. */
-  allDataObjects(): Map<string, string[]> {
+  /** Returns every indexed DataWindow object with its source URI and columns. */
+  allDataObjects(): Map<string, { uri: string; columns: DataWindowColumn[] }> {
     return this.dwColumns;
+  }
+
+  /** The DataWindow object bound to a control, from any indexed document. */
+  dataObjectFor(control: string): string | undefined {
+    const lower = control.toLowerCase();
+    for (const bindings of this.dwBindingsByUri.values()) {
+      const hit = bindings.find((b) => b.control.toLowerCase() === lower);
+      if (hit) {
+        return hit.dataObject;
+      }
+    }
+    return undefined;
+  }
+
+  /** Every indexed column definition matching a name, as .srd locations. */
+  findColumns(name: string): { uri: string; line: number; character: number; dataObject: string }[] {
+    const lower = name.toLowerCase();
+    const results: { uri: string; line: number; character: number; dataObject: string }[] = [];
+    for (const [dataObject, entry] of this.dwColumns) {
+      for (const col of entry.columns) {
+        if (col.name.toLowerCase() === lower) {
+          results.push({ uri: entry.uri, line: col.line, character: col.character, dataObject });
+        }
+      }
+    }
+    return results;
+  }
+
+  /**
+   * Every textual occurrence of an identifier across the indexed workspace
+   * (word-boundary, case-insensitive — PowerScript identifiers are
+   * case-insensitive), skipping comments and string literals.
+   */
+  references(name: string): { uri: string; line: number; character: number }[] {
+    const results: { uri: string; line: number; character: number }[] = [];
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(?<![\\w])${escaped}(?![\\w!])`, 'gi');
+
+    for (const [uri, text] of this.textByUri) {
+      const cleaned = stripCommentsAndStrings(text.split(/\r?\n/));
+      for (let i = 0; i < cleaned.length; i++) {
+        re.lastIndex = 0;
+        let match: RegExpExecArray | null;
+        while ((match = re.exec(cleaned[i])) !== null) {
+          results.push({ uri, line: i, character: match.index });
+        }
+      }
+    }
+    return results;
   }
 
   /** Returns the immediate ancestor type name, or undefined if not found or if it's a base type. */

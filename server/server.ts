@@ -17,6 +17,8 @@ import {
   MarkupKind,
   ParameterInformation,
   ProposedFeatures,
+  ReferenceParams,
+  RenameParams,
   SignatureHelp,
   SignatureHelpParams,
   SignatureInformation,
@@ -25,12 +27,21 @@ import {
   TextDocumentPositionParams,
   TextDocuments,
   TextDocumentSyncKind,
+  TextEdit,
+  WorkspaceEdit,
   WorkspaceSymbolParams
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import * as fs from 'fs';
-import { formatEventHover, formatHover, formatParam, formatSignature, ParamInfo } from './builtins';
+import {
+  formatEventHover,
+  formatHover,
+  formatParam,
+  formatSignature,
+  ParamInfo,
+  VariantInfo
+} from './builtins';
 import {
   builtinEvents2022,
   builtinFunctions2022,
@@ -102,7 +113,9 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
       },
       workspaceSymbolProvider: true,
       documentSymbolProvider: true,
-      foldingRangeProvider: true
+      foldingRangeProvider: true,
+      referencesProvider: true,
+      renameProvider: true
     }
   };
 });
@@ -119,15 +132,43 @@ connection.onDidChangeConfiguration((): void => {
   void loadConfiguration();
 });
 
+// Diagnostics are debounced per document: the index update stays immediate
+// (completion needs it), but the full semantic pass over a large export only
+// runs once typing pauses.
+const DIAGNOSTICS_DEBOUNCE_MS = 300;
+const diagnosticsTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
 documents.onDidChangeContent((change): void => {
-  index.updateDocument(change.document.uri, change.document.getText());
-  connection.sendDiagnostics({
-    uri: change.document.uri,
-    diagnostics: computeDiagnostics(
-      change.document.getText(),
-      buildSemanticContext(change.document.getText())
-    )
-  });
+  const uri = change.document.uri;
+  index.updateDocument(uri, change.document.getText());
+
+  const existing = diagnosticsTimers.get(uri);
+  if (existing) {
+    clearTimeout(existing);
+  }
+  diagnosticsTimers.set(
+    uri,
+    setTimeout(() => {
+      diagnosticsTimers.delete(uri);
+      const doc = documents.get(uri);
+      if (!doc) {
+        return;
+      }
+      const text = doc.getText();
+      connection.sendDiagnostics({
+        uri,
+        diagnostics: computeDiagnostics(text, buildSemanticContext(text))
+      });
+    }, DIAGNOSTICS_DEBOUNCE_MS)
+  );
+});
+
+documents.onDidClose((event): void => {
+  const timer = diagnosticsTimers.get(event.document.uri);
+  if (timer) {
+    clearTimeout(timer);
+    diagnosticsTimers.delete(event.document.uri);
+  }
 });
 
 /**
@@ -136,12 +177,48 @@ documents.onDidChangeContent((change): void => {
  * identifiers declared anywhere in the current document (loose local scan, so
  * script-local declarations are never flagged).
  */
+const PRONOUNS = new Set([
+  'this', 'parent', 'super', 'sqlca', 'sqlda', 'sqlsa', 'error', 'message', 'parentwindow'
+]);
+
+let anyPropertyCache: { source: Map<string, unknown>; names: Set<string> } | null = null;
+
+/** Lazily-built set of every property name in the active catalog. */
+function anyPropertyNames(): Set<string> {
+  if (anyPropertyCache?.source !== activeProperties) {
+    const names = new Set<string>();
+    for (const props of activeProperties.values()) {
+      for (const p of props) {
+        names.add(p.name.toLowerCase());
+      }
+    }
+    anyPropertyCache = { source: activeProperties, names };
+  }
+  return anyPropertyCache.names;
+}
+
 function buildSemanticContext(text: string): SemanticContext {
   const localNames = new Set<string>();
   const lines = text.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     for (const decl of parseVariableDeclaration(lines[i], i, '', 'local')) {
       localNames.add(decl.name.toLowerCase());
+    }
+    // Script parameters declare identifiers too: function/subroutine/event
+    // prototypes and catch clauses.
+    const proto = /^\s*(?:(?:public|private|protected|global)\s+)*(?:function|subroutine|event)\b[^(]*\(([^)]*)\)/i.exec(lines[i]);
+    if (proto && proto[1].trim()) {
+      for (const segment of proto[1].split(',')) {
+        const tokens = segment.trim().split(/\s+/).filter((t) => !/^(ref|readonly)$/i.test(t));
+        const name = tokens[tokens.length - 1]?.replace(/\[.*$/, '');
+        if (name && /^[A-Za-z_]\w*$/.test(name)) {
+          localNames.add(name.toLowerCase());
+        }
+      }
+    }
+    const caught = /\bcatch\s*\(\s*\w+\s+(\w+)\s*\)/i.exec(lines[i]);
+    if (caught) {
+      localNames.add(caught[1].toLowerCase());
     }
   }
 
@@ -166,10 +243,36 @@ function buildSemanticContext(text: string): SemanticContext {
     },
     maxArgs: (name) => {
       const fn = findActiveBuiltin(name);
-      if (!fn || fn.variadic || index.find(name).length > 0) {
-        return undefined; // unknown arity, or shadowed by a workspace symbol
+      if (!fn || fn.variadic || (fn.variants?.length ?? 0) > 1 || index.find(name).length > 0) {
+        return undefined; // unknown arity, variants, or shadowed by workspace
       }
       return fn.params.length;
+    },
+    paramTypesOf: (name) => {
+      const fn = findActiveBuiltin(name);
+      if (!fn || fn.variadic || (fn.variants?.length ?? 0) > 1 || index.find(name).length > 0) {
+        return undefined;
+      }
+      return fn.params.map((p) => p.type);
+    },
+    enumNameOf: (valueToken) => {
+      const lower = valueToken.toLowerCase();
+      for (const en of activeEnums.values()) {
+        if (en.values.some((v) => v.toLowerCase() === lower)) {
+          return en.name;
+        }
+      }
+      return undefined;
+    },
+    isEnumType: (typeName) => activeEnums.has(typeName.toLowerCase()),
+    isDeclaredIdentifier: (name) => {
+      const lower = name.toLowerCase();
+      return (
+        localNames.has(lower) ||
+        index.findVariables(name).length > 0 ||
+        PRONOUNS.has(lower) ||
+        anyPropertyNames().has(lower)
+      );
     }
   };
 }
@@ -353,6 +456,50 @@ connection.onHover((params): Hover | null => {
     return { contents: { kind: MarkupKind.Markdown, value: lines.join('\n') } };
   }
 
+  // Enumerated value: Identifier!
+  const lineText = doc.getText({
+    start: { line: params.position.line, character: 0 },
+    end: { line: params.position.line + 1, character: 0 }
+  });
+  if (new RegExp(`\\b${word}!`, 'i').test(lineText)) {
+    for (const en of activeEnums.values()) {
+      const hit = en.values.find((v) => v.toLowerCase() === `${word.toLowerCase()}!`);
+      if (hit) {
+        const lines = [
+          `**${hit}** — value of the \`${en.name}\` enumerated datatype`,
+          '',
+          `All values: ${en.values.map((v) => `\`${v}\``).join(', ')}`
+        ];
+        return { contents: { kind: MarkupKind.Markdown, value: lines.join('\n') } };
+      }
+    }
+  }
+
+  // Property accessed through a resolvable receiver chain (`this.Title`)
+  let wordStart = params.position.character;
+  while (wordStart > 0 && /[A-Za-z0-9_]/.test(lineText[wordStart - 1])) {
+    wordStart--;
+  }
+  const receiverPrefix = lineText.slice(0, wordStart);
+  const chainBefore =
+    /([A-Za-z_]\w*(?:\s*\([^()]*\))?(?:\s*\.\s*[A-Za-z_]\w*(?:\s*\([^()]*\))?)*)\s*\.\s*$/.exec(receiverPrefix);
+  if (chainBefore) {
+    const receiverType = resolveChainType(doc, params.position, parseChainSegments(chainBefore[1]));
+    if (receiverType) {
+      const chain = index.getInheritanceChain(receiverType);
+      for (const t of chain.length > 0 ? chain : [receiverType.toLowerCase()]) {
+        const prop = activeProperties.get(t)?.find((p) => p.name.toLowerCase() === word.toLowerCase());
+        if (prop) {
+          const lines = [`**${prop.name}** : \`${prop.type}\` — *property of ${t}*`];
+          if (prop.description) {
+            lines.push('', prop.description);
+          }
+          return { contents: { kind: MarkupKind.Markdown, value: lines.join('\n') } };
+        }
+      }
+    }
+  }
+
   // Check types and show inheritance chain
   const typeDefs = index.find(word).filter((def) => def.kind === 'type');
   if (typeDefs.length > 0) {
@@ -390,6 +537,17 @@ connection.onDefinition((params): Definition | null => {
 
   const defs = index.find(word);
   if (defs.length === 0) {
+    // DataWindow column names jump into their .srd definition
+    const columns = index.findColumns(word);
+    if (columns.length > 0) {
+      const locations = columns.map((col) =>
+        Location.create(col.uri, {
+          start: { line: col.line, character: col.character },
+          end: { line: col.line, character: col.character + word.length }
+        })
+      );
+      return locations.length === 1 ? locations[0] : locations;
+    }
     return null;
   }
 
@@ -416,6 +574,9 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
 
   const builtIn = findActiveBuiltin(call.name);
   if (builtIn) {
+    if ((builtIn.variants?.length ?? 0) >= 2) {
+      return buildVariantSignatureHelp(builtIn.name, builtIn.variants!, call.activeParam, builtIn.documentation);
+    }
     return buildSignatureHelp(builtIn.name, formatSignature(builtIn), builtIn.params, call.activeParam, builtIn.documentation);
   }
 
@@ -426,6 +587,14 @@ connection.onSignatureHelp((params: SignatureHelpParams): SignatureHelp | null =
 
   // Built-in object events, for call sites like `obj.EVENT Clicked(...)`.
   const builtinEvent = findActiveEvent(call.name);
+  if (builtinEvent && (builtinEvent.variants?.length ?? 0) >= 2) {
+    return buildVariantSignatureHelp(
+      builtinEvent.name,
+      builtinEvent.variants!,
+      call.activeParam,
+      formatEventHover(builtinEvent)
+    );
+  }
   if (builtinEvent && builtinEvent.params.length > 0) {
     const label = `event ${builtinEvent.name}(${builtinEvent.params.map(formatParam).join(', ')})`;
     return buildSignatureHelp(
@@ -468,6 +637,47 @@ connection.onFoldingRanges((params: FoldingRangeParams): FoldingRange[] => {
     startLine: r.startLine,
     endLine: r.endLine
   }));
+});
+
+connection.onReferences((params: ReferenceParams): Location[] => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) {
+    return [];
+  }
+  const word = getWordAtPosition(doc, params.position);
+  if (!word) {
+    return [];
+  }
+  return index.references(word).map((ref) =>
+    Location.create(ref.uri, {
+      start: { line: ref.line, character: ref.character },
+      end: { line: ref.line, character: ref.character + word.length }
+    })
+  );
+});
+
+connection.onRenameRequest((params: RenameParams): WorkspaceEdit | null => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) {
+    return null;
+  }
+  const word = getWordAtPosition(doc, params.position);
+  if (!word || !/^[A-Za-z_]\w*$/.test(params.newName)) {
+    return null;
+  }
+  const changes: { [uri: string]: TextEdit[] } = {};
+  for (const ref of index.references(word)) {
+    (changes[ref.uri] ??= []).push(
+      TextEdit.replace(
+        {
+          start: { line: ref.line, character: ref.character },
+          end: { line: ref.line, character: ref.character + word.length }
+        },
+        params.newName
+      )
+    );
+  }
+  return { changes };
 });
 
 connection.onWorkspaceSymbol((params: WorkspaceSymbolParams): SymbolInformation[] => {
@@ -900,7 +1110,11 @@ function resolveDataObject(doc: TextDocument, receiver: string): string | undefi
     `\\btype\\s+${receiver}\\s+from\\b[\\s\\S]*?dataobject\\s*=\\s*"([\\w$#%-]+)"`,
     'i'
   ).exec(text);
-  return typeBlock?.[1];
+  if (typeBlock) {
+    return typeBlock[1];
+  }
+  // Bindings made in other indexed documents (open + closed files)
+  return index.dataObjectFor(receiver);
 }
 
 /**
@@ -923,7 +1137,7 @@ function dataWindowColumnCompletion(
     const columns = index.columnsForDataObject(bound);
     if (columns.length > 0) {
       return columns.map((col) => ({
-        label: col,
+        label: col.name,
         kind: CompletionItemKind.Field,
         detail: `column (${bound})`
       }));
@@ -932,12 +1146,12 @@ function dataWindowColumnCompletion(
 
   const items: CompletionItem[] = [];
   const seen = new Set<string>();
-  for (const [dataObject, columns] of index.allDataObjects()) {
-    for (const col of columns) {
-      const key = col.toLowerCase();
+  for (const [dataObject, entry] of index.allDataObjects()) {
+    for (const col of entry.columns) {
+      const key = col.name.toLowerCase();
       if (!seen.has(key)) {
         seen.add(key);
-        items.push({ label: col, kind: CompletionItemKind.Field, detail: `column (${dataObject})` });
+        items.push({ label: col.name, kind: CompletionItemKind.Field, detail: `column (${dataObject})` });
       }
     }
   }
@@ -994,6 +1208,45 @@ function symbolKindFor(def: SymbolDefinition): SymbolKind {
     default:
       return SymbolKind.Function;
   }
+}
+
+/**
+ * Signature help across every documented syntax variant. The active signature
+ * is the first variant that can still accept the argument being typed.
+ */
+function buildVariantSignatureHelp(
+  name: string,
+  variants: VariantInfo[],
+  activeParam: number,
+  documentation: string
+): SignatureHelp {
+  const signatures: SignatureInformation[] = variants.map((variant) => {
+    const ret = variant.returnType ? `${variant.returnType} ` : '';
+    const label = variant.syntax
+      ? variant.syntax
+      : `${ret}${name}(${variant.params.map(formatParam).join(', ')})`;
+    const doc = variant.label ? `**${variant.label}**\n\n${documentation}` : documentation;
+    return {
+      label,
+      documentation: { kind: MarkupKind.Markdown, value: doc },
+      parameters: variant.params.map((param) => ({
+        label: `${param.type} ${param.name}`,
+        documentation: param.description
+          ? { kind: MarkupKind.Markdown, value: param.description }
+          : undefined
+      }))
+    } as SignatureInformation;
+  });
+
+  let active = variants.findIndex((v) => v.params.length > activeParam);
+  if (active === -1) {
+    active = 0;
+  }
+  return {
+    signatures,
+    activeSignature: active,
+    activeParameter: Math.min(activeParam, Math.max(0, (variants[active]?.params.length ?? 1) - 1))
+  };
 }
 
 function buildSignatureHelp(
