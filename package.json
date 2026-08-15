@@ -92,6 +92,7 @@
     "vscode:prepublish": "npm run compile && npm run bundle",
     "compile": "tsc -p ./",
     "bundle": "node esbuild.js",
+    "build": "npm run compile && npm run bundle",
     "watch": "tsc -watch -p ./",
     "lint": "eslint . --ext .ts",
     "test": "npm run compile && npm run bundle && node tools/lsp-smoke.js"
