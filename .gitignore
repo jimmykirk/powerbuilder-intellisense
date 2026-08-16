@@ -66,3 +66,7 @@ tools/docs-scraper/venv/
 
 tools/docs-scraper/cache-oc/
 tools/docs-scraper/cache-dw/
+
+# Docs scraper: index page copies (refetched by crawl*.py) and Python bytecode
+tools/docs-scraper/*_index.html
+tools/docs-scraper/__pycache__/

@@ -123,10 +123,40 @@ The extension is a thin client (`src/extension.ts`) that launches a Language Ser
 - `server/textutils.ts` — cursor helpers for hover / signature help
 - `server/server.ts` — wires the LSP features together
 
+## Publishing
+
+Both registries are published from the same `.vsix`, so build it once and
+upload that exact file to each:
+
+```bash
+npm run package                            # -> powerbuilder-intellisense-<version>.vsix
+```
+
+**VS Code Marketplace** (for VS Code proper) needs the `jimmykirk` publisher,
+created once at [marketplace.visualstudio.com/manage](https://marketplace.visualstudio.com/manage),
+and an Azure DevOps Personal Access Token scoped to *Marketplace: Manage* with
+"All accessible organizations":
+
+```bash
+npx vsce login jimmykirk                   # stores the PAT, or set VSCE_PAT
+npm run publish
+```
+
+**Open VSX** (for VSCodium, Cursor, Windsurf, Gitpod, and Eclipse Theia, which
+cannot use the Microsoft Marketplace) needs an
+[open-vsx.org](https://open-vsx.org) account, a signed Eclipse Foundation
+Publisher Agreement, and a namespace claimed once:
+
+```bash
+npx ovsx create-namespace jimmykirk -p <token>
+npm run publish:ovsx -- -p <token>         # or set OVSX_PAT
+```
+
+Publish the Marketplace first — if it rejects the package, nothing is live yet.
+The two registries version independently, so re-run both on every release to
+keep them in step.
+
 ## Roadmap
 
-- Validate against a real exported PowerBuilder workspace
-- Publish to the VS Code Marketplace (requires the `jimmykirk` publisher
-  account; `npx @vscode/vsce publish`)
 - DataWindow expression functions for `dw.Object.<column>.<property>` chains
 - Unused local/instance variable hints
