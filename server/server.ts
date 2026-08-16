@@ -81,6 +81,7 @@ import {
   stripCommentsAndStrings
 } from './diagnostics';
 import { decodePBExport, setAnsiEncoding } from './encoding';
+import { toStatements } from './preprocess';
 import { findActiveCall, getWordAtPosition } from './textutils';
 
 const connection = createConnection(ProposedFeatures.all);
@@ -239,16 +240,50 @@ function trustworthySignature(name: string): FunctionInfo | undefined {
   return fn;
 }
 
+/**
+ * Params to check a *bare* call's arguments against. PowerBuilder lets a
+ * documented `receiver.Method(args)` member function also be called bare with
+ * the receiver passed explicitly as the first argument (e.g.
+ * `TriggerEvent(this, "ue_init")`, `SetFocus(pb_save)`) — CALL_RE only ever
+ * matches bare calls (dot-calls are skipped), so for member functions a
+ * synthetic untyped receiver slot is prepended to line arguments up.
+ */
+function trustworthyParams(name: string): ParamInfo[] | undefined {
+  const fn = trustworthySignature(name);
+  if (!fn) {
+    return undefined;
+  }
+  return fn.member ? [{ name: 'receiver', type: 'any' }, ...fn.params] : fn.params;
+}
+
+/**
+ * Alternate interpretation for member functions called bare with NO receiver
+ * at all — an implicit-self call from within a script that inherits the
+ * member function (e.g. a custom DataWindow subclass calling its own
+ * `GetItemStatus(row, col, buffer!)`). Undefined for non-member names; used
+ * only to avoid flagging arity/type errors that are valid under either
+ * ambiguous bare-call interpretation.
+ */
+function trustworthyRawParams(name: string): ParamInfo[] | undefined {
+  const fn = trustworthySignature(name);
+  return fn?.member ? fn.params : undefined;
+}
+
 function buildSemanticContext(text: string): SemanticContext {
   const localNames = new Set<string>();
-  const lines = text.split(/\r?\n/);
-  for (let i = 0; i < lines.length; i++) {
-    for (const decl of parseVariableDeclaration(lines[i], i, '', 'local')) {
+  // Split on real `;` first: a variable declaration commonly shares a
+  // physical line with a preceding statement (classically
+  // `function foo();longlong x, y`, the signature and its first local both
+  // on one line) — scanning raw physical lines would see the whole blob and
+  // fail to recognize either the declaration shape.
+  const statements = toStatements(text.split(/\r?\n/));
+  for (const stmt of statements) {
+    for (const decl of parseVariableDeclaration(stmt.text, stmt.line, '', 'local')) {
       localNames.add(decl.name.toLowerCase());
     }
     // Script parameters declare identifiers too: function/subroutine/event
     // prototypes and catch clauses.
-    const proto = /^\s*(?:(?:public|private|protected|global)\s+)*(?:function|subroutine|event)\b[^(]*\(([^)]*)\)/i.exec(lines[i]);
+    const proto = /^\s*(?:(?:public|private|protected|global)\s+)*(?:function|subroutine|event)\b[^(]*\(([^)]*)\)/i.exec(stmt.text);
     if (proto && proto[1].trim()) {
       for (const segment of proto[1].split(',')) {
         const tokens = segment.trim().split(/\s+/).filter((t) => !/^(ref|readonly)$/i.test(t));
@@ -258,7 +293,7 @@ function buildSemanticContext(text: string): SemanticContext {
         }
       }
     }
-    const caught = /\bcatch\s*\(\s*\w+\s+(\w+)\s*\)/i.exec(lines[i]);
+    const caught = /\bcatch\s*\(\s*\w+\s+(\w+)\s*\)/i.exec(stmt.text);
     if (caught) {
       localNames.add(caught[1].toLowerCase());
     }
@@ -285,9 +320,12 @@ function buildSemanticContext(text: string): SemanticContext {
           : `it was removed after PB ${otherVersion}`;
       return `'${other.name}' is not available in PowerBuilder ${pbVersion} — ${detail}.`;
     },
-    maxArgs: (name) => trustworthySignature(name)?.params.length,
-    paramTypesOf: (name) => trustworthySignature(name)?.params.map((p) => p.type),
-    refParamsOf: (name) => trustworthySignature(name)?.params.map((p) => !!p.ref),
+    maxArgs: (name) => trustworthyParams(name)?.length,
+    paramTypesOf: (name) => trustworthyParams(name)?.map((p) => p.type),
+    refParamsOf: (name) => trustworthyParams(name)?.map((p) => !!p.ref),
+    rawMaxArgs: (name) => trustworthyRawParams(name)?.length,
+    rawParamTypesOf: (name) => trustworthyRawParams(name)?.map((p) => p.type),
+    rawRefParamsOf: (name) => trustworthyRawParams(name)?.map((p) => !!p.ref),
     enumNameOf: (valueToken) => {
       const lower = valueToken.toLowerCase();
       for (const en of activeEnums.values()) {

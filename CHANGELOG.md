@@ -1,5 +1,35 @@
 # Change Log
 
+## 0.3.1
+
+Validated semantic diagnostics (unknown-function, argument-count,
+argument-type, and undeclared-variable checks) against a much larger
+real-world corpus (18,499 exported objects). False positives went from
+164,832 warnings across 14,006 files to 3,218 across 304 — the remaining
+cases stem from cross-file ancestor instance-variable resolution, a larger
+architectural gap left for a future release.
+
+- DataWindow/Query (`.srd`/`.srq`) exports use a declarative
+  `key=(nested=key=value)` attribute syntax, not PowerScript; these are now
+  detected (via their `release <n>;` header) and skipped entirely by
+  semantic checks, instead of misreading attribute lines as undeclared
+  variable assignments.
+- PowerBuilder lets several documented member functions also be called bare
+  with the receiver passed explicitly as the first argument (e.g.
+  `TriggerEvent(this, "ue_init")`, `SetFocus(pb_save)`), or bare with no
+  receiver at all from a script that inherits the function (e.g.
+  `GetItemStatus(row, col, buffer!)`). Argument-count and argument-type
+  checks now consider both call shapes before flagging a mismatch.
+- `object.dynamic MethodName(args)` dynamic-dispatch calls are no longer
+  mistaken for calls to an unrelated global/bare function named
+  `MethodName`.
+- Local variable declarations that share a physical source line with a
+  preceding function/subroutine/event signature (`event ue_foo;longlong
+  old_id, rtn`) are now recognised, instead of being flagged as "assigned
+  but never declared" wherever they're later used.
+- A comma inside a 2D array subscript (`arr[i,3]`) passed as a call
+  argument is no longer miscounted as a second argument.
+
 ## 0.3.0
 
 Validated against a real PowerBuilder application for the first time (OpenPay,

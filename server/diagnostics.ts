@@ -47,13 +47,13 @@ const CLOSER_LABEL: Record<BlockType, string> = {
 
 const FUNCTION_DEF_RE =
   /^(?:(?:public|private|protected|global)\s+)*(function|subroutine)\s+[\p{L}_][\p{L}\p{N}_]*.*\(/iu;
-const TYPE_DEF_RE = /^(?:global\s+)?type\s+[\p{L}_][\p{L}\p{N}_-]*\s+from\b/iu;
+const TYPE_DEF_RE = /^(?:global\s+)?type\s+[\p{L}_][\p{L}\p{N}_$#%-]*\s+from\b/iu;
 
 const PROTOTYPES_START_RE = /^\s*(?:forward\s+|type\s+|global\s+)?prototypes\b/i;
 const PROTOTYPES_END_RE = /^\s*end\s+prototypes\b/i;
 
 /** Identifies a block opener on a cleaned line, if any. */
-function detectOpener(clean: string, insideType = false): BlockType | null {
+function detectOpener(clean: string, enclosingType?: BlockType): BlockType | null {
   const trimmed = clean.trim();
   const lower = trimmed.toLowerCase();
   if (!lower) {
@@ -79,11 +79,27 @@ function detectOpener(clean: string, insideType = false): BlockType | null {
   if (TYPE_DEF_RE.test(trimmed)) {
     return 'type';
   }
-  if (FUNCTION_DEF_RE.test(trimmed)) {
-    return lower.includes('subroutine') && !lower.includes('function') ? 'subroutine' : 'function';
+  const functionMatch = FUNCTION_DEF_RE.exec(trimmed);
+  if (functionMatch) {
+    // Function/subroutine *declarations* only ever appear at the top level of
+    // a script, same as `event` below. `Function wf_foo()` (or `Subroutine
+    // ...`) nested inside an already-open block is a call statement (real
+    // corpora call functions this way with an explicit, case-varying keyword
+    // prefix), not a nested declaration.
+    if (enclosingType) {
+      return null;
+    }
+    // Use the matched keyword itself, not a substring search over the whole
+    // line — a name like `of_validatefunctionnames` contains "function" and
+    // would otherwise misclassify a `subroutine` declaration.
+    return functionMatch[1].toLowerCase() === 'subroutine' ? 'subroutine' : 'function';
   }
   if (/^event\b/.test(lower)) {
-    return insideType ? null : 'event';
+    // Event *declarations* only ever appear at the top level of a script.
+    // `Event <name>(args)` inside an already-open block (an override calling
+    // its own event, `if`/`for`/... bodies, ...) is PowerScript's syntax for
+    // synchronously *triggering* an event, not a nested declaration.
+    return enclosingType ? null : 'event';
   }
   if (/^on\s+[\p{L}_]/u.test(lower)) {
     return 'on';
@@ -102,7 +118,8 @@ function detectCloser(clean: string): BlockType | null {
   if (/^end\s+if\b/.test(lower)) {
     return 'if';
   }
-  if (/^next\b/.test(lower)) {
+  if (/^next\b/.test(lower) || /^end\s+for\b/.test(lower)) {
+    // `end for` shows up in real-world code as an alternate to `next`.
     return 'for';
   }
   if (/^loop\b/.test(lower)) {
@@ -171,6 +188,18 @@ export interface SemanticContext {
    * PowerBuilder requires a variable for these — a literal will not compile.
    */
   refParamsOf(name: string): boolean[] | undefined;
+  /**
+   * For member functions callable bare in two ambiguous ways — receiver
+   * passed explicitly as the first argument (`TriggerEvent(this, "x")`) vs.
+   * an implicit-self call from within an inherited script
+   * (`GetItemStatus(row, col, buffer!)`) — the arity/type info for the
+   * *implicit-self* (no receiver slot) interpretation. Undefined for
+   * non-member names. Used only to avoid flagging a call that is valid under
+   * either interpretation.
+   */
+  rawMaxArgs?(name: string): number | undefined;
+  rawParamTypesOf?(name: string): string[] | undefined;
+  rawRefParamsOf?(name: string): boolean[] | undefined;
   /** The enum an `Identifier!` value belongs to, or undefined. */
   enumNameOf(valueToken: string): string | undefined;
   /** True when typeName is a known enumerated datatype. */
@@ -264,8 +293,6 @@ const CALL_RE = /(^|[^.\w:])([A-Za-z_]\w*)\s*\(/g;
  * than a built-in accepts (Warning). Member calls after a dot are skipped:
  * without full type inference an unknown member is too often a false alarm.
  */
-const SQL_START_RE =
-  /^(select|selectblob|insert|update(?!\s*\()|updateblob|delete|fetch|declare|open(?!\s*\()|close(?!\s*\()|connect|disconnect|commit|rollback|execute)\b/i;
 
 function semanticDiagnostics(
   cleaned: string[],
@@ -275,7 +302,6 @@ function semanticDiagnostics(
 ): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   let inPrototypes = false;
-  let inSql = false;
 
   for (let i = 0; i < cleaned.length; i++) {
     const clean = cleaned[i];
@@ -293,13 +319,7 @@ function semanticDiagnostics(
     }
     // Embedded SQL statements run until their terminating semicolon and follow
     // SQL semantics, not PowerScript's.
-    if (!inSql && SQL_START_RE.test(trimmed)) {
-      inSql = true;
-    }
-    if (inSql) {
-      if (/;\s*$/.test(trimmed)) {
-        inSql = false;
-      }
+    if (logical[i]?.sql) {
       continue;
     }
     // Declaration lines legitimately contain `name (params)` shapes.
@@ -339,6 +359,13 @@ function semanticDiagnostics(
       if (STATEMENT_WORDS.has(name.toLowerCase())) {
         continue;
       }
+      // `object.dynamic MethodName(...)` is a dynamic-dispatch member call,
+      // not a bare/global call — the `dynamic` keyword sits between the dot
+      // chain and the method name, so CALL_RE's "not preceded by `.`" guard
+      // doesn't catch it.
+      if (/\bdynamic\s*$/i.test(clean.slice(0, nameStart))) {
+        continue;
+      }
 
       if (!semantic.isKnown(name)) {
         const note = semantic.versionNote(name);
@@ -358,7 +385,8 @@ function semanticDiagnostics(
       if (args === undefined) {
         continue; // multiline call — structure unknown on this line
       }
-      if (max !== undefined && args.length > max) {
+      const rawMax = semantic.rawMaxArgs?.(name);
+      if (max !== undefined && args.length > max && (rawMax === undefined || args.length > rawMax)) {
         diagnostics.push({
           severity: DiagnosticSeverity.Warning,
           range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
@@ -370,10 +398,14 @@ function semanticDiagnostics(
 
       const paramTypes = semantic.paramTypesOf(name);
       const refParams = semantic.refParamsOf(name);
+      const rawParamTypes = semantic.rawParamTypesOf?.(name);
+      const rawRefParams = semantic.rawRefParamsOf?.(name);
       if (paramTypes) {
         for (let a = 0; a < args.length && a < paramTypes.length; a++) {
           const literal = literalKindOf(args[a]);
-          if (refParams?.[a] && literal.kind !== 'other') {
+          const isRefHere = refParams?.[a];
+          const isRefUnderRaw = rawRefParams?.[a];
+          if (isRefHere && literal.kind !== 'other' && (rawRefParams === undefined || isRefUnderRaw)) {
             diagnostics.push({
               severity: DiagnosticSeverity.Warning,
               range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
@@ -384,12 +416,17 @@ function semanticDiagnostics(
           }
           const mismatch = literalMismatch(semantic, paramTypes[a], literal);
           if (mismatch) {
-            diagnostics.push({
-              severity: DiagnosticSeverity.Warning,
-              range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
-              message: `Argument ${a + 1} of '${name}' ${mismatch}.`,
-              source: 'powerbuilder'
-            });
+            const rawMismatch = rawParamTypes && a < rawParamTypes.length
+              ? literalMismatch(semantic, rawParamTypes[a], literal)
+              : mismatch;
+            if (rawMismatch) {
+              diagnostics.push({
+                severity: DiagnosticSeverity.Warning,
+                range: { start: { line: logical[i]?.line ?? i, character: nameStart }, end: { line: logical[i]?.line ?? i, character: nameStart + name.length } },
+                message: `Argument ${a + 1} of '${name}' ${mismatch}.`,
+                source: 'powerbuilder'
+              });
+            }
           }
         }
       }
@@ -407,6 +444,7 @@ function semanticDiagnostics(
  */
 function extractArguments(clean: string, orig: string, openParen: number): string[] | undefined {
   let depth = 0;
+  let bracketDepth = 0;
   let segStart = openParen + 1;
   const args: string[] = [];
   for (let i = openParen; i < clean.length; i++) {
@@ -422,13 +460,24 @@ function extractArguments(clean: string, orig: string, openParen: number): strin
         }
         return args;
       }
-    } else if (ch === ',' && depth === 1) {
+    } else if (ch === '[') {
+      bracketDepth++;
+    } else if (ch === ']') {
+      bracketDepth--;
+    } else if (ch === ',' && depth === 1 && bracketDepth === 0) {
       args.push(orig.slice(segStart, i));
       segStart = i + 1;
     }
   }
   return undefined;
 }
+
+// DataWindow (.srd) and Query (.srq) exports use a declarative
+// `key=(nested=key=value pairs)` attribute syntax, not PowerScript — every
+// object always opens with a `release <n>;` statement, which is otherwise
+// never valid PowerScript. Detected once per file so semantic checks (which
+// assume PowerScript statement shapes) can be skipped entirely for them.
+const DW_SYNTAX_HEADER_RE = /^release\s+\d+(?:\.\d+)?\s*$/i;
 
 export function computeDiagnostics(text: string, semantic?: SemanticContext): Diagnostic[] {
   const logical = toStatements(text.split(/\r?\n/));
@@ -439,6 +488,9 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
   const diagnostics: Diagnostic[] = [];
   const stack: OpenBlock[] = [];
   let inPrototypes = false;
+  const isDataWindowSyntax = DW_SYNTAX_HEADER_RE.test(
+    (cleaned.find((l) => l.trim()) ?? '').trim()
+  );
 
   for (let i = 0; i < cleaned.length; i++) {
     const clean = cleaned[i];
@@ -457,6 +509,12 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
       continue;
     }
     if (inPrototypes) {
+      continue;
+    }
+
+    // Embedded SQL runs until its terminating semicolon and follows SQL
+    // syntax, not PowerScript's — a `JOIN ... ON` clause is not an `on` block.
+    if (logical[i]?.sql) {
       continue;
     }
 
@@ -486,7 +544,7 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
       continue;
     }
 
-    const opener = detectOpener(clean, stack[stack.length - 1]?.type === 'type');
+    const opener = detectOpener(clean, stack[stack.length - 1]?.type);
     if (opener) {
       const leading = colOf(i) + clean.length - clean.trimStart().length;
       stack.push({
@@ -508,7 +566,7 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
     });
   }
 
-  if (semantic) {
+  if (semantic && !isDataWindowSyntax) {
     diagnostics.push(...semanticDiagnostics(cleaned, lines, semantic, logical));
   }
 
@@ -550,6 +608,10 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
       continue;
     }
 
+    if (logical[i]?.sql) {
+      continue;
+    }
+
     const closer = detectCloser(clean);
     if (closer) {
       const matchIndex = findMatchIndex(stack, closer);
@@ -563,7 +625,7 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
       continue;
     }
 
-    const opener = detectOpener(clean, stack[stack.length - 1]?.type === 'type');
+    const opener = detectOpener(clean, stack[stack.length - 1]?.type);
     if (opener) {
       const leading = clean.length - clean.trimStart().length;
       stack.push({ type: opener, line: lineNo(i), startChar: leading, endChar: clean.trimEnd().length });

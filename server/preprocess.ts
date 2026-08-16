@@ -24,7 +24,17 @@ export interface LogicalLine {
   line: number;
   /** Character offset of this statement within its logical line. */
   column?: number;
+  /** True when this chunk is embedded SQL text, not a PowerScript statement. */
+  sql?: boolean;
 }
+
+/**
+ * SQL verbs that begin an embedded SQL statement in PowerScript — the
+ * statement runs (across physical lines, if needed) until its terminating
+ * `;` and follows SQL syntax, not PowerScript's.
+ */
+export const SQL_START_RE =
+  /^(select|selectblob|insert|update(?!\s*\()|updateblob|delete|fetch|declare|open(?!\s*\()|close(?!\s*\()|connect|disconnect|commit|rollback|execute)\b/i;
 
 /**
  * Removes comments and string literals from each line, replacing them with
@@ -32,19 +42,61 @@ export interface LogicalLine {
  */
 export function stripCommentsAndStrings(lines: string[]): string[] {
   const cleaned: string[] = [];
-  let inBlockComment = false;
+  // PowerScript block comments *nest* (unlike C-style languages) — a `/*`
+  // inside an already-open comment starts another level that needs its own
+  // `*/`, so track depth rather than a boolean.
+  let commentDepth = 0;
+  // Active quote character when a string literal is left open at end of line
+  // (real DataWindow exports embed literal newlines inside quoted attribute
+  // values, e.g. a `tag="..."` whose design-time text had line breaks), or
+  // null when not mid-string.
+  let inString: string | null = null;
 
   for (const original of lines) {
+    // `$PBExportHeader$...` / `$PBExportComments$...` are free-form export
+    // metadata, not PowerScript — their text can contain unbalanced quotes
+    // (e.g. "don't") that would otherwise be mistaken for an unterminated
+    // string literal and corrupt masking for the rest of the file.
+    if (/^\$PBExport(Header|Comments)\$/.test(original)) {
+      cleaned.push(''.padEnd(original.length, ' '));
+      continue;
+    }
+
     const chars = original.split('');
     let i = 0;
 
-    while (i < chars.length) {
-      if (inBlockComment) {
-        if (chars[i] === '*' && chars[i + 1] === '/') {
+    if (inString) {
+      while (i < chars.length && chars[i] !== inString) {
+        if (chars[i] === '~' && i + 1 < chars.length) {
+          // `~` escapes the next character (e.g. `~'` for a literal quote,
+          // `~~` for a literal tilde) — it never ends the string.
           chars[i] = ' ';
           chars[i + 1] = ' ';
           i += 2;
-          inBlockComment = false;
+          continue;
+        }
+        chars[i] = ' ';
+        i++;
+      }
+      if (i < chars.length) {
+        chars[i] = ' '; // closing quote
+        i++;
+        inString = null;
+      }
+    }
+
+    while (i < chars.length) {
+      if (commentDepth > 0) {
+        if (chars[i] === '/' && chars[i + 1] === '*') {
+          chars[i] = ' ';
+          chars[i + 1] = ' ';
+          i += 2;
+          commentDepth++;
+        } else if (chars[i] === '*' && chars[i + 1] === '/') {
+          chars[i] = ' ';
+          chars[i + 1] = ' ';
+          i += 2;
+          commentDepth--;
         } else {
           chars[i] = ' ';
           i++;
@@ -64,7 +116,7 @@ export function stripCommentsAndStrings(lines: string[]): string[] {
         chars[i] = ' ';
         chars[i + 1] = ' ';
         i += 2;
-        inBlockComment = true;
+        commentDepth = 1;
         continue;
       }
       if (chars[i] === '"' || chars[i] === "'") {
@@ -72,12 +124,22 @@ export function stripCommentsAndStrings(lines: string[]): string[] {
         chars[i] = ' ';
         i++;
         while (i < chars.length && chars[i] !== quote) {
+          if (chars[i] === '~' && i + 1 < chars.length) {
+            // `~` escapes the next character (e.g. `~'` for a literal quote,
+            // `~~` for a literal tilde) — it never ends the string.
+            chars[i] = ' ';
+            chars[i + 1] = ' ';
+            i += 2;
+            continue;
+          }
           chars[i] = ' ';
           i++;
         }
         if (i < chars.length) {
           chars[i] = ' '; // closing quote
           i++;
+        } else {
+          inString = quote; // unterminated on this line — continues onto the next
         }
         continue;
       }
@@ -142,23 +204,48 @@ export function toLogicalLines(lines: string[]): LogicalLine[] {
  */
 export function toStatements(lines: string[]): LogicalLine[] {
   const out: LogicalLine[] = [];
+  // Tracked across logical lines while semicolons are still visible in the
+  // masked text — once a statement is split off below, its own trailing `;`
+  // is gone, so SQL state can't be recovered from that stripped chunk alone.
+  let inSql = false;
 
-  for (const logical of toLogicalLines(lines)) {
-    const masked = stripCommentsAndStrings([logical.text])[0];
+  const allLogical = toLogicalLines(lines);
+  // Mask every logical line in one pass so block-comment/string state (e.g. a
+  // `/* ... */` doc comment spanning several logical lines) carries across
+  // them correctly. Masking each logical line in isolation would reset that
+  // state and let comment text leak through as if it were real code — which
+  // could spuriously match `SQL_START_RE` and get SQL tracking stuck on.
+  const maskedAll = stripCommentsAndStrings(allLogical.map((l) => l.text));
+
+  for (let li = 0; li < allLogical.length; li++) {
+    const logical = allLogical[li];
+    const masked = maskedAll[li];
     let start = 0;
+    let pushedAny = false;
     for (let i = 0; i <= masked.length; i++) {
       const atEnd = i === masked.length;
       if (!atEnd && masked[i] !== ';') {
         continue;
       }
+      const chunkMasked = masked.slice(start, i);
+      if (!inSql && SQL_START_RE.test(chunkMasked.trim())) {
+        inSql = true;
+      }
+      const sql = inSql;
       const text = logical.text.slice(start, i);
       if (text.trim()) {
-        out.push({ text, line: logical.line, column: start });
+        out.push({ text, line: logical.line, column: start, sql });
+        pushedAny = true;
+      }
+      if (!atEnd) {
+        inSql = false; // a real `;` terminates the statement, SQL or not
       }
       start = i + 1;
     }
-    if (!masked.trim()) {
-      out.push(logical); // keep blank lines so indices stay meaningful
+    if (!pushedAny) {
+      // Keep lines that produced no real statement text (blank lines, or
+      // lines that are entirely a comment) so indices stay meaningful.
+      out.push({ ...logical, sql: inSql });
     }
   }
 

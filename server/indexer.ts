@@ -66,9 +66,10 @@ const EVENT_RE = new RegExp(
   `^\\s*event\\s+(?:type\\s+(${ID})\\s+)?(${ID})\\s*(?:\\(([^)]*)\\))?\\s*;`,
   'iu'
 );
-// Menu separators are declared with punctuation in the name (`type m_- from menu`).
+// Menu separators are declared with punctuation in the name (`type m_- from menu`,
+// `type m_annual$ from menu`, `type m_$###000 from menu`).
 const TYPE_RE = new RegExp(
-  `^\\s*(?:global\\s+)?type\\s+([\\p{L}_][\\p{L}\\p{N}_-]*)\\s+from\\s+([\\p{L}\\p{N}_\`.]+)`,
+  `^\\s*(?:global\\s+)?type\\s+([\\p{L}_][\\p{L}\\p{N}_$#%-]*)\\s+from\\s+([\\p{L}\\p{N}_\`.]+)`,
   'iu'
 );
 const ID_RE = new RegExp(`^${ID}$`, 'u');
@@ -227,7 +228,7 @@ export function parseDataObjectBindings(text: string): { control: string; dataOb
 
   let currentType: string | null = null;
   for (const line of text.split(/\r?\n/)) {
-    const typeMatch = /^\s*(?:global\s+)?type\s+(\w+)\s+from\b/i.exec(line);
+    const typeMatch = /^\s*(?:global\s+)?type\s+([\p{L}_][\p{L}\p{N}_$#%-]*)\s+from\b/iu.exec(line);
     if (typeMatch) {
       currentType = typeMatch[1];
       continue;
