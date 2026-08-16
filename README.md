@@ -94,69 +94,30 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 - `.srq` Query
 - `.srj` Project object
 
-## Development
+## Settings
 
-```bash
-npm install
-npm test                                   # compile, bundle, 83 end-to-end LSP checks
-node tools/corpus-check.js /path/to/src    # index real exports and report anomalies
-```
+- `powerbuilder.version` — target PowerBuilder version, `2022` or `2025`
+  (default `2025`). Selects which built-in catalog is used.
+- `powerbuilder.ansiEncoding` — codepage for exports that are neither UTF-16
+  nor UTF-8 (default `windows-1252`; use e.g. `windows-1253` for Greek). This
+  cannot be detected from the file itself.
 
-`corpus-check.js` runs the parsers over a directory of real PowerBuilder
-exports and reports what was indexed plus any structural diagnostics — which
-should be zero on code that compiles. It is how the continuation, statement
-splitting, and identifier rules below were found and verified.
+## Commands
 
-Press `F5` in VS Code to launch an Extension Development Host.
+- **PowerBuilder: Switch Version (2022 ↔ 2025)**
+- **PowerBuilder: Generate OrcaScript to Rebuild PBLs from Source**
 
-The built-in catalogs live in `server/data/*.json`, generated from the Appeon
-docs by `tools/docs-scraper/` (see its README to regenerate).
+## Documentation
 
-## Architecture
-
-The extension is a thin client (`src/extension.ts`) that launches a Language Server (`server/`) over IPC:
-
-- `server/builtins.ts` — types, formatters, and loaders for the scraped catalogs
-- `server/builtins-2022.ts` / `server/builtins-2025.ts` — per-version catalogs loaded from `server/data/*.json`
-- `server/indexer.ts` — workspace symbol/variable index, type inheritance, and `.srd` column extraction
-- `server/diagnostics.ts` — comment/string-aware block-structure validator plus semantic call checks
-- `server/textutils.ts` — cursor helpers for hover / signature help
-- `server/server.ts` — wires the LSP features together
-
-## Publishing
-
-Both registries are published from the same `.vsix`, so build it once and
-upload that exact file to each:
-
-```bash
-npm run package                            # -> powerbuilder-intellisense-<version>.vsix
-```
-
-**VS Code Marketplace** (for VS Code proper) needs the `jimmykirk` publisher,
-created once at [marketplace.visualstudio.com/manage](https://marketplace.visualstudio.com/manage),
-and an Azure DevOps Personal Access Token scoped to *Marketplace: Manage* with
-"All accessible organizations":
-
-```bash
-npx vsce login jimmykirk                   # stores the PAT, or set VSCE_PAT
-npm run publish
-```
-
-**Open VSX** (for VSCodium, Cursor, Windsurf, Gitpod, and Eclipse Theia, which
-cannot use the Microsoft Marketplace) needs an
-[open-vsx.org](https://open-vsx.org) account, a signed Eclipse Foundation
-Publisher Agreement, and a namespace claimed once:
-
-```bash
-npx ovsx create-namespace jimmykirk -p <token>
-npm run publish:ovsx -- -p <token>         # or set OVSX_PAT
-```
-
-Publish the Marketplace first — if it rejects the package, nothing is live yet.
-The two registries version independently, so re-run both on every release to
-keep them in step.
+- [USAGE.md](USAGE.md) — day-to-day usage guide
+- [CHANGELOG.md](CHANGELOG.md) — release notes
+- [CONTRIBUTING.md](CONTRIBUTING.md) — building, architecture, and releasing
 
 ## Roadmap
 
 - DataWindow expression functions for `dw.Object.<column>.<property>` chains
 - Unused local/instance variable hints
+
+## License
+
+MIT — see [LICENSE](LICENSE).
