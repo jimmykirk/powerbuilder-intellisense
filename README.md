@@ -117,6 +117,8 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 
 - DataWindow expression functions for `dw.Object.<column>.<property>` chains
 - Unused local/instance variable hints
+- Cross-file inheritance resolution for instance variables/properties declared
+  on an ancestor UserObject, to close the remaining gap in semantic diagnostics
 
 ## License
 
