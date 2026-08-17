@@ -1,5 +1,38 @@
 # Change Log
 
+## 0.3.2
+
+Continued corpus-driven false-positive hunting from 0.3.1 — semantic warnings
+across the 18,499-object real-world corpus went from 3,218 across 304 files to
+**7 across 5 files**, and two roadmap items landed: DataWindow column
+expression-property completion and unused-variable hints.
+
+- `decimal{2} ld_amt` (no space before the precision brace) is now parsed as a
+  declaration; previously only the spaced form `decimal {2} ld_amt` was
+  recognized.
+- An inline `/* ... */` block comment that opens and closes on the same
+  declaration line (e.g. `boolean is_valid /* True, if ... */`) is now
+  stripped before the line is parsed, so a comma inside the comment no longer
+  corrupts multi-name declaration splitting.
+- External functions declared with `LIBRARY "..."` inside a
+  `prototypes ... end prototypes` block are now indexed. Previously all
+  prototype-block declarations were skipped in favor of a "real"
+  implementation elsewhere — external functions have no such implementation,
+  so they were never indexed at all.
+- A bare event override (`event clicked;`, no restated parameter list) now
+  recognizes the implicit parameters of the system/DataWindow event it
+  overrides (e.g. DataWindow's `Clicked` implicitly supplies `row`, `dwo`,
+  `data`), instead of flagging their use as "assigned but never declared".
+- New: completion after `dw.Object.<column>.` offers the standard DataWindow
+  column/computed-field expression properties (`Format`, `Protect`, `Color`,
+  `Font.Face`, `Background.Color`, `Expression`, and more).
+- New: unused-variable hints (lowest severity, shown as faded/strikethrough
+  text) for local variables never referenced again in their own script, and
+  for instance variables never referenced anywhere else in their file.
+  Instance-variable hints are single-file only, so a variable used solely by
+  a descendant class or another object's direct access may still be flagged
+  — the hint's message notes this explicitly.
+
 ## 0.3.1
 
 Validated semantic diagnostics (unknown-function, argument-count,

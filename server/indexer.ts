@@ -130,6 +130,11 @@ export function parseVariableDeclaration(
   if (/^(public|private|protected)\s*:/i.test(text)) {
     return [];
   }
+  // Strip inline block comments that open and close on this same line, e.g.
+  // `boolean is_valid_filter /* True if ... */` — a comment that trails past
+  // the end of the line is left alone; the leading `text.startsWith('/*')`
+  // check above already skips lines that are nothing but such a comment.
+  text = text.replace(/\/\*.*?\*\//g, ' ').trim();
   // Strip trailing line comment
   text = text.replace(/\/\/.*$/, '').trim();
 
@@ -144,8 +149,12 @@ export function parseVariableDeclaration(
 
   let type = tokens[idx];
   idx++;
-  // Decimal precision: `decimal {2} ld_amt`
-  if (tokens[idx]?.startsWith('{')) {
+  // Decimal precision: `decimal {2} ld_amt` (space) or the equally common
+  // fused form `decimal{2} ld_amt`, where `{2}` is glued onto the type token.
+  const fusedDecimal = /^([A-Za-z_]\w*)\{[^{}]*\}$/.exec(type);
+  if (fusedDecimal) {
+    type = fusedDecimal[1];
+  } else if (tokens[idx]?.startsWith('{')) {
     while (idx < tokens.length && !tokens[idx].includes('}')) {
       idx++;
     }
@@ -318,7 +327,12 @@ export function parseSymbols(uri: string, text: string): {
       continue;
     }
 
-    if (!inPrototypes) {
+    // Function/subroutine bodies elsewhere in the file are the "real"
+    // implementation of a forward-declared prototype, so prototype-block
+    // matches are normally skipped in favor of those. External functions
+    // (`... LIBRARY "some.dll"`) are the exception — the prototype line IS
+    // the only declaration, there's no separate body to prefer instead.
+    if (!inPrototypes || /\blibrary\b/i.test(line)) {
       const fnMatch = FUNCTION_RE.exec(line);
       if (fnMatch) {
         const kind = fnMatch[2].toLowerCase() as 'function' | 'subroutine';

@@ -7,7 +7,8 @@
  * it is closed by the correct terminator.
  */
 
-import { Diagnostic, DiagnosticSeverity, Range } from 'vscode-languageserver/node';
+import { Diagnostic, DiagnosticSeverity, DiagnosticTag, Range } from 'vscode-languageserver/node';
+import { parseVariableDeclaration } from './indexer';
 import { LogicalLine, stripCommentsAndStrings, toStatements } from './preprocess';
 
 export { stripCommentsAndStrings };
@@ -29,6 +30,8 @@ interface OpenBlock {
   line: number;
   startChar: number;
   endChar: number;
+  /** Index into the `cleaned`/`logical` arrays where this block opened. */
+  idx: number;
 }
 
 /** The terminator keyword expected for each block type (used in messages). */
@@ -288,6 +291,77 @@ const STATEMENT_WORDS = new Set([
 const CALL_RE = /(^|[^.\w:])([A-Za-z_]\w*)\s*\(/g;
 
 /**
+ * Statement/section leaders that must never be mistaken for a local
+ * declaration's type when scanning a script body line-by-line (as opposed to
+ * a dedicated `variables ... end variables` block, where every line really is
+ * a declaration).
+ */
+const NON_DECLARATION_LEADERS = new Set([
+  ...STATEMENT_WORDS,
+  'end', 'function', 'subroutine', 'event', 'type', 'global', 'forward', 'prototypes'
+]);
+
+/**
+ * Flags local variables (declared with `type name[, name2...]` inside a
+ * function/subroutine/event/on body) that are never referenced again
+ * anywhere else in that same script. Only bare declaration-shaped lines
+ * (no `(`, not embedded SQL, not a control-flow/section keyword) are
+ * considered, so this under-detects rather than risks a false declaration —
+ * and it is reported as a Hint (with the `Unnecessary` tag), the least
+ * intrusive severity, since it is a heuristic rather than a compile check.
+ */
+function unusedLocalVariableDiagnostics(
+  cleaned: string[],
+  logical: LogicalLine[],
+  startIdx: number,
+  endIdx: number
+): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const decls: { name: string; idx: number; char: number }[] = [];
+
+  for (let i = startIdx + 1; i < endIdx; i++) {
+    const clean = cleaned[i];
+    if (!clean.trim() || logical[i]?.sql || clean.includes('(')) {
+      continue;
+    }
+    for (const decl of parseVariableDeclaration(clean, i, '', 'local')) {
+      if (!NON_DECLARATION_LEADERS.has(decl.type.toLowerCase())) {
+        decls.push({ name: decl.name, idx: i, char: decl.character });
+      }
+    }
+  }
+
+  for (const decl of decls) {
+    const escaped = decl.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(?<![\\w])${escaped}(?![\\w])`, 'i');
+    let used = false;
+    for (let i = startIdx + 1; i < endIdx && !used; i++) {
+      let hay = cleaned[i];
+      if (i === decl.idx) {
+        hay = hay.slice(0, decl.char) + hay.slice(decl.char + decl.name.length);
+      }
+      if (re.test(hay)) {
+        used = true;
+      }
+    }
+    if (!used) {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Hint,
+        tags: [DiagnosticTag.Unnecessary],
+        range: {
+          start: { line: logical[decl.idx]?.line ?? decl.idx, character: decl.char },
+          end: { line: logical[decl.idx]?.line ?? decl.idx, character: decl.char + decl.name.length }
+        },
+        message: `Variable '${decl.name}' is declared but never used in this script.`,
+        source: 'powerbuilder'
+      });
+    }
+  }
+
+  return diagnostics;
+}
+
+/**
  * Flags unknown bare calls (Information — the target may live in a library
  * that isn't exported to the workspace) and calls that pass more arguments
  * than a built-in accepts (Warning). Member calls after a dot are skipped:
@@ -479,6 +553,79 @@ function extractArguments(clean: string, orig: string, openParen: number): strin
 // assume PowerScript statement shapes) can be skipped entirely for them.
 const DW_SYNTAX_HEADER_RE = /^release\s+\d+(?:\.\d+)?\s*$/i;
 
+const VARIABLES_BLOCK_START_RE = /^\s*(global|shared|type)\s+variables\b/i;
+const VARIABLES_BLOCK_END_RE = /^\s*end\s+variables\b/i;
+
+/**
+ * Flags instance variables (`type variables ... end variables`) that are
+ * never referenced anywhere else in this same file. Cross-file usage (a
+ * descendant class's own script referencing an inherited instance variable,
+ * or another object reaching in via `object.varname`) is invisible to a
+ * single-file check — this is deliberately the least severe diagnostic
+ * level (Hint) for that reason.
+ */
+function unusedInstanceVariableDiagnostics(cleaned: string[], logical: LogicalLine[]): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  const ownBlocks: { start: number; end: number }[] = [];
+  const decls: { name: string; idx: number; char: number }[] = [];
+  let blockStart = -1;
+  let isInstance = false;
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const clean = cleaned[i];
+    if (blockStart === -1) {
+      const opener = VARIABLES_BLOCK_START_RE.exec(clean);
+      if (opener) {
+        blockStart = i;
+        isInstance = opener[1].toLowerCase() === 'type';
+      }
+      continue;
+    }
+    if (VARIABLES_BLOCK_END_RE.test(clean)) {
+      ownBlocks.push({ start: blockStart, end: i });
+      blockStart = -1;
+      continue;
+    }
+    if (isInstance && clean.trim() && !logical[i]?.sql) {
+      for (const decl of parseVariableDeclaration(clean, i, '', 'instance')) {
+        decls.push({ name: decl.name, idx: i, char: decl.character });
+      }
+    }
+  }
+
+  for (const decl of decls) {
+    const escaped = decl.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(?<![\\w])${escaped}(?![\\w])`, 'i');
+    let used = false;
+    for (let i = 0; i < cleaned.length && !used; i++) {
+      // A variables block only ever *declares* names — never counts as a use,
+      // even for other variable-block lines (initializer expressions there
+      // referencing an unrelated instance variable are rare enough that
+      // skipping the whole block is the safer, simpler choice).
+      if (ownBlocks.some((b) => i >= b.start && i <= b.end)) {
+        continue;
+      }
+      if (re.test(cleaned[i])) {
+        used = true;
+      }
+    }
+    if (!used) {
+      diagnostics.push({
+        severity: DiagnosticSeverity.Hint,
+        tags: [DiagnosticTag.Unnecessary],
+        range: {
+          start: { line: logical[decl.idx]?.line ?? decl.idx, character: decl.char },
+          end: { line: logical[decl.idx]?.line ?? decl.idx, character: decl.char + decl.name.length }
+        },
+        message: `Instance variable '${decl.name}' is not referenced anywhere in this file (it may still be used by a descendant class or another object).`,
+        source: 'powerbuilder'
+      });
+    }
+  }
+
+  return diagnostics;
+}
+
 export function computeDiagnostics(text: string, semantic?: SemanticContext): Diagnostic[] {
   const logical = toStatements(text.split(/\r?\n/));
   const lines = logical.map((l) => l.text);
@@ -539,6 +686,15 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
             source: 'powerbuilder'
           });
         }
+        // A cleanly-closed function/subroutine/event/on script is a good spot
+        // to look for local variables that are declared but never used.
+        const opened = stack[matchIndex];
+        if (
+          matchIndex === stack.length - 1 &&
+          (closer === 'function' || closer === 'subroutine' || closer === 'event' || closer === 'on')
+        ) {
+          diagnostics.push(...unusedLocalVariableDiagnostics(cleaned, logical, opened.idx, i));
+        }
         stack.length = matchIndex;
       }
       continue;
@@ -551,7 +707,8 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
         type: opener,
         line: lineNo(i),
         startChar: leading,
-        endChar: colOf(i) + clean.trimEnd().length
+        endChar: colOf(i) + clean.trimEnd().length,
+        idx: i
       });
     }
   }
@@ -564,6 +721,10 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
       message: `'${orphan.type}' block is never closed (missing '${CLOSER_LABEL[orphan.type]}').`,
       source: 'powerbuilder'
     });
+  }
+
+  if (!isDataWindowSyntax) {
+    diagnostics.push(...unusedInstanceVariableDiagnostics(cleaned, logical));
   }
 
   if (semantic && !isDataWindowSyntax) {
@@ -628,7 +789,7 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
     const opener = detectOpener(clean, stack[stack.length - 1]?.type);
     if (opener) {
       const leading = clean.length - clean.trimStart().length;
-      stack.push({ type: opener, line: lineNo(i), startChar: leading, endChar: clean.trimEnd().length });
+      stack.push({ type: opener, line: lineNo(i), startChar: leading, endChar: clean.trimEnd().length, idx: i });
     }
   }
 

@@ -115,10 +115,12 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 
 ## Roadmap
 
-- DataWindow expression functions for `dw.Object.<column>.<property>` chains
-- Unused local/instance variable hints
-- Cross-file inheritance resolution for instance variables/properties declared
-  on an ancestor UserObject, to close the remaining gap in semantic diagnostics
+- DataWindow expression functions that mirror runtime `dw.Object.<column>.<property>`
+  chains for arbitrary column expressions beyond property completion (e.g.
+  validating property names against the bound `.srd`'s actual column types)
+- Cross-file "unused" analysis for instance variables (today's hint is
+  single-file only, so a variable used solely by a descendant class or another
+  object's direct access won't be seen)
 
 ## License
 

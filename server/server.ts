@@ -211,6 +211,29 @@ const PRONOUNS = new Set([
   'this', 'parent', 'super', 'sqlca', 'sqlda', 'sqlsa', 'error', 'message', 'parentwindow'
 ]);
 
+/**
+ * Implicit parameter names for the common DataWindow row/item events. These
+ * are stable, decades-old PowerScript signatures, but the DataWindow
+ * Reference pages describe their arguments in a shape the docs scraper
+ * doesn't extract (`server/data/*_datawindow.json` has `params: []` for all
+ * of them) — so `findActiveDWEvent` can't supply this for `buildSemanticContext`'s
+ * bare-event-override handling. Used only as a fallback when the scraped
+ * catalog has no params for the event name.
+ */
+// A Map, not a plain object literal: PB event names include `constructor` and
+// `destructor`, which would otherwise collide with Object.prototype members.
+const DW_EVENT_IMPLICIT_PARAMS = new Map<string, string[]>([
+  ['clicked', ['row', 'dwo', 'data']],
+  ['doubleclicked', ['row', 'dwo', 'data']],
+  ['itemchanged', ['row', 'dwo', 'data']],
+  ['itemerror', ['row', 'dwo', 'data']],
+  ['itemfocuschanged', ['row', 'dwo']],
+  ['editchanged', ['row', 'dwo', 'data']],
+  ['rowfocuschanged', ['currentrow']],
+  ['rowfocuschanging', ['currentrow', 'newrow']],
+  ['rbuttondown', ['xpos', 'ypos', 'row', 'dwo']]
+]);
+
 let anyPropertyCache: { source: Map<string, unknown>; names: Set<string> } | null = null;
 
 /** Lazily-built set of every property name in the active catalog. */
@@ -296,6 +319,21 @@ function buildSemanticContext(text: string): SemanticContext {
     const caught = /\bcatch\s*\(\s*\w+\s+(\w+)\s*\)/i.exec(stmt.text);
     if (caught) {
       localNames.add(caught[1].toLowerCase());
+    }
+    // A bare event override (`event clicked;`, no parameter list) still
+    // receives whatever arguments the system/DataWindow event of that name
+    // is documented to pass (e.g. DataWindow's `Clicked` implicitly supplies
+    // `row`, `dwo`, `data`) — the override just doesn't have to restate them.
+    const bareEvent = /^\s*event\s+([\p{L}_][\p{L}\p{N}_]*)\s*$/iu.exec(stmt.text);
+    if (bareEvent) {
+      const eventName = bareEvent[1].toLowerCase();
+      const known = findActiveDWEvent(eventName) ?? findActiveEvent(eventName);
+      for (const p of known?.params ?? []) {
+        localNames.add(p.name.toLowerCase());
+      }
+      for (const p of DW_EVENT_IMPLICIT_PARAMS.get(eventName) ?? []) {
+        localNames.add(p);
+      }
     }
   }
 
@@ -383,6 +421,13 @@ connection.onCompletion((params: TextDocumentPositionParams): CompletionItem[] =
     // Event stub: `event ` offers the built-in events of the current object type
     if (/^\s*event\s+\w*$/i.test(linePrefix)) {
       return eventStubCompletion(doc);
+    }
+
+    // DataWindow column expression-property chain: `dw_ctrl.object.<column>.<property>`
+    const columnPropertyChain =
+      /([A-Za-z_]\w*)\s*\.\s*object\s*\.\s*([A-Za-z_]\w*)\s*\.\s*\w*$/i.exec(linePrefix);
+    if (columnPropertyChain) {
+      return dataWindowColumnPropertyCompletion(doc, params.position, columnPropertyChain[1]);
     }
 
     // DataWindow object-expression chain: `dw_ctrl.object.<column>`
@@ -1619,6 +1664,73 @@ function dataWindowColumnCompletion(
     }
   }
   return items;
+}
+
+/**
+ * Column-level DataWindow expression properties, offered after
+ * `dw.Object.<column>.<property>`. Not scraped from the DataWindow Reference
+ * (its property pages don't map cleanly onto this specific runtime chain) —
+ * this is a small, stable, hand-maintained list of the properties every
+ * PowerBuilder version has supported for column/computed-field objects. A
+ * Map, not a plain object literal: property-ish names here are unlikely to
+ * collide with Object.prototype, but consistency with DW_EVENT_IMPLICIT_PARAMS
+ * avoids the same class of bug if that ever changes.
+ */
+const DW_COLUMN_EXPRESSION_PROPERTIES = new Map<string, string>([
+  ['Alignment', 'Text alignment: 0 (left), 1 (right), 2 (center)'],
+  ['Background.Color', 'Background color (a long RGB value, or -1 for none)'],
+  ['Background.Mode', '0 (opaque) or 1 (transparent)'],
+  ['Border', 'Border style enumerated value (0-6)'],
+  ['Color', 'Text color (a long RGB value)'],
+  ['DataType', 'The column\u2019s underlying datatype (read-only)'],
+  ['Edit.AllowEditing', 'Whether direct edits are allowed (edit style)'],
+  ['Edit.Limit', 'Maximum number of characters (edit style)'],
+  ['Edit.LimitToList', 'Restrict entry to the DDDW/edit list (edit style)'],
+  ['Edit.Style', 'Edit control style name (edit, editmask, dddw, ...)'],
+  ['Expression', 'The computed field\u2019s expression string (computed fields only)'],
+  ['Font.Bold', 'Bold text (0/1)'],
+  ['Font.Face', 'Font family name'],
+  ['Font.Height', 'Font height in points (negative) or pixels'],
+  ['Font.Italic', 'Italic text (0/1)'],
+  ['Font.Underline', 'Underlined text (0/1)'],
+  ['Format', 'Display format string (e.g. "#,##0.00")'],
+  ['Height', 'Height in PowerBuilder units'],
+  ['Moveable', 'Whether the column can be moved in the painter (0/1)'],
+  ['Pointer', 'Mouse pointer shown over the column'],
+  ['Primary', 'True when a computed field is the DataWindow\u2019s primary display'],
+  ['Protect', 'Read-only/protected state (0/1)'],
+  ['Resizable', 'Whether the column can be resized in the painter (0/1)'],
+  ['Tag', 'Free-form string for application use'],
+  ['Validation', 'Validation expression string'],
+  ['Values', 'Value list string (code table)'],
+  ['Visible', 'Visible/hidden state (0/1)'],
+  ['Width', 'Width in PowerBuilder units'],
+  ['X', 'X position in PowerBuilder units'],
+  ['Y', 'Y position in PowerBuilder units']
+]);
+
+/**
+ * Property completion for `dw.object.<column>.` — the standard set of
+ * DataWindow column/computed-field expression properties. Offered whenever
+ * the receiver is (or is likely to be) a DataWindow-ish control; the column
+ * name itself isn't validated against the bound DataWindow object, since a
+ * typo'd column name shouldn't hide otherwise-useful property completions.
+ */
+function dataWindowColumnPropertyCompletion(
+  doc: TextDocument,
+  position: { line: number },
+  receiver: string
+): CompletionItem[] {
+  const receiverType = resolveReceiverType(doc, position, receiver)?.toLowerCase();
+  if (receiverType && !DATAWINDOW_TYPES.has(receiverType) && !index.uriForType(receiverType)) {
+    return [];
+  }
+
+  return [...DW_COLUMN_EXPRESSION_PROPERTIES].map(([name, description]) => ({
+    label: name,
+    kind: CompletionItemKind.Property,
+    detail: `DataWindow column expression property — ${description}`
+  }));
 }
 
 // ---------------------------------------------------------------- helpers

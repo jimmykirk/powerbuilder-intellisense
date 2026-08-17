@@ -75,6 +75,21 @@ const PRONOUNS = new Set([
   'this', 'parent', 'super', 'sqlca', 'sqlda', 'sqlsa', 'error', 'message', 'parentwindow'
 ]);
 
+// Mirrors DW_EVENT_IMPLICIT_PARAMS in server/server.ts. A Map, not a plain
+// object literal: PB event names include `constructor`/`destructor`, which
+// would otherwise collide with Object.prototype members.
+const DW_EVENT_IMPLICIT_PARAMS = new Map([
+  ['clicked', ['row', 'dwo', 'data']],
+  ['doubleclicked', ['row', 'dwo', 'data']],
+  ['itemchanged', ['row', 'dwo', 'data']],
+  ['itemerror', ['row', 'dwo', 'data']],
+  ['itemfocuschanged', ['row', 'dwo']],
+  ['editchanged', ['row', 'dwo', 'data']],
+  ['rowfocuschanged', ['currentrow']],
+  ['rowfocuschanging', ['currentrow', 'newrow']],
+  ['rbuttondown', ['xpos', 'ypos', 'row', 'dwo']]
+]);
+
 let anyPropertyNamesCache = null;
 function anyPropertyNames() {
   if (!anyPropertyNamesCache) {
@@ -135,6 +150,18 @@ function buildSemanticContext(text) {
     const caught = /\bcatch\s*\(\s*\w+\s+(\w+)\s*\)/i.exec(stmt.text);
     if (caught) {
       localNames.add(caught[1].toLowerCase());
+    }
+    // Mirrors the bare-event-override handling in server/server.ts.
+    const bareEvent = /^\s*event\s+([\p{L}_][\p{L}\p{N}_]*)\s*$/iu.exec(stmt.text);
+    if (bareEvent) {
+      const eventName = bareEvent[1].toLowerCase();
+      const known = findDWEvent2025(eventName) ?? findBuiltinEvent2025(eventName);
+      for (const p of known?.params ?? []) {
+        localNames.add(p.name.toLowerCase());
+      }
+      for (const p of DW_EVENT_IMPLICIT_PARAMS.get(eventName) ?? []) {
+        localNames.add(p);
+      }
     }
   }
 
@@ -199,6 +226,13 @@ const samples = new Map();
 let total = 0;
 let filesWithFindings = 0;
 let errors = 0;
+let hintTotal = 0;
+let hintFiles = 0;
+let localHintTotal = 0;
+let instanceHintTotal = 0;
+let instanceHintFiles = 0;
+const hintSamples = [];
+const instanceHintSamples = [];
 
 for (const file of files) {
   let text;
@@ -211,7 +245,25 @@ for (const file of files) {
   let diags;
   try {
     const semantic = buildSemanticContext(text);
-    diags = computeDiagnostics(text, semantic).filter((d) => d.severity <= 2);
+    const allDiags = computeDiagnostics(text, semantic);
+    diags = allDiags.filter((d) => d.severity <= 2);
+    const hints = allDiags.filter((d) => d.severity === 4);
+    if (hints.length > 0) {
+      hintFiles++;
+      hintTotal += hints.length;
+      if (hintSamples.length < 20) {
+        hintSamples.push(`${path.basename(file)}:${hints[0].range.start.line + 1} ${hints[0].message}`);
+      }
+      const instanceHints = hints.filter((d) => d.message.startsWith('Instance variable'));
+      localHintTotal += hints.length - instanceHints.length;
+      if (instanceHints.length > 0) {
+        instanceHintFiles++;
+        instanceHintTotal += instanceHints.length;
+        if (instanceHintSamples.length < 20) {
+          instanceHintSamples.push(`${path.basename(file)}:${instanceHints[0].range.start.line + 1} ${instanceHints[0].message}`);
+        }
+      }
+    }
   } catch (e) {
     errors++;
     continue;
@@ -240,6 +292,18 @@ if (errors > 0) {
 console.log('\nby category:');
 for (const [bucket, count] of [...buckets.entries()].sort((a, b) => b[1] - a[1])) {
   console.log(`  ${count.toString().padStart(6)}  ${bucket}`);
+}
+
+console.log(`\nunused-variable hints (severity Hint, informational only): ${hintTotal} in ${hintFiles} files`);
+console.log(`  local: ${localHintTotal}`);
+console.log(`  instance: ${instanceHintTotal} in ${instanceHintFiles} files`);
+console.log('sample (local):');
+for (const s of hintSamples) {
+  console.log(`  ${s}`);
+}
+console.log('sample (instance):');
+for (const s of instanceHintSamples) {
+  console.log(`  ${s}`);
 }
 for (const [bucket, arr] of samples) {
   console.log(`\n-- ${bucket} --`);
