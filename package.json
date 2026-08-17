@@ -2,7 +2,7 @@
   "name": "powerbuilder-intellisense",
   "displayName": "PowerBuilder IntelliSense",
   "description": "Language support for Appeon PowerBuilder 2022/2025: completion, hover, signature help, diagnostics, and navigation from the official PowerScript reference.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "publisher": "jimmykirk",
   "license": "MIT",
   "icon": "images/icon.png",
@@ -24,7 +24,8 @@
     "pbl"
   ],
   "activationEvents": [
-    "onLanguage:powerbuilder"
+    "onLanguage:powerbuilder",
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -89,6 +90,41 @@
           "type": "string",
           "default": "windows-1252",
           "description": "Codepage for exports that are neither UTF-16 nor UTF-8 (e.g. windows-1253 for Greek). Cannot be detected from the file itself."
+        },
+        "powerbuilder.folding.blockTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "if",
+              "for",
+              "do",
+              "choose",
+              "try",
+              "function",
+              "subroutine",
+              "event",
+              "on",
+              "type",
+              "variables",
+              "prototypes"
+            ]
+          },
+          "default": [
+            "if",
+            "for",
+            "do",
+            "choose",
+            "try",
+            "function",
+            "subroutine",
+            "event",
+            "on",
+            "type",
+            "variables",
+            "prototypes"
+          ],
+          "description": "Which PowerScript block/section kinds produce folding ranges. Remove an entry to stop folding for that kind (e.g. drop \"if\" if if/end-if folding feels too noisy)."
         }
       }
     }

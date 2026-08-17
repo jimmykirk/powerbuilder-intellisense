@@ -1,5 +1,22 @@
 # Change Log
 
+## 0.3.3
+
+- Sticky scroll now works for long functions/subroutines/events/`on` blocks:
+  document symbols previously reported only their declaration line as their
+  `range`, so VS Code's sticky-scroll feature (which pins a symbol's header
+  while the viewport is inside its range) never activated except right at the
+  declaration. Symbol ranges now span the full body, down to its matching
+  `end function`/`end subroutine`/`end event`/`end on`.
+- New: the extension now remembers the last-edited PowerBuilder file and
+  cursor position per workspace and reopens it on the next VS Code launch, if
+  no editors are already open. Requires the extension to activate on startup
+  (`onStartupFinished`) rather than only when a PowerBuilder file is opened.
+- New setting `powerbuilder.folding.blockTypes`: choose which block/section
+  kinds (`if`, `for`, `do`, `choose`, `try`, `function`, `subroutine`, `event`,
+  `on`, `type`, `variables`, `prototypes`) produce folding ranges, instead of
+  the previously fixed set.
+
 ## 0.3.2
 
 Continued corpus-driven false-positive hunting from 0.3.1 — semantic warnings

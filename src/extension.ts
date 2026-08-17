@@ -7,6 +7,15 @@ import { parseTargetFile, parseWorkspaceFile } from '../server/workspace';
 let client: LanguageClient | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
 
+/** Persisted per-workspace so "open where you last left off" survives restarts. */
+const LAST_POSITION_KEY = 'powerbuilder.lastPosition';
+
+interface LastPosition {
+  uri: string;
+  line: number;
+  character: number;
+}
+
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));
 
@@ -66,6 +75,67 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   context.subscriptions.push(
     vscode.commands.registerCommand('powerbuilder.generateOrcaScript', generateOrcaScript)
   );
+
+  registerLastPositionTracking(context);
+  await restoreLastPosition(context);
+}
+
+/**
+ * Remembers the cursor position of the active PowerBuilder editor (debounced)
+ * so it can be restored the next time VS Code opens this workspace — mainly
+ * useful when core VS Code's own window/editor restore doesn't kick in (e.g.
+ * `window.restoreWindows: "none"`, or the workspace is reopened in a fresh
+ * window with no tabs of its own yet).
+ */
+function registerLastPositionTracking(context: vscode.ExtensionContext): void {
+  let saveTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const save = (editor: vscode.TextEditor | undefined): void => {
+    if (!editor || editor.document.languageId !== 'powerbuilder') {
+      return;
+    }
+    const position = editor.selection.active;
+    const value: LastPosition = {
+      uri: editor.document.uri.toString(),
+      line: position.line,
+      character: position.character
+    };
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+    }
+    saveTimer = setTimeout(() => {
+      void context.workspaceState.update(LAST_POSITION_KEY, value);
+    }, 500);
+  };
+
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(save),
+    vscode.window.onDidChangeTextEditorSelection((e) => save(e.textEditor))
+  );
+
+  save(vscode.window.activeTextEditor);
+}
+
+/** Reopens the last-remembered PowerBuilder file/position, if nothing is already open. */
+async function restoreLastPosition(context: vscode.ExtensionContext): Promise<void> {
+  if (vscode.window.visibleTextEditors.length > 0) {
+    return;
+  }
+
+  const last = context.workspaceState.get<LastPosition>(LAST_POSITION_KEY);
+  if (!last) {
+    return;
+  }
+
+  try {
+    const doc = await vscode.workspace.openTextDocument(vscode.Uri.parse(last.uri));
+    const editor = await vscode.window.showTextDocument(doc);
+    const position = new vscode.Position(last.line, last.character);
+    editor.selection = new vscode.Selection(position, position);
+    editor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+  } catch {
+    // The file may have been moved, renamed, or deleted since — nothing to restore.
+  }
 }
 
 /**

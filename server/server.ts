@@ -75,8 +75,11 @@ import {
 } from './builtins-2025';
 import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
 import {
+  ALL_FOLDABLE_KINDS,
   computeDiagnostics,
   computeFoldingRanges,
+  computeFunctionRanges,
+  FoldableKind,
   SemanticContext,
   stripCommentsAndStrings
 } from './diagnostics';
@@ -89,6 +92,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 const index = new WorkspaceIndex();
 
 let hasConfigurationCapability = false;
+let foldableKinds: Set<FoldableKind> = new Set(ALL_FOLDABLE_KINDS);
 let pbVersion: '2022' | '2025' = '2025'; // Default
 let activeFunctions = builtinFunctions2025;
 let findActiveBuiltin = findBuiltin2025;
@@ -907,20 +911,29 @@ const STATEMENT_LIKE = new Set([
 ]);
 
 connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => {
+  const doc = documents.get(params.textDocument.uri);
+  // Full declaration-to-`end ...` ranges (not just the declaration line) so
+  // VS Code's sticky-scroll feature keeps a long function's/event's header
+  // pinned while scrolling through its body.
+  const functionRanges = doc ? computeFunctionRanges(doc.getText()) : new Map<number, number>();
   const symbols = index.symbolsIn(params.textDocument.uri);
   return symbols
     .filter((def) => def.kind !== 'variable')
     .map((def) => {
-      const range = {
+      const selectionRange = {
         start: { line: def.line, character: def.character },
         end: { line: def.line, character: def.character + def.name.length }
       };
+      const endLine = functionRanges.get(def.line);
+      const range = endLine !== undefined && endLine > def.line
+        ? { start: { line: def.line, character: 0 }, end: { line: endLine, character: 0 } }
+        : selectionRange;
       return {
         name: def.name,
         detail: def.signature,
         kind: symbolKindFor(def),
         range,
-        selectionRange: range
+        selectionRange
       };
     });
 });
@@ -930,7 +943,7 @@ connection.onFoldingRanges((params: FoldingRangeParams): FoldingRange[] => {
   if (!doc) {
     return [];
   }
-  return computeFoldingRanges(doc.getText()).map((r) => ({
+  return computeFoldingRanges(doc.getText(), foldableKinds).map((r) => ({
     startLine: r.startLine,
     endLine: r.endLine
   }));
@@ -1899,6 +1912,17 @@ async function loadConfiguration(): Promise<void> {
       otherFindBuiltin = findBuiltin2022;
       otherFindEvent = findBuiltinEvent2022;
       otherVersion = '2022';
+    }
+
+    if (Array.isArray(config?.folding?.blockTypes)) {
+      const requested = new Set(
+        (config.folding.blockTypes as unknown[]).filter(
+          (v): v is FoldableKind => typeof v === 'string' && (ALL_FOLDABLE_KINDS as string[]).includes(v)
+        )
+      );
+      foldableKinds = requested;
+    } else {
+      foldableKinds = new Set(ALL_FOLDABLE_KINDS);
     }
 
     connection.console.log(`PowerBuilder version set to: ${pbVersion}`);

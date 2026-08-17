@@ -121,13 +121,6 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 - Cross-file "unused" analysis for instance variables (today's hint is
   single-file only, so a variable used solely by a descendant class or another
   object's direct access won't be seen)
-- Sticky scroll support for long functions/events, so the enclosing
-  function/subroutine/event signature stays pinned at the top while scrolling
-  through a long body
-- Restore the last-opened file/cursor position when VS Code (re)opens, so
-  editing can resume exactly where it left off
-- Make folding markers configurable (which block types fold, and how they're
-  detected) instead of the current fixed set
 
 ## License
 

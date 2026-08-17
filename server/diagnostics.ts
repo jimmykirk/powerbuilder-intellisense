@@ -734,11 +734,27 @@ export function computeDiagnostics(text: string, semantic?: SemanticContext): Di
   return diagnostics;
 }
 
+/** Block/section kinds that can independently be toggled on or off for folding. */
+export type FoldableKind = BlockType | 'variables' | 'prototypes';
+
+export const ALL_FOLDABLE_KINDS: FoldableKind[] = [
+  'if', 'for', 'do', 'choose', 'try', 'function', 'subroutine', 'event', 'on', 'type',
+  'variables', 'prototypes'
+];
+
 /**
  * Foldable line ranges: every matched block pair from the structural matcher,
  * plus variables/prototypes sections (which the block stack ignores).
+ *
+ * `enabledKinds` restricts which block/section kinds produce a folding range
+ * (see the `powerbuilder.folding.blockTypes` setting); omitted/undefined
+ * means "everything", matching the original unconfigurable behavior.
  */
-export function computeFoldingRanges(text: string): { startLine: number; endLine: number }[] {
+export function computeFoldingRanges(
+  text: string,
+  enabledKinds?: ReadonlySet<FoldableKind>
+): { startLine: number; endLine: number }[] {
+  const isEnabled = (kind: FoldableKind): boolean => !enabledKinds || enabledKinds.has(kind);
   const logical = toStatements(text.split(/\r?\n/));
   const lines = logical.map((l) => l.text);
   const lineNo = (i: number): number => logical[i]?.line ?? i;
@@ -746,6 +762,7 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
   const ranges: { startLine: number; endLine: number }[] = [];
   const stack: OpenBlock[] = [];
   let sectionStart = -1;
+  let sectionKind: FoldableKind = 'variables';
 
   for (let i = 0; i < cleaned.length; i++) {
     const clean = cleaned[i];
@@ -754,12 +771,18 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
       continue;
     }
 
-    if (/^(?:global|shared|type)\s+variables\b/i.test(trimmed) || PROTOTYPES_START_RE.test(clean)) {
+    if (/^(?:global|shared|type)\s+variables\b/i.test(trimmed)) {
       sectionStart = lineNo(i);
+      sectionKind = 'variables';
+      continue;
+    }
+    if (PROTOTYPES_START_RE.test(clean)) {
+      sectionStart = lineNo(i);
+      sectionKind = 'prototypes';
       continue;
     }
     if (/^end\s+(?:variables|prototypes)\b/i.test(trimmed)) {
-      if (sectionStart >= 0 && lineNo(i) > sectionStart) {
+      if (sectionStart >= 0 && lineNo(i) > sectionStart && isEnabled(sectionKind)) {
         ranges.push({ startLine: sectionStart, endLine: lineNo(i) - 1 });
       }
       sectionStart = -1;
@@ -778,7 +801,7 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
       const matchIndex = findMatchIndex(stack, closer);
       if (matchIndex !== -1) {
         const opener = stack[matchIndex];
-        if (lineNo(i) > opener.line) {
+        if (lineNo(i) > opener.line && isEnabled(opener.type)) {
           ranges.push({ startLine: opener.line, endLine: lineNo(i) - 1 });
         }
         stack.length = matchIndex;
@@ -790,6 +813,68 @@ export function computeFoldingRanges(text: string): { startLine: number; endLine
     if (opener) {
       const leading = clean.length - clean.trimStart().length;
       stack.push({ type: opener, line: lineNo(i), startChar: leading, endChar: clean.trimEnd().length, idx: i });
+    }
+  }
+
+  return ranges;
+}
+
+/**
+ * Maps the declaration line of each function/subroutine/event/on block to its
+ * closing line (`end function`/`end subroutine`/`end event`/`end on`).
+ *
+ * VS Code's built-in sticky-scroll feature pins a `DocumentSymbol`'s
+ * declaration line at the top of the viewport only while the cursor/viewport
+ * sits inside that symbol's `range` — so for sticky scroll to be useful for
+ * long functions, the symbol's range must span its whole body, not just the
+ * single declaration line the indexer records for hover/go-to-definition.
+ */
+export function computeFunctionRanges(text: string): Map<number, number> {
+  const logical = toStatements(text.split(/\r?\n/));
+  const lines = logical.map((l) => l.text);
+  const lineNo = (i: number): number => logical[i]?.line ?? i;
+  const cleaned = stripCommentsAndStrings(lines);
+  const ranges = new Map<number, number>();
+  const stack: OpenBlock[] = [];
+  let inPrototypes = false;
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const clean = cleaned[i];
+    if (!clean.trim()) {
+      continue;
+    }
+    if (PROTOTYPES_START_RE.test(clean)) {
+      inPrototypes = true;
+      continue;
+    }
+    if (PROTOTYPES_END_RE.test(clean)) {
+      inPrototypes = false;
+      continue;
+    }
+    if (inPrototypes || logical[i]?.sql) {
+      continue;
+    }
+
+    const closer = detectCloser(clean);
+    if (closer) {
+      const matchIndex = findMatchIndex(stack, closer);
+      if (matchIndex !== -1) {
+        const opener = stack[matchIndex];
+        if (
+          lineNo(i) > opener.line &&
+          (opener.type === 'function' || opener.type === 'subroutine' ||
+            opener.type === 'event' || opener.type === 'on' || opener.type === 'type')
+        ) {
+          ranges.set(opener.line, lineNo(i));
+        }
+        stack.length = matchIndex;
+      }
+      continue;
+    }
+
+    const opener = detectOpener(clean, stack[stack.length - 1]?.type);
+    if (opener) {
+      stack.push({ type: opener, line: lineNo(i), startChar: 0, endChar: 0, idx: i });
     }
   }
 
