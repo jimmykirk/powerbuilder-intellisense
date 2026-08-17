@@ -13,7 +13,7 @@ import { LogicalLine, stripCommentsAndStrings, toStatements } from './preprocess
 
 export { stripCommentsAndStrings };
 
-type BlockType =
+export type BlockType =
   | 'if'
   | 'for'
   | 'do'
@@ -881,6 +881,80 @@ export function computeFunctionRanges(text: string): Map<number, number> {
   return ranges;
 }
 
+/** One block (of any kind — a whole function, or a nested `if`/`for`/... inside one) with its nested blocks. */
+export interface BlockRange {
+  type: BlockType;
+  startLine: number;
+  endLine: number;
+  children: BlockRange[];
+}
+
+/**
+ * Builds the full nesting tree of every block in the file — function/
+ * subroutine/event/on/type declarations at the root, with their nested
+ * `if`/`for`/`do`/`choose`/`try` (and so on, recursively) blocks as
+ * `children`. Used to give sticky scroll a "double sticky" (or deeper):
+ * a long control-flow block *inside* a function keeps its own header pinned
+ * underneath the function's, same idea as `computeFunctionRanges` but for
+ * every nesting level instead of just the outermost declaration.
+ */
+export function computeNestedBlockRanges(text: string): BlockRange[] {
+  const logical = toStatements(text.split(/\r?\n/));
+  const lines = logical.map((l) => l.text);
+  const lineNo = (i: number): number => logical[i]?.line ?? i;
+  const cleaned = stripCommentsAndStrings(lines);
+  const root: BlockRange[] = [];
+  const stack: { type: BlockType; node: BlockRange }[] = [];
+  let inPrototypes = false;
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const clean = cleaned[i];
+    if (!clean.trim()) {
+      continue;
+    }
+    if (PROTOTYPES_START_RE.test(clean)) {
+      inPrototypes = true;
+      continue;
+    }
+    if (PROTOTYPES_END_RE.test(clean)) {
+      inPrototypes = false;
+      continue;
+    }
+    if (inPrototypes || logical[i]?.sql) {
+      continue;
+    }
+
+    const closer = detectCloser(clean);
+    if (closer) {
+      let matchIndex = -1;
+      for (let s = stack.length - 1; s >= 0; s--) {
+        if (stack[s].type === closer) {
+          matchIndex = s;
+          break;
+        }
+      }
+      if (matchIndex !== -1) {
+        stack[matchIndex].node.endLine = lineNo(i);
+        stack.length = matchIndex;
+      }
+      continue;
+    }
+
+    const opener = detectOpener(clean, stack[stack.length - 1]?.type);
+    if (opener) {
+      const node: BlockRange = { type: opener, startLine: lineNo(i), endLine: lineNo(i), children: [] };
+      if (stack.length > 0) {
+        stack[stack.length - 1].node.children.push(node);
+      } else {
+        root.push(node);
+      }
+      stack.push({ type: opener, node });
+    }
+  }
+
+  return root;
+}
+
 /** Returns the deepest stack index whose block type matches, or -1. */
 function findMatchIndex(stack: OpenBlock[], type: BlockType): number {
   for (let i = stack.length - 1; i >= 0; i--) {
@@ -889,4 +963,110 @@ function findMatchIndex(stack: OpenBlock[], type: BlockType): number {
     }
   }
   return -1;
+}
+const MID_BLOCK_MARKER_RE: { re: RegExp; enclosing: BlockType }[] = [
+  { re: /^else\b/, enclosing: 'if' },
+  { re: /^case\b/, enclosing: 'choose' },
+  { re: /^(?:catch|finally)\b/, enclosing: 'try' }
+];
+
+/**
+ * Computes the desired indent depth (in block-nesting levels, not
+ * characters) for every physical line that begins a statement, keyed by
+ * 0-based line number. Reuses the same block-stack/`detectOpener`/
+ * `detectCloser` logic as `computeFoldingRanges`/`computeFunctionRanges`, so
+ * it stays in sync with how the rest of the extension understands PB block
+ * structure.
+ *
+ * Deliberately conservative — this backs a "basic" formatter that only ever
+ * rewrites a line's LEADING whitespace, never its content:
+ * - Lines inside embedded SQL are skipped entirely (not included in the
+ *   result), since SQL's own internal column alignment is meaningful and
+ *   must not be flattened to a single block depth.
+ * - `&`-continuation lines are invisible to `toStatements` (folded into the
+ *   statement's first physical line) and so are never touched either.
+ * - `.srd`/`.srq` declarative export syntax is not PowerScript at all —
+ *   returns an empty map for those.
+ * - `else`/`elseif`, `case`, and `catch`/`finally` sit at their enclosing
+ *   block's own depth (one less than the body), not nested further, matching
+ *   conventional PowerScript indentation.
+ */
+export function computeIndentation(text: string): Map<number, number> {
+  const logical = toStatements(text.split(/\r?\n/));
+  const lines = logical.map((l) => l.text);
+  const lineNo = (i: number): number => logical[i]?.line ?? i;
+  const cleaned = stripCommentsAndStrings(lines);
+
+  // Same check as `computeDiagnostics`: the first non-blank line once
+  // comments/`$PBExportHeader$`-style artifacts are masked out, not the raw
+  // first line (which is usually the export header, not the `release`
+  // statement that actually identifies declarative DW/Query syntax).
+  const firstNonBlank = (cleaned.find((l) => l.trim()) ?? '').trim();
+  if (DW_SYNTAX_HEADER_RE.test(firstNonBlank)) {
+    return new Map();
+  }
+
+  const depths = new Map<number, number>();
+  const stack: OpenBlock[] = [];
+  let inPrototypes = false;
+  const seenLines = new Set<number>();
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const line = lineNo(i);
+    if (seenLines.has(line)) {
+      // A later statement chunk sharing this physical line via `;` — the
+      // line's own leading whitespace was already assigned above.
+      continue;
+    }
+    seenLines.add(line);
+
+    if (logical[i]?.sql) {
+      continue;
+    }
+
+    const clean = cleaned[i];
+    if (PROTOTYPES_START_RE.test(clean)) {
+      depths.set(line, stack.length);
+      inPrototypes = true;
+      continue;
+    }
+    if (PROTOTYPES_END_RE.test(clean)) {
+      inPrototypes = false;
+      depths.set(line, stack.length);
+      continue;
+    }
+    if (inPrototypes || !clean.trim()) {
+      depths.set(line, stack.length);
+      continue;
+    }
+
+    const closer = detectCloser(clean);
+    if (closer) {
+      const matchIndex = findMatchIndex(stack, closer);
+      if (matchIndex === -1) {
+        // Unmatched closer (malformed nesting) — leave depth as-is rather
+        // than guess.
+        depths.set(line, stack.length);
+        continue;
+      }
+      stack.length = matchIndex;
+      depths.set(line, stack.length);
+      continue;
+    }
+
+    const enclosing = stack[stack.length - 1]?.type;
+    const midBlock = MID_BLOCK_MARKER_RE.find((m) => m.enclosing === enclosing && m.re.test(clean.trim().toLowerCase()));
+    if (midBlock) {
+      depths.set(line, Math.max(stack.length - 1, 0));
+      continue;
+    }
+
+    depths.set(line, stack.length);
+    const opener = detectOpener(clean, enclosing);
+    if (opener) {
+      stack.push({ type: opener, line, startChar: 0, endChar: 0, idx: i });
+    }
+  }
+
+  return depths;
 }

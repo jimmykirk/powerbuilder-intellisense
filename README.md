@@ -121,14 +121,6 @@ PowerBuilder language support extension for Appeon PowerBuilder 2022 and 2025
 - Cross-file "unused" analysis for instance variables (today's hint is
   single-file only, so a variable used solely by a descendant class or another
   object's direct access won't be seen)
-- Quick fix ("Remove unused declaration") for the unused local/instance
-  variable hints
-- Hover documentation for DataWindow column expression properties
-  (`dw.Object.<column>.<property>`)
-- Cache the workspace index in `workspaceStorage` between sessions, so large
-  workspaces don't pay a full folder rescan on every VS Code startup
-- Go-to/peek the ancestor implementation of an overridden event or function
-- Basic document formatter for PowerScript (indentation/alignment)
 
 ## License
 

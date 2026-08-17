@@ -1,10 +1,14 @@
 import {
   CompletionItem,
   CompletionItemKind,
+  CodeAction,
+  CodeActionKind,
+  CodeActionParams,
   createConnection,
   Definition,
   DidChangeConfigurationNotification,
   DidChangeWatchedFilesParams,
+  DocumentFormattingParams,
   DocumentSymbol,
   DocumentSymbolParams,
   FileChangeType,
@@ -37,6 +41,7 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { URI } from 'vscode-uri';
 import * as fs from 'fs';
+import * as path from 'path';
 import {
   EventInfo,
   formatEventHover,
@@ -73,12 +78,15 @@ import {
   findDWMethod2025,
   propertyMap2025
 } from './builtins-2025';
-import { parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
+import { findDeclarationSegments, parseVariableDeclaration, SymbolDefinition, WorkspaceIndex } from './indexer';
 import {
   ALL_FOLDABLE_KINDS,
+  BlockRange,
   computeDiagnostics,
   computeFoldingRanges,
   computeFunctionRanges,
+  computeIndentation,
+  computeNestedBlockRanges,
   FoldableKind,
   SemanticContext,
   stripCommentsAndStrings
@@ -122,10 +130,32 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
   const capabilities = params.capabilities;
   hasConfigurationCapability = !!(capabilities.workspace && !!capabilities.workspace.configuration);
 
+  // Load a cached snapshot of the previous scan (if any) so completions/
+  // hover/go-to-definition work immediately, instead of waiting for a large
+  // workspace's full disk scan to finish. The real scan below always runs
+  // regardless and overwrites the cache when done, self-healing staleness.
+  const storagePath = (params.initializationOptions as { storagePath?: string } | undefined)?.storagePath;
+  const cacheFile = storagePath ? path.join(storagePath, 'pb-index-cache.json') : undefined;
+  if (cacheFile) {
+    try {
+      const raw = fs.readFileSync(cacheFile, 'utf8');
+      index.loadCache(JSON.parse(raw));
+      connection.console.log(`PowerBuilder index: loaded cached snapshot from ${cacheFile}.`);
+    } catch {
+      // No cache yet, or it failed to parse — fall through to the real scan.
+    }
+  }
+
   // Seed the workspace index from disk in the background.
   const folders = collectWorkspacePaths(params);
   void index.scanFolders(folders).then(() => {
     connection.console.log(`PowerBuilder index: scanned ${folders.length} folder(s).`);
+    if (cacheFile) {
+      void fs.promises
+        .mkdir(storagePath!, { recursive: true })
+        .then(() => fs.promises.writeFile(cacheFile, JSON.stringify(index.exportCache())))
+        .catch((e) => connection.console.log(`PowerBuilder index: cache save failed (${(e as Error).message}).`));
+    }
   });
 
   return {
@@ -146,6 +176,8 @@ connection.onInitialize((params: InitializeParams): InitializeResult => {
       foldingRangeProvider: true,
       referencesProvider: true,
       renameProvider: true,
+      codeActionProvider: true,
+      documentFormattingProvider: true,
       semanticTokensProvider: {
         legend: { tokenTypes: SEMANTIC_TOKEN_TYPES, tokenModifiers: [] },
         full: true
@@ -654,6 +686,31 @@ connection.onHover((params): Hover | null => {
     wordStart--;
   }
   const receiverPrefix = lineText.slice(0, wordStart);
+
+  // DataWindow column expression property: `dw_ctrl.Object.<column>.<property>`,
+  // where `<property>` may itself be a dotted pair (`Font.Face`, `Background.Color`).
+  const columnPropChain =
+    /[A-Za-z_]\w*\s*\.\s*object\s*\.\s*[A-Za-z_]\w*\s*\.\s*([A-Za-z_]\w*(?:\s*\.\s*[A-Za-z_]\w*)?)$/i.exec(
+      lineText.slice(0, wordStart + word.length)
+    );
+  if (columnPropChain) {
+    const typed = columnPropChain[1].replace(/\s*\.\s*/g, '.');
+    const lastSegment = typed.split('.').pop() ?? typed;
+    if (lastSegment.toLowerCase() === word.toLowerCase()) {
+      const entry = [...DW_COLUMN_EXPRESSION_PROPERTIES.entries()].find(
+        ([name]) => name.toLowerCase() === typed.toLowerCase() || name.toLowerCase().endsWith(`.${word.toLowerCase()}`)
+      );
+      if (entry) {
+        return {
+          contents: {
+            kind: MarkupKind.Markdown,
+            value: `**${entry[0]}** — DataWindow column expression property\n\n${entry[1]}`
+          }
+        };
+      }
+    }
+  }
+
   const chainBefore =
     /([A-Za-z_]\w*(?:\s*\([^()]*\))?(?:\s*\.\s*[A-Za-z_]\w*(?:\s*\([^()]*\))?)*)\s*\.\s*$/.exec(receiverPrefix);
   if (chainBefore) {
@@ -697,6 +754,51 @@ connection.onHover((params): Hover | null => {
   return null;
 });
 
+/**
+ * When the cursor sits on a function/subroutine/event's OWN declaration name
+ * (not a call site), "go to definition" on the declaration itself isn't
+ * useful — jump to the nearest ancestor's implementation of the same name
+ * instead (the "go to super" pattern). Walks the enclosing document's own
+ * inheritance chain, checking each ancestor's indexed symbols for a matching
+ * name + kind, so unrelated same-named functions in unrelated classes are
+ * never mistaken for an override.
+ */
+function findAncestorDefinition(doc: TextDocument, position: { line: number }, word: string): Location | null {
+  const docSymbols = index.symbolsIn(doc.uri);
+  const ownDef = docSymbols.find(
+    (def) =>
+      (def.kind === 'function' || def.kind === 'subroutine' || def.kind === 'event') &&
+      def.name.toLowerCase() === word.toLowerCase() &&
+      def.line === position.line
+  );
+  if (!ownDef) {
+    return null;
+  }
+
+  const mainType = docSymbols.find((def) => def.kind === 'type' && !!def.container);
+  if (!mainType) {
+    return null;
+  }
+
+  const chain = index.getInheritanceChain(mainType.name);
+  for (let i = 1; i < chain.length; i++) {
+    const ancestorUri = index.uriForType(chain[i]);
+    if (!ancestorUri) {
+      continue;
+    }
+    const match = index
+      .symbolsIn(ancestorUri)
+      .find((def) => def.kind === ownDef.kind && def.name.toLowerCase() === word.toLowerCase());
+    if (match) {
+      return Location.create(match.uri, {
+        start: { line: match.line, character: match.character },
+        end: { line: match.line, character: match.character + match.name.length }
+      });
+    }
+  }
+  return null;
+}
+
 connection.onDefinition((params): Definition | null => {
   const doc = documents.get(params.textDocument.uri);
   if (!doc) {
@@ -706,6 +808,11 @@ connection.onDefinition((params): Definition | null => {
   const word = getWordAtPosition(doc, params.position);
   if (!word) {
     return null;
+  }
+
+  const ancestorDef = findAncestorDefinition(doc, params.position, word);
+  if (ancestorDef) {
+    return ancestorDef;
   }
 
   const defs = index.find(word);
@@ -910,12 +1017,62 @@ const STATEMENT_LIKE = new Set([
   'throw', 'when', 'not', 'and', 'or', 'create', 'destroy', 'call', 'on', 'is'
 ]);
 
+/**
+ * Nested control-flow blocks (`if`/`for`/`do`/`choose`/`try`) only get their
+ * own sticky-scroll entry once they're long enough to be worth pinning —
+ * without a floor, every tiny `if` in the file would become its own
+ * DocumentSymbol, cluttering the Outline view/breadcrumbs for no benefit
+ * (a short block scrolls past before sticky scroll would meaningfully help).
+ * A block's own span is always >= any of its children's, so a block that
+ * doesn't meet this floor can simply be skipped entirely (nothing nested
+ * inside it can qualify either).
+ */
+const MIN_STICKY_BLOCK_LINES = 10;
+
+function blockSymbolName(node: BlockRange, rawLines: string[]): string {
+  const raw = (rawLines[node.startLine] ?? node.type).trim();
+  return raw.length > 60 ? `${raw.slice(0, 57)}...` : raw || node.type;
+}
+
+/** Converts qualifying nested block ranges into child `DocumentSymbol`s, recursively. */
+function buildBlockSymbolChildren(nodes: BlockRange[], rawLines: string[]): DocumentSymbol[] {
+  const result: DocumentSymbol[] = [];
+  for (const node of nodes) {
+    if (node.endLine - node.startLine < MIN_STICKY_BLOCK_LINES) {
+      continue;
+    }
+    const name = blockSymbolName(node, rawLines);
+    const nameLine = rawLines[node.startLine] ?? '';
+    result.push({
+      name,
+      kind: SymbolKind.Namespace,
+      range: { start: { line: node.startLine, character: 0 }, end: { line: node.endLine, character: 0 } },
+      selectionRange: {
+        start: { line: node.startLine, character: 0 },
+        end: { line: node.startLine, character: nameLine.trimEnd().length }
+      },
+      children: buildBlockSymbolChildren(node.children, rawLines)
+    });
+  }
+  return result;
+}
+
 connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => {
   const doc = documents.get(params.textDocument.uri);
   // Full declaration-to-`end ...` ranges (not just the declaration line) so
   // VS Code's sticky-scroll feature keeps a long function's/event's header
   // pinned while scrolling through its body.
   const functionRanges = doc ? computeFunctionRanges(doc.getText()) : new Map<number, number>();
+  // Nested `if`/`for`/`do`/`choose`/`try` blocks inside each function/event —
+  // long ones get their own sticky-scroll entry stacked under the enclosing
+  // function's, matched to it below by (type, startLine).
+  const rawLines = doc ? doc.getText().split(/\r?\n/) : [];
+  const nestedBlocks = doc ? computeNestedBlockRanges(doc.getText()) : [];
+  const blocksByStartLine = new Map<number, BlockRange>();
+  for (const node of nestedBlocks) {
+    blocksByStartLine.set(node.startLine, node);
+  }
+
   const symbols = index.symbolsIn(params.textDocument.uri);
   return symbols
     .filter((def) => def.kind !== 'variable')
@@ -928,12 +1085,15 @@ connection.onDocumentSymbol((params: DocumentSymbolParams): DocumentSymbol[] => 
       const range = endLine !== undefined && endLine > def.line
         ? { start: { line: def.line, character: 0 }, end: { line: endLine, character: 0 } }
         : selectionRange;
+      const matchingBlock = blocksByStartLine.get(def.line);
+      const children = matchingBlock ? buildBlockSymbolChildren(matchingBlock.children, rawLines) : undefined;
       return {
         name: def.name,
         detail: def.signature,
         kind: symbolKindFor(def),
         range,
-        selectionRange
+        selectionRange,
+        ...(children && children.length > 0 ? { children } : {})
       };
     });
 });
@@ -947,6 +1107,111 @@ connection.onFoldingRanges((params: FoldingRangeParams): FoldingRange[] => {
     startLine: r.startLine,
     endLine: r.endLine
   }));
+});
+
+/**
+ * Basic formatter: only rewrites each statement line's LEADING whitespace to
+ * match its block-nesting depth (one tab per level) — never touches line
+ * content, blank lines, `&`-continuation lines, or embedded SQL, to avoid
+ * destructively reflowing code the parser can't fully reconstruct. See
+ * `computeIndentation` for the exact rules.
+ */
+connection.onDocumentFormatting((params: DocumentFormattingParams): TextEdit[] => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) {
+    return [];
+  }
+  const text = doc.getText();
+  const rawLines = text.split(/\r?\n/);
+  const depths = computeIndentation(text);
+  const edits: TextEdit[] = [];
+  for (const [lineNo, depth] of depths) {
+    const line = rawLines[lineNo];
+    if (line === undefined || line.trim() === '') {
+      continue;
+    }
+    const currentIndent = /^[ \t]*/.exec(line)![0];
+    const desiredIndent = '\t'.repeat(Math.max(depth, 0));
+    if (currentIndent !== desiredIndent) {
+      edits.push({
+        range: { start: { line: lineNo, character: 0 }, end: { line: lineNo, character: currentIndent.length } },
+        newText: desiredIndent
+      });
+    }
+  }
+  return edits;
+});
+
+const UNUSED_VARIABLE_RE = /^(?:Variable|Instance variable) '([^']+)'/;
+
+/**
+ * "Remove unused declaration" quick fix for the unused local/instance
+ * variable Hints. Only offered when the declaration's whole physical line is
+ * a single statement (no `;`-joined companion statement, no `&` line
+ * continuation) — anything else is ambiguous to edit safely from just a
+ * diagnostic + document text, so no action is offered rather than risking a
+ * bad edit.
+ */
+connection.onCodeAction((params: CodeActionParams): CodeAction[] => {
+  const doc = documents.get(params.textDocument.uri);
+  if (!doc) {
+    return [];
+  }
+
+  const actions: CodeAction[] = [];
+  for (const diag of params.context.diagnostics) {
+    if (diag.source !== 'powerbuilder') {
+      continue;
+    }
+    const match = UNUSED_VARIABLE_RE.exec(diag.message);
+    if (!match) {
+      continue;
+    }
+    const varName = match[1];
+    const lineNumber = diag.range.start.line;
+    const rawLine = doc.getText({
+      start: { line: lineNumber, character: 0 },
+      end: { line: lineNumber + 1, character: 0 }
+    }).replace(/\r?\n$/, '');
+
+    // Bail if this physical line has more than one statement on it (a
+    // `;`-joined companion, e.g. `event ue_foo;longlong old_id, rtn`) — too
+    // risky to isolate just the declaration's own span in that case.
+    if (stripCommentsAndStrings([rawLine])[0].includes(';')) {
+      continue;
+    }
+
+    const segments = findDeclarationSegments(rawLine);
+    const target = segments?.find((s) => s.name === varName);
+    if (!segments || !target) {
+      continue;
+    }
+
+    let edit: TextEdit;
+    if (segments.length === 1) {
+      edit = {
+        range: { start: { line: lineNumber, character: 0 }, end: { line: lineNumber + 1, character: 0 } },
+        newText: ''
+      };
+    } else {
+      const idx = segments.indexOf(target);
+      const start = idx === 0 ? segments[0].start : segments[idx - 1].end;
+      const end = idx === 0 ? segments[1].start : target.end;
+      edit = {
+        range: { start: { line: lineNumber, character: start }, end: { line: lineNumber, character: end } },
+        newText: ''
+      };
+    }
+
+    actions.push({
+      title: `Remove unused declaration '${varName}'`,
+      kind: CodeActionKind.QuickFix,
+      diagnostics: [diag],
+      edit: { changes: { [params.textDocument.uri]: [edit] } }
+    });
+  }
+
+  return actions;
 });
 
 connection.onReferences((params: ReferenceParams): Location[] => {

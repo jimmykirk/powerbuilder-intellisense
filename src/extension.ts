@@ -32,6 +32,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     documentSelector: [{ scheme: 'file', language: 'powerbuilder' }],
     synchronize: {
       fileEvents: vscode.workspace.createFileSystemWatcher('**/*.{sra,srw,sru,srm,srd,srf,srs,srp,srq,srj}')
+    },
+    initializationOptions: {
+      storagePath: (context.storageUri ?? context.globalStorageUri).fsPath
     }
   };
 

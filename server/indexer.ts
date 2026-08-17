@@ -50,6 +50,16 @@ export interface VariableDefinition {
   character: number;
 }
 
+/** Serialized snapshot of one file's already-parsed index data (see `WorkspaceIndex.exportCache`). */
+export interface CachedFileEntry {
+  uri: string;
+  symbols: SymbolDefinition[];
+  variables: VariableDefinition[];
+  structures: StructureDefinition[];
+  dwColumns?: DataWindowColumn[];
+  bindings?: { control: string; dataObject: string }[];
+}
+
 /** File extensions that belong to PowerBuilder exported objects. */
 export const POWERBUILDER_EXTENSIONS = [
   '.sra', '.srw', '.sru', '.srm', '.srd', '.srf', '.srs', '.srp', '.srq', '.srj'
@@ -186,6 +196,88 @@ export function parseVariableDeclaration(
     }
   }
   return declarations;
+}
+
+/** One `name[, name2...]` segment of a declaration line, with its character range. */
+export interface DeclarationSegment {
+  name: string;
+  /** Character offset where this segment (including any leading separator) starts. */
+  start: number;
+  /** Character offset (exclusive) where this segment ends. */
+  end: number;
+}
+
+/**
+ * Splits a `type name[, name2...]` declaration line into its comma-separated
+ * name segments, tracking each segment's exact character range in `line` —
+ * used by the "Remove unused declaration" code action to edit out exactly one
+ * name from a multi-name declaration without disturbing the others. Returns
+ * `null` for lines that aren't a plain declaration (same shape rules as
+ * `parseVariableDeclaration`).
+ */
+export function findDeclarationSegments(line: string): DeclarationSegment[] | null {
+  // Mask comments/strings so identifier-shaped regexes never match inside
+  // them, while keeping every character position identical to `line`.
+  const masked = stripCommentsAndStrings([line])[0];
+
+  const wordAt = (pos: number): { word: string; end: number } | null => {
+    const m = /^[\p{L}_][\p{L}\p{N}_]*/u.exec(masked.slice(pos));
+    return m ? { word: m[0], end: pos + m[0].length } : null;
+  };
+  const skipSpaces = (pos: number): number => {
+    let i = pos;
+    while (i < masked.length && (masked[i] === ' ' || masked[i] === '\t')) {
+      i++;
+    }
+    return i;
+  };
+
+  let idx = skipSpaces(0);
+  let word = wordAt(idx);
+  while (word && DECLARATION_MODIFIERS.has(word.word.toLowerCase())) {
+    idx = skipSpaces(word.end);
+    word = wordAt(idx);
+  }
+  if (!word || !ID_RE.test(word.word)) {
+    return null;
+  }
+  idx = skipSpaces(word.end);
+  // Decimal precision: `decimal {2} ld_amt` / fused `decimal{2} ld_amt`.
+  if (masked[idx] === '{') {
+    const close = masked.indexOf('}', idx);
+    if (close === -1) {
+      return null;
+    }
+    idx = skipSpaces(close + 1);
+  }
+
+  const restStart = idx;
+  if (restStart >= masked.length) {
+    return null;
+  }
+
+  const segments: DeclarationSegment[] = [];
+  let segStart = restStart;
+  let depth = 0;
+  for (let i = restStart; i <= masked.length; i++) {
+    const ch = masked[i];
+    const atEnd = i === masked.length;
+    if (!atEnd && (ch === '[' || ch === '(')) {
+      depth++;
+    } else if (!atEnd && (ch === ']' || ch === ')')) {
+      depth--;
+    }
+    if (atEnd || (ch === ',' && depth === 0)) {
+      const segText = masked.slice(segStart, i);
+      const nameMatch = /^\s*([\p{L}_][\p{L}\p{N}_]*)/u.exec(segText);
+      if (nameMatch && !DECLARATION_MODIFIERS.has(nameMatch[1].toLowerCase())) {
+        segments.push({ name: nameMatch[1], start: segStart, end: i });
+      }
+      segStart = i + 1;
+    }
+  }
+
+  return segments.length > 0 ? segments : null;
 }
 
 /**
@@ -686,6 +778,62 @@ export class WorkspaceIndex {
       return this.all();
     }
     return this.all().filter((def) => def.name.toLowerCase().includes(needle));
+  }
+
+  /**
+   * Snapshot of every indexed file's already-parsed data, suitable for
+   * serializing to disk (`JSON.stringify`) and restoring later without
+   * re-parsing. Used for a fast cold-start cache in `workspaceStorage` — the
+   * expensive part of indexing is parsing, not the in-memory data structures.
+   */
+  exportCache(): CachedFileEntry[] {
+    const entries: CachedFileEntry[] = [];
+    for (const [uri, symbols] of this.byUri) {
+      const entry: CachedFileEntry = {
+        uri,
+        symbols,
+        variables: this.varsByUri.get(uri) ?? [],
+        structures: this.structuresByUri.get(uri) ?? []
+      };
+      for (const dw of this.dwColumns.values()) {
+        if (dw.uri === uri) {
+          entry.dwColumns = dw.columns;
+          break;
+        }
+      }
+      const bindings = this.dwBindingsByUri.get(uri);
+      if (bindings) {
+        entry.bindings = bindings;
+      }
+      entries.push(entry);
+    }
+    return entries;
+  }
+
+  /**
+   * Restores previously-parsed data from `exportCache()` without re-parsing
+   * any file. Meant to run once at startup, before the real disk scan
+   * (which always follows and self-heals any staleness) — this only exists
+   * to make completions/hover/go-to-definition usable immediately rather
+   * than waiting for a large workspace's full scan to finish.
+   */
+  loadCache(entries: CachedFileEntry[]): void {
+    for (const entry of entries) {
+      this.setEntries(entry.uri, entry.symbols, entry.variables);
+
+      this.structuresByUri.set(entry.uri, entry.structures);
+      for (const struct of entry.structures) {
+        this.structuresByName.set(struct.name.toLowerCase(), struct);
+      }
+
+      if (entry.dwColumns && entry.dwColumns.length > 0) {
+        const dataObject = path.basename(URI.parse(entry.uri).fsPath, path.extname(URI.parse(entry.uri).fsPath));
+        this.dwColumns.set(dataObject.toLowerCase(), { uri: entry.uri, columns: entry.dwColumns });
+      }
+      if (entry.bindings && entry.bindings.length > 0) {
+        this.dwBindingsByUri.set(entry.uri, entry.bindings);
+      }
+    }
   }
 
   /**

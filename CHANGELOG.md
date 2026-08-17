@@ -1,5 +1,31 @@
 # Change Log
 
+## 0.3.4
+
+- New quick fix: "Remove unused declaration" on the unused local/instance
+  variable hints, safely removing just that name (and its comma) from a
+  multi-name declaration line, or the whole line for a single-name
+  declaration. Not offered when the physical line also contains another
+  statement joined by `;`, to avoid an unsafe edit.
+- New: hovering a DataWindow column expression property
+  (`dw.Object.<column>.<property>`, including compound properties like
+  `Font.Face`/`Background.Color`) now shows its documentation.
+- New: "Go to Definition" (F12) on a function/subroutine/event's own
+  declaration now jumps to the nearest ancestor's implementation of the same
+  name — the "go to super" pattern for overridden events/functions.
+- The workspace index is now cached in `workspaceStorage` between sessions,
+  so large workspaces don't wait on a full folder rescan before
+  completions/hover/go-to-definition become usable; a full rescan still runs
+  in the background afterward and refreshes the cache.
+- New: a basic document formatter (`Format Document`) that normalizes each
+  statement line's indentation to match its block nesting depth. Only
+  rewrites leading whitespace — never line content, blank lines,
+  `&`-continuation lines, or embedded SQL.
+- Sticky scroll now also pins long `if`/`for`/`do`/`choose`/`try` blocks
+  nested inside a function/subroutine/event, stacking underneath the
+  enclosing function's own sticky header ("double sticky") instead of only
+  ever showing the outermost declaration.
+
 ## 0.3.3
 
 - Sticky scroll now works for long functions/subroutines/events/`on` blocks:
